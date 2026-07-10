@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FC Lachendorf Darts – Post Generator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <button class="menu-button" id="menuButton" aria-label="Menü öffnen" type="button">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="brand">
+      <p>FC Lachendorf Darts</p>
+      <h1>Post Generator</h1>
+    </div>
+
+    <nav class="nav" id="nav">
+      <a href="#" class="active">Trainingssieger</a>
+      <a href="#" aria-disabled="true">Spieltagsankündigung</a>
+      <a href="#" aria-disabled="true">Tabelle</a>
+      <a href="#" aria-disabled="true">Spielplan</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="card data-card">
+      <div class="section-head">
+        <h2>Trainingssieger</h2>
+        <p>Gewinnerdaten eintragen und Foto auswählen.</p>
+      </div>
+
+      <div class="grid two">
+        <label>
+          Vorname
+          <input id="firstName" type="text" placeholder="Alexander" value="Alexander" autocomplete="off" />
+        </label>
+
+        <label>
+          Nachname
+          <input id="lastName" type="text" placeholder="Mustermann" value="Mustermann" autocomplete="off" />
+        </label>
+      </div>
+
+      <label>
+        Game Average
+        <input id="average" type="text" inputmode="decimal" placeholder="56,3" value="56,3" autocomplete="off" />
+      </label>
+
+      <div class="upload-wrap">
+        <label class="upload-box" for="photoInput" id="uploadBox">
+          <input id="photoInput" type="file" accept="image/*" />
+
+          <span class="upload-empty" id="uploadEmpty">
+            <strong>Foto auswählen</strong>
+            <em>JPG oder PNG vom Gewinner hochladen</em>
+          </span>
+
+          <span class="upload-selected" id="uploadSelected" hidden>
+            <img id="uploadThumb" alt="" />
+            <span>
+              <strong id="uploadFileName">Foto ausgewählt</strong>
+              <em>Tippen, um ein anderes Foto auszuwählen</em>
+            </span>
+          </span>
+        </label>
+
+        <button class="remove-photo" id="removePhotoButton" type="button" aria-label="Foto entfernen" hidden>
+          ×
+        </button>
+      </div>
+    </section>
+
+    <section class="preview-card">
+      <div class="preview-topline">
+        <span>Live-Vorschau</span>
+        <span>1080 × 1350 px</span>
+      </div>
+
+      <div class="canvas-shell">
+        <canvas id="postCanvas" width="1080" height="1350"></canvas>
+      </div>
+
+      <p class="preview-help">Tipp: Du kannst das Foto auch direkt in der Vorschau verschieben.</p>
+    </section>
+
+    <section class="card controls-card">
+      <div class="section-head compact">
+        <h2>Bild ausrichten</h2>
+        <p>Zoom und Position sind begrenzt, damit keine leeren Ränder entstehen.</p>
+      </div>
+
+      <label>
+        Zoom
+        <input id="photoZoom" type="range" min="1" max="2.5" step="0.01" value="1" />
+      </label>
+
+      <label>
+        Bild horizontal
+        <input id="photoX" type="range" min="0" max="0" step="1" value="0" />
+      </label>
+
+      <label>
+        Bild vertikal
+        <input id="photoY" type="range" min="0" max="0" step="1" value="0" />
+      </label>
+
+      <details class="date-details">
+        <summary>Datum ändern</summary>
+        <label>
+          Datum
+          <input id="date" type="date" />
+        </label>
+      </details>
+
+      <button class="download-button" id="downloadButton" type="button">
+        PNG herunterladen
+      </button>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
