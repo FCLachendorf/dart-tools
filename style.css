@@ -10,9 +10,7 @@
   --radius: 18px;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -24,10 +22,7 @@ body {
     var(--bg);
 }
 
-button,
-input {
-  font: inherit;
-}
+button, input { font: inherit; }
 
 .app-header {
   position: sticky;
@@ -51,31 +46,18 @@ input {
   text-transform: uppercase;
 }
 
-.brand h1,
-.section-head h2 {
+.brand h1, .section-head h2 {
   margin: 0;
   line-height: 1.05;
 }
 
-.brand h1 {
-  font-size: 1.05rem;
-}
+.brand h1 { font-size: 1.05rem; }
 
-.section-head {
-  margin-bottom: 16px;
-}
+.section-head { margin-bottom: 16px; }
+.section-head.compact { margin-bottom: 12px; }
+.section-head h2 { font-size: 1.18rem; }
 
-.section-head.compact {
-  margin-bottom: 12px;
-}
-
-.section-head h2 {
-  font-size: 1.18rem;
-}
-
-.section-head p,
-.hint,
-.preview-help {
+.section-head p, .hint, .preview-help {
   margin: 7px 0 0;
   color: var(--muted);
   line-height: 1.45;
@@ -114,9 +96,7 @@ input {
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
 }
 
-.nav.open {
-  display: grid;
-}
+.nav.open { display: grid; }
 
 .nav a {
   padding: 14px;
@@ -143,17 +123,14 @@ input {
   gap: 12px;
 }
 
-.card,
-.preview-card {
+.card, .preview-card {
   background: rgba(21, 21, 25, 0.96);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
 }
 
-.card {
-  padding: 16px;
-}
+.card { padding: 16px; }
 
 .preview-card {
   position: sticky;
@@ -184,20 +161,54 @@ input {
 
 canvas {
   width: auto;
-  height: min(42svh, 430px);
+  height: min(48svh, 560px);
   max-width: 100%;
   display: block;
   touch-action: none;
   cursor: grab;
 }
 
-canvas:active {
-  cursor: grabbing;
-}
+canvas:active { cursor: grabbing; }
 
 .preview-help {
   margin: 8px 2px 0;
   font-size: 0.78rem;
+}
+
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 6px;
+  background: #101014;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.mode-button {
+  min-height: 44px;
+  color: var(--muted);
+  font-weight: 950;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+}
+
+.mode-button.active {
+  color: white;
+  background: linear-gradient(135deg, var(--red), var(--red-dark));
+}
+
+.input-group { margin-bottom: 4px; }
+
+.mini-title {
+  margin: 8px 0 8px;
+  color: var(--red);
+  font-size: 0.76rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .grid {
@@ -205,9 +216,7 @@ canvas:active {
   gap: 10px;
 }
 
-.grid.two {
-  grid-template-columns: 1fr 1fr;
-}
+.grid.two { grid-template-columns: 1fr 1fr; }
 
 label {
   display: grid;
@@ -218,8 +227,7 @@ label {
   font-weight: 800;
 }
 
-input[type="text"],
-input[type="date"] {
+input[type="text"], input[type="date"] {
   width: 100%;
   min-height: 48px;
   padding: 0 14px;
@@ -253,25 +261,18 @@ input:focus {
   cursor: pointer;
 }
 
-.upload-box input {
-  display: none;
-}
+.upload-box input { display: none; }
 
-.upload-empty,
-.upload-selected {
+.upload-empty, .upload-selected {
   width: 100%;
   display: grid;
   gap: 4px;
   place-items: center;
 }
 
-.upload-empty strong,
-.upload-selected strong {
-  color: white;
-}
+.upload-empty strong, .upload-selected strong { color: white; }
 
-.upload-empty em,
-.upload-selected em {
+.upload-empty em, .upload-selected em {
   color: var(--muted);
   font-size: 0.84rem;
   font-style: normal;
@@ -328,9 +329,7 @@ input[type="range"] {
   font-weight: 900;
 }
 
-.date-details label {
-  margin-top: 12px;
-}
+.date-details label { margin-top: 12px; }
 
 .download-button {
   width: 100%;
@@ -348,10 +347,7 @@ input[type="range"] {
     align-items: start;
   }
 
-  .data-card,
-  .controls-card {
-    grid-column: 1;
-  }
+  .data-card, .controls-card { grid-column: 1; }
 
   .preview-card {
     grid-column: 2;
@@ -359,11 +355,7 @@ input[type="range"] {
     top: 84px;
   }
 
-  canvas {
-    height: min(76svh, 760px);
-  }
+  canvas { height: min(82svh, 840px); }
 
-  .app-header {
-    padding-inline: 24px;
-  }
+  .app-header { padding-inline: 24px; }
 }

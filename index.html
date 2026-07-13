@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FC Lachendorf Darts – Post Generator</title>
+  <title>FC Lachendorf Darts – Story Generator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -14,7 +14,7 @@
 
     <div class="brand">
       <p>FC Lachendorf Darts</p>
-      <h1>Post Generator</h1>
+      <h1>Story Generator</h1>
     </div>
 
     <nav class="nav" id="nav">
@@ -29,25 +29,67 @@
     <section class="card data-card">
       <div class="section-head">
         <h2>Trainingssieger</h2>
-        <p>Gewinnerdaten eintragen und Foto auswählen.</p>
+        <p>Story-Format 1080 × 1920 px. Solo oder Duo auswählen.</p>
+      </div>
+
+      <div class="mode-switch" role="group" aria-label="Modus auswählen">
+        <button class="mode-button active" id="soloModeButton" type="button" data-mode="solo">Solo</button>
+        <button class="mode-button" id="duoModeButton" type="button" data-mode="duo">Duo</button>
+      </div>
+
+      <div class="input-group" id="soloFields">
+        <div class="grid two">
+          <label>
+            Vorname
+            <input id="soloFirstName" type="text" placeholder="Alexander" value="Alexander" autocomplete="off" />
+          </label>
+
+          <label>
+            Nachname
+            <input id="soloLastName" type="text" placeholder="Mustermann" value="Mustermann" autocomplete="off" />
+          </label>
+        </div>
+      </div>
+
+      <div class="input-group" id="duoFields" hidden>
+        <p class="mini-title">Spieler 1</p>
+        <div class="grid two">
+          <label>
+            Vorname
+            <input id="duoFirstName1" type="text" placeholder="Alexander" value="Alexander" autocomplete="off" />
+          </label>
+
+          <label>
+            Nachname
+            <input id="duoLastName1" type="text" placeholder="Mustermann" value="Mustermann" autocomplete="off" />
+          </label>
+        </div>
+
+        <p class="mini-title">Spieler 2</p>
+        <div class="grid two">
+          <label>
+            Vorname
+            <input id="duoFirstName2" type="text" placeholder="Steven" value="Steven" autocomplete="off" />
+          </label>
+
+          <label>
+            Nachname
+            <input id="duoLastName2" type="text" placeholder="Musterfrau" value="Musterfrau" autocomplete="off" />
+          </label>
+        </div>
       </div>
 
       <div class="grid two">
         <label>
-          Vorname
-          <input id="firstName" type="text" placeholder="Alexander" value="Alexander" autocomplete="off" />
+          Team / Game Average
+          <input id="average" type="text" inputmode="decimal" placeholder="56,3" value="56,3" autocomplete="off" />
         </label>
 
         <label>
-          Nachname
-          <input id="lastName" type="text" placeholder="Mustermann" value="Mustermann" autocomplete="off" />
+          Highest Finish
+          <input id="highestFinish" type="text" inputmode="numeric" placeholder="76" value="76" autocomplete="off" />
         </label>
       </div>
-
-      <label>
-        Game Average
-        <input id="average" type="text" inputmode="decimal" placeholder="56,3" value="56,3" autocomplete="off" />
-      </label>
 
       <div class="upload-wrap">
         <label class="upload-box" for="photoInput" id="uploadBox">
@@ -55,7 +97,7 @@
 
           <span class="upload-empty" id="uploadEmpty">
             <strong>Foto auswählen</strong>
-            <em>JPG oder PNG vom Gewinner hochladen</em>
+            <em>JPG oder PNG hochladen</em>
           </span>
 
           <span class="upload-selected" id="uploadSelected" hidden>
@@ -76,14 +118,14 @@
     <section class="preview-card">
       <div class="preview-topline">
         <span>Live-Vorschau</span>
-        <span>1080 × 1350 px</span>
+        <span>1080 × 1920 px</span>
       </div>
 
       <div class="canvas-shell">
-        <canvas id="postCanvas" width="1080" height="1350"></canvas>
+        <canvas id="postCanvas" width="1080" height="1920"></canvas>
       </div>
 
-      <p class="preview-help">Tipp: Du kannst das Foto auch direkt in der Vorschau verschieben.</p>
+      <p class="preview-help">Foto ziehen oder mit zwei Fingern zoomen.</p>
     </section>
 
     <section class="card controls-card">
@@ -94,7 +136,7 @@
 
       <label>
         Zoom
-        <input id="photoZoom" type="range" min="1" max="2.5" step="0.01" value="1" />
+        <input id="photoZoom" type="range" min="1" max="3" step="0.01" value="1" />
       </label>
 
       <label>
@@ -116,8 +158,12 @@
       </details>
 
       <button class="download-button" id="downloadButton" type="button">
-        PNG herunterladen
+        Story herunterladen
       </button>
+
+      <p class="hint">
+        Alle Daten bleiben im Browser. Das Foto wird nicht hochgeladen.
+      </p>
     </section>
   </main>
 

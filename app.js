@@ -1,25 +1,33 @@
-// FC Lachendorf Darts – Trainingssieger Generator
-// ------------------------------------------------
-// Positionen und Größen passt du oben in CONFIG.text an.
-// x = links/rechts, y = oben/unten, fontSize = Schriftgröße in Pixeln.
+// FC Lachendorf Darts – Story Generator v3
+// -----------------------------------------
+// Format: 1080 × 1920 px.
+// An deine Beispielbilder angepasst:
+// - Solo: ein Namensblock unten rechts/zentral
+// - Duo: zwei getrennte Namensboxen unten
+// - Werte für Average und Highest Finish werden in die festen Balken geschrieben.
 
 const CONFIG = {
   width: 1080,
-  height: 1350,
+  height: 1920,
 
-  assets: [
+  paths: {
+    assets: "assets/",
+    fonts: "fonts/",
+  },
+
+  // Reihenfolge wie von dir beschrieben:
+  // Foto -> 6 % dunkler -> t1 -> bgra -> rgra -> vignetten -> Modus-Layer
+  sharedAssets: [
     "t1.png",
     "bgra1.png",
     "rgra1.png",
     "vigne1.png",
     "vigne2.png",
-    "logoname.png",
-    "title.png",
   ],
 
-  paths: {
-    assets: "assets/",
-    fonts: "fonts/",
+  modeAssets: {
+    solo: ["soloname.png", "solotitle.png"],
+    duo: ["duoname.png", "duotitle.png"],
   },
 
   fonts: {
@@ -38,53 +46,155 @@ const CONFIG = {
     fallbackColor: "#c83a31",
   },
 
+  // Diese Positionen sind bewusst leicht an deine Beispielbilder angenähert.
+  // Du musst sie wahrscheinlich noch 1x feinjustieren, weil deine echten PNG-Layer entscheidend sind.
   text: {
-    firstName: {
-      x: 180,
-      y: 1150,
-      maxWidth: 430,
-      fontSize: 46,
-      minFontSize: 28,
-      color: "#ededf5",
-      family: "Topshow",
-      align: "left",
-      uppercase: true,
+    solo: {
+      firstName: {
+        x: 235,
+        y: 1720,
+        maxWidth: 470,
+        fontSize: 54,
+        minFontSize: 30,
+        color: "#ededf5",
+        family: "Topshow",
+        align: "left",
+        uppercase: true,
+      },
+
+      lastName: {
+        x: 230,
+        y: 1790,
+        maxWidth: 735,
+        fontSize: 86,
+        minFontSize: 48,
+        color: "#ededf5",
+        family: "Topshow",
+        align: "left",
+        uppercase: true,
+      },
+
+      average: {
+        x: 515,
+        y: 1573,
+        maxWidth: 115,
+        fontSize: 38,
+        minFontSize: 25,
+        color: "#330808",
+        family: "Topshow",
+        align: "left",
+        uppercase: false,
+      },
+
+      highestFinish: {
+        x: 522,
+        y: 1643,
+        maxWidth: 120,
+        fontSize: 38,
+        minFontSize: 25,
+        color: "#98252f",
+        family: "Topshow",
+        align: "left",
+        uppercase: false,
+      },
+
+      date: {
+        x: 540,
+        y: 1875,
+        maxWidth: 500,
+        fontSize: 38,
+        minFontSize: 24,
+        color: "#646468",
+        family: "TacticSans",
+        align: "center",
+        uppercase: false,
+      },
     },
 
-    lastName: {
-      x: 175,
-      y: 1230,
-      maxWidth: 700,
-      fontSize: 86,
-      minFontSize: 48,
-      color: "#ededf5",
-      family: "Topshow",
-      align: "left",
-      uppercase: true,
-    },
+    duo: {
+      player1FirstName: {
+        x: 280,
+        y: 1720,
+        maxWidth: 270,
+        fontSize: 40,
+        minFontSize: 24,
+        color: "#ededf5",
+        family: "Topshow",
+        align: "center",
+        uppercase: true,
+      },
 
-    average: {
-      x: 1000,
-      y: 1108,
-      maxWidth: 135,
-      fontSize: 42,
-      minFontSize: 26,
-      color: "#330808",
-      family: "Topshow",
-      align: "right",
-      uppercase: false,
-    },
+      player1LastName: {
+        x: 285,
+        y: 1780,
+        maxWidth: 430,
+        fontSize: 58,
+        minFontSize: 33,
+        color: "#ededf5",
+        family: "Topshow",
+        align: "center",
+        uppercase: true,
+      },
 
-    date: {
-      x: 420,
-      y: 1320,
-      maxWidth: 250,
-      fontSize: 31,
-      minFontSize: 22,
-      color: "#646468",
-      family: "TacticSans",
-      align: "middle",
-      uppercase: false,
+      player2FirstName: {
+        x: 780,
+        y: 1720,
+        maxWidth: 300,
+        fontSize: 40,
+        minFontSize: 24,
+        color: "#ededf5",
+        family: "Topshow",
+        align: "center",
+        uppercase: true,
+      },
+
+      player2LastName: {
+        x: 785,
+        y: 1780,
+        maxWidth: 430,
+        fontSize: 58,
+        minFontSize: 33,
+        color: "#ededf5",
+        family: "Topshow",
+        align: "center",
+        uppercase: true,
+      },
+
+      average: {
+        x: 403,
+        y: 1573,
+        maxWidth: 110,
+        fontSize: 38,
+        minFontSize: 25,
+        color: "#330808",
+        family: "Topshow",
+        align: "left",
+        uppercase: false,
+      },
+
+      highestFinish: {
+        x: 410,
+        y: 1643,
+        maxWidth: 120,
+        fontSize: 38,
+        minFontSize: 25,
+        color: "#ededf5",
+        family: "Topshow",
+        align: "left",
+        uppercase: false,
+      },
+
+      date: {
+        x: 540,
+        y: 1884,
+        maxWidth: 680,
+        fontSize: 36,
+        minFontSize: 24,
+        color: "#646468",
+        family: "TacticSans",
+        align: "center",
+        uppercase: false,
+      },
     },
   },
 };
@@ -92,16 +202,32 @@ const CONFIG = {
 const els = {
   canvas: document.getElementById("postCanvas"),
   photoInput: document.getElementById("photoInput"),
-  firstName: document.getElementById("firstName"),
-  lastName: document.getElementById("lastName"),
+
+  soloFields: document.getElementById("soloFields"),
+  duoFields: document.getElementById("duoFields"),
+  soloModeButton: document.getElementById("soloModeButton"),
+  duoModeButton: document.getElementById("duoModeButton"),
+
+  soloFirstName: document.getElementById("soloFirstName"),
+  soloLastName: document.getElementById("soloLastName"),
+
+  duoFirstName1: document.getElementById("duoFirstName1"),
+  duoLastName1: document.getElementById("duoLastName1"),
+  duoFirstName2: document.getElementById("duoFirstName2"),
+  duoLastName2: document.getElementById("duoLastName2"),
+
   average: document.getElementById("average"),
+  highestFinish: document.getElementById("highestFinish"),
   date: document.getElementById("date"),
+
   photoZoom: document.getElementById("photoZoom"),
   photoX: document.getElementById("photoX"),
   photoY: document.getElementById("photoY"),
+
   downloadButton: document.getElementById("downloadButton"),
   menuButton: document.getElementById("menuButton"),
   nav: document.getElementById("nav"),
+
   uploadEmpty: document.getElementById("uploadEmpty"),
   uploadSelected: document.getElementById("uploadSelected"),
   uploadThumb: document.getElementById("uploadThumb"),
@@ -112,9 +238,14 @@ const els = {
 const ctx = els.canvas.getContext("2d");
 
 const state = {
+  mode: "solo",
   userPhoto: null,
   userPhotoName: "",
-  overlayImages: [],
+  images: {
+    shared: [],
+    solo: [],
+    duo: [],
+  },
   drag: {
     active: false,
     startClientX: 0,
@@ -122,6 +253,12 @@ const state = {
     startOffsetX: 0,
     startOffsetY: 0,
   },
+  pinch: {
+    active: false,
+    startDistance: 0,
+    startZoom: 1,
+  },
+  pointers: new Map(),
 };
 
 init();
@@ -132,16 +269,31 @@ async function init() {
   bindEvents();
 
   await loadFonts();
-  state.overlayImages = await loadOverlayImages(CONFIG.assets);
 
+  state.images.shared = await loadOverlayImages(CONFIG.sharedAssets);
+  state.images.solo = await loadOverlayImages(CONFIG.modeAssets.solo);
+  state.images.duo = await loadOverlayImages(CONFIG.modeAssets.duo);
+
+  updateModeUi();
   updatePhotoRangeLimits();
   render();
 }
 
 function bindEvents() {
-  [els.firstName, els.lastName, els.average, els.date].forEach((el) => {
-    el.addEventListener("input", render);
-  });
+  [
+    els.soloFirstName,
+    els.soloLastName,
+    els.duoFirstName1,
+    els.duoLastName1,
+    els.duoFirstName2,
+    els.duoLastName2,
+    els.average,
+    els.highestFinish,
+    els.date,
+  ].forEach((el) => el.addEventListener("input", render));
+
+  els.soloModeButton.addEventListener("click", () => setMode("solo"));
+  els.duoModeButton.addEventListener("click", () => setMode("duo"));
 
   els.photoZoom.addEventListener("input", () => {
     updatePhotoRangeLimits();
@@ -163,10 +315,27 @@ function bindEvents() {
     els.nav.classList.toggle("open");
   });
 
-  els.canvas.addEventListener("pointerdown", startCanvasDrag);
-  window.addEventListener("pointermove", moveCanvasDrag);
-  window.addEventListener("pointerup", endCanvasDrag);
-  window.addEventListener("pointercancel", endCanvasDrag);
+  els.canvas.addEventListener("pointerdown", onPointerDown);
+  els.canvas.addEventListener("pointermove", onPointerMove);
+  els.canvas.addEventListener("pointerup", onPointerUp);
+  els.canvas.addEventListener("pointercancel", onPointerUp);
+  els.canvas.addEventListener("pointerleave", onPointerUp);
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  updateModeUi();
+  render();
+}
+
+function updateModeUi() {
+  const isSolo = state.mode === "solo";
+
+  els.soloFields.hidden = !isSolo;
+  els.duoFields.hidden = isSolo;
+
+  els.soloModeButton.classList.toggle("active", isSolo);
+  els.duoModeButton.classList.toggle("active", !isSolo);
 }
 
 async function loadFonts() {
@@ -377,22 +546,46 @@ function clampPhotoOffsets() {
 }
 
 function drawOverlayImages() {
-  for (const image of state.overlayImages) {
+  for (const image of state.images.shared) {
+    if (!image) continue;
+    ctx.drawImage(image, 0, 0, CONFIG.width, CONFIG.height);
+  }
+
+  for (const image of state.images[state.mode]) {
     if (!image) continue;
     ctx.drawImage(image, 0, 0, CONFIG.width, CONFIG.height);
   }
 }
 
 function drawTextValues() {
-  const firstName = sanitizeText(els.firstName.value || "Alexander");
-  const lastName = sanitizeText(els.lastName.value || "Mustermann");
   const average = formatAverage(els.average.value);
+  const highestFinish = sanitizeNumberText(els.highestFinish.value || "0");
   const date = formatDateGerman(els.date.value);
 
-  drawFittedText(firstName, CONFIG.text.firstName);
-  drawFittedText(lastName, CONFIG.text.lastName);
-  drawFittedText(average, CONFIG.text.average);
-  drawFittedText(date, CONFIG.text.date);
+  if (state.mode === "solo") {
+    const firstName = sanitizeText(els.soloFirstName.value || "Alexander");
+    const lastName = sanitizeText(els.soloLastName.value || "Mustermann");
+
+    drawFittedText(firstName, CONFIG.text.solo.firstName);
+    drawFittedText(lastName, CONFIG.text.solo.lastName);
+    drawFittedText(average, CONFIG.text.solo.average);
+    drawFittedText(highestFinish, CONFIG.text.solo.highestFinish);
+    drawFittedText(date, CONFIG.text.solo.date);
+    return;
+  }
+
+  const firstName1 = sanitizeText(els.duoFirstName1.value || "Alexander");
+  const lastName1 = sanitizeText(els.duoLastName1.value || "Mustermann");
+  const firstName2 = sanitizeText(els.duoFirstName2.value || "Steven");
+  const lastName2 = sanitizeText(els.duoLastName2.value || "Musterfrau");
+
+  drawFittedText(firstName1, CONFIG.text.duo.player1FirstName);
+  drawFittedText(lastName1, CONFIG.text.duo.player1LastName);
+  drawFittedText(firstName2, CONFIG.text.duo.player2FirstName);
+  drawFittedText(lastName2, CONFIG.text.duo.player2LastName);
+  drawFittedText(average, CONFIG.text.duo.average);
+  drawFittedText(highestFinish, CONFIG.text.duo.highestFinish);
+  drawFittedText(date, CONFIG.text.duo.date);
 }
 
 function drawFittedText(text, options) {
@@ -416,44 +609,93 @@ function drawFittedText(text, options) {
   ctx.restore();
 }
 
-function startCanvasDrag(event) {
+function onPointerDown(event) {
   if (!state.userPhoto) return;
 
-  state.drag.active = true;
-  state.drag.startClientX = event.clientX;
-  state.drag.startClientY = event.clientY;
-  state.drag.startOffsetX = Number(els.photoX.value);
-  state.drag.startOffsetY = Number(els.photoY.value);
-
   els.canvas.setPointerCapture?.(event.pointerId);
+  state.pointers.set(event.pointerId, event);
+
+  if (state.pointers.size === 1) {
+    state.drag.active = true;
+    state.drag.startClientX = event.clientX;
+    state.drag.startClientY = event.clientY;
+    state.drag.startOffsetX = Number(els.photoX.value);
+    state.drag.startOffsetY = Number(els.photoY.value);
+  }
+
+  if (state.pointers.size === 2) {
+    const [a, b] = [...state.pointers.values()];
+    state.pinch.active = true;
+    state.pinch.startDistance = getPointerDistance(a, b);
+    state.pinch.startZoom = Number(els.photoZoom.value);
+    state.drag.active = false;
+  }
 }
 
-function moveCanvasDrag(event) {
-  if (!state.drag.active || !state.userPhoto) return;
+function onPointerMove(event) {
+  if (!state.userPhoto || !state.pointers.has(event.pointerId)) return;
 
   event.preventDefault();
+  state.pointers.set(event.pointerId, event);
 
-  const rect = els.canvas.getBoundingClientRect();
-  const scaleX = CONFIG.width / rect.width;
-  const scaleY = CONFIG.height / rect.height;
+  if (state.pinch.active && state.pointers.size >= 2) {
+    const [a, b] = [...state.pointers.values()];
+    const distance = getPointerDistance(a, b);
+    const ratio = distance / state.pinch.startDistance;
+    const nextZoom = clamp(state.pinch.startZoom * ratio, Number(els.photoZoom.min), Number(els.photoZoom.max));
 
-  const nextX = state.drag.startOffsetX + (event.clientX - state.drag.startClientX) * scaleX;
-  const nextY = state.drag.startOffsetY + (event.clientY - state.drag.startClientY) * scaleY;
+    els.photoZoom.value = String(nextZoom);
+    updatePhotoRangeLimits();
+    render();
+    return;
+  }
 
-  const { maxX, maxY } = getPhotoBounds();
+  if (state.drag.active && state.pointers.size === 1) {
+    const rect = els.canvas.getBoundingClientRect();
+    const scaleX = CONFIG.width / rect.width;
+    const scaleY = CONFIG.height / rect.height;
 
-  els.photoX.value = String(Math.round(clamp(nextX, -maxX, maxX)));
-  els.photoY.value = String(Math.round(clamp(nextY, -maxY, maxY)));
+    const nextX = state.drag.startOffsetX + (event.clientX - state.drag.startClientX) * scaleX;
+    const nextY = state.drag.startOffsetY + (event.clientY - state.drag.startClientY) * scaleY;
 
-  render();
+    const { maxX, maxY } = getPhotoBounds();
+
+    els.photoX.value = String(Math.round(clamp(nextX, -maxX, maxX)));
+    els.photoY.value = String(Math.round(clamp(nextY, -maxY, maxY)));
+
+    render();
+  }
 }
 
-function endCanvasDrag() {
-  state.drag.active = false;
+function onPointerUp(event) {
+  state.pointers.delete(event.pointerId);
+
+  if (state.pointers.size < 2) {
+    state.pinch.active = false;
+  }
+
+  if (state.pointers.size === 1) {
+    const remaining = [...state.pointers.values()][0];
+    state.drag.active = true;
+    state.drag.startClientX = remaining.clientX;
+    state.drag.startClientY = remaining.clientY;
+    state.drag.startOffsetX = Number(els.photoX.value);
+    state.drag.startOffsetY = Number(els.photoY.value);
+  } else {
+    state.drag.active = false;
+  }
+}
+
+function getPointerDistance(a, b) {
+  return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
 }
 
 function sanitizeText(text) {
   return String(text).trim().replace(/\s+/g, " ");
+}
+
+function sanitizeNumberText(text) {
+  return String(text).trim().replace(/[^\d]/g, "") || "0";
 }
 
 function formatAverage(value) {
@@ -485,11 +727,13 @@ function toInputDate(date) {
 function downloadImage() {
   render();
 
-  const firstName = sanitizeText(els.firstName.value || "spieler");
-  const lastName = sanitizeText(els.lastName.value || "");
   const date = els.date.value || toInputDate(new Date());
+  const namePart =
+    state.mode === "solo"
+      ? `${els.soloFirstName.value}-${els.soloLastName.value}`
+      : `${els.duoFirstName1.value}-${els.duoLastName1.value}-${els.duoFirstName2.value}-${els.duoLastName2.value}`;
 
-  const fileName = `trainingssieger-${slugify(`${firstName}-${lastName}`)}-${date}.png`;
+  const fileName = `${state.mode}-trainingssieger-${slugify(namePart)}-${date}.png`;
 
   const link = document.createElement("a");
   link.download = fileName;
