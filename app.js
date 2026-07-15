@@ -1,11 +1,3 @@
-// FC Lachendorf Darts – Story Generator v3
-// -----------------------------------------
-// Format: 1080 × 1920 px.
-// An deine Beispielbilder angepasst:
-// - Solo: ein Namensblock unten rechts/zentral
-// - Duo: zwei getrennte Namensboxen unten
-// - Werte für Average und Highest Finish werden in die festen Balken geschrieben.
-
 const CONFIG = {
   width: 1080,
   height: 1920,
@@ -15,8 +7,6 @@ const CONFIG = {
     fonts: "fonts/",
   },
 
-  // Reihenfolge wie von dir beschrieben:
-  // Foto -> 6 % dunkler -> t1 -> bgra -> rgra -> vignetten -> Modus-Layer
   sharedAssets: [
     "t1.png",
     "bgra1.png",
@@ -26,8 +16,18 @@ const CONFIG = {
   ],
 
   modeAssets: {
-    solo: ["soloname.png", "solotitle.png"],
-    duo: ["duoname.png", "duotitle.png"],
+    solo: {
+      name: "soloname.png",
+      avg: "soloavg.png",
+      fin: "solofin.png",
+      title: "solotitle.png",
+    },
+    duo: {
+      name: "duoname.png",
+      avg: "duoavg.png",
+      fin: "duofin.png",
+      title: "duotitle.png",
+    },
   },
 
   fonts: {
@@ -46,8 +46,11 @@ const CONFIG = {
     fallbackColor: "#c83a31",
   },
 
-  // Diese Positionen sind bewusst leicht an deine Beispielbilder angenähert.
-  // Du musst sie wahrscheinlich noch 1x feinjustieren, weil deine echten PNG-Layer entscheidend sind.
+  statShift: {
+    soloAverageOnlyY: 70,
+    duoAverageOnlyY: 70,
+  },
+
   text: {
     solo: {
       firstName: {
@@ -216,6 +219,10 @@ const els = {
   duoFirstName2: document.getElementById("duoFirstName2"),
   duoLastName2: document.getElementById("duoLastName2"),
 
+  showAverage: document.getElementById("showAverage"),
+  showFinish: document.getElementById("showFinish"),
+  averageField: document.getElementById("averageField"),
+  finishField: document.getElementById("finishField"),
   average: document.getElementById("average"),
   highestFinish: document.getElementById("highestFinish"),
   date: document.getElementById("date"),
@@ -243,8 +250,8 @@ const state = {
   userPhotoName: "",
   images: {
     shared: [],
-    solo: [],
-    duo: [],
+    solo: {},
+    duo: {},
   },
   drag: {
     active: false,
@@ -271,10 +278,11 @@ async function init() {
   await loadFonts();
 
   state.images.shared = await loadOverlayImages(CONFIG.sharedAssets);
-  state.images.solo = await loadOverlayImages(CONFIG.modeAssets.solo);
-  state.images.duo = await loadOverlayImages(CONFIG.modeAssets.duo);
+  state.images.solo = await loadModeImages(CONFIG.modeAssets.solo);
+  state.images.duo = await loadModeImages(CONFIG.modeAssets.duo);
 
   updateModeUi();
+  updateStatFieldsUi();
   updatePhotoRangeLimits();
   render();
 }
@@ -291,6 +299,13 @@ function bindEvents() {
     els.highestFinish,
     els.date,
   ].forEach((el) => el.addEventListener("input", render));
+
+  [els.showAverage, els.showFinish].forEach((el) => {
+    el.addEventListener("change", () => {
+      updateStatFieldsUi();
+      render();
+    });
+  });
 
   els.soloModeButton.addEventListener("click", () => setMode("solo"));
   els.duoModeButton.addEventListener("click", () => setMode("duo"));
@@ -338,6 +353,14 @@ function updateModeUi() {
   els.duoModeButton.classList.toggle("active", !isSolo);
 }
 
+function updateStatFieldsUi() {
+  els.averageField.classList.toggle("is-disabled", !els.showAverage.checked);
+  els.finishField.classList.toggle("is-disabled", !els.showFinish.checked);
+
+  els.average.disabled = !els.showAverage.checked;
+  els.highestFinish.disabled = !els.showFinish.checked;
+}
+
 async function loadFonts() {
   const fontDefinitions = Object.values(CONFIG.fonts);
 
@@ -356,6 +379,17 @@ function loadOverlayImages(fileNames) {
   return Promise.all(
     fileNames.map((fileName) => loadImage(`${CONFIG.paths.assets}${fileName}`))
   );
+}
+
+async function loadModeImages(modeAssetConfig) {
+  const entries = await Promise.all(
+    Object.entries(modeAssetConfig).map(async ([key, fileName]) => {
+      const image = await loadImage(`${CONFIG.paths.assets}${fileName}`);
+      return [key, image];
+    })
+  );
+
+  return Object.fromEntries(entries);
 }
 
 function loadImage(src) {
@@ -551,40 +585,111 @@ function drawOverlayImages() {
     ctx.drawImage(image, 0, 0, CONFIG.width, CONFIG.height);
   }
 
-  for (const image of state.images[state.mode]) {
-    if (!image) continue;
-    ctx.drawImage(image, 0, 0, CONFIG.width, CONFIG.height);
+  const modeImages = state.images[state.mode];
+  const showAverage = els.showAverage.checked;
+  const showFinish = els.showFinish.checked;
+  const averageOnly = showAverage && !showFinish;
+
+  if (modeImages.name) {
+    ctx.drawImage(modeImages.name, 0, 0, CONFIG.width, CONFIG.height);
+  }
+
+  if (showAverage && modeImages.avg) {
+    const shiftY =
+      averageOnly && state.mode === "solo"
+        ? CONFIG.statShift.soloAverageOnlyY
+        : averageOnly && state.mode === "duo"
+          ? CONFIG.statShift.duoAverageOnlyY
+          : 0;
+
+    ctx.drawImage(modeImages.avg, 0, shiftY, CONFIG.width, CONFIG.height);
+  }
+
+  if (showFinish && modeImages.fin) {
+    ctx.drawImage(modeImages.fin, 0, 0, CONFIG.width, CONFIG.height);
+  }
+
+  if (modeImages.title) {
+    ctx.drawImage(modeImages.title, 0, 0, CONFIG.width, CONFIG.height);
   }
 }
 
 function drawTextValues() {
   const average = formatAverage(els.average.value);
-  const highestFinish = sanitizeNumberText(els.highestFinish.value || "0");
+  const highestFinish = sanitizeNumberText(els.highestFinish.value || "");
   const date = formatDateGerman(els.date.value);
 
-  if (state.mode === "solo") {
-    const firstName = sanitizeText(els.soloFirstName.value || "Alexander");
-    const lastName = sanitizeText(els.soloLastName.value || "Mustermann");
+  const showAverage = els.showAverage.checked;
+  const showFinish = els.showFinish.checked;
+  const averageOnly = showAverage && !showFinish;
 
-    drawFittedText(firstName, CONFIG.text.solo.firstName);
-    drawFittedText(lastName, CONFIG.text.solo.lastName);
-    drawFittedText(average, CONFIG.text.solo.average);
-    drawFittedText(highestFinish, CONFIG.text.solo.highestFinish);
+  if (state.mode === "solo") {
+    const firstName = sanitizeText(els.soloFirstName.value);
+    const lastName = sanitizeText(els.soloLastName.value);
+
+    if (firstName) {
+      drawFittedText(firstName, CONFIG.text.solo.firstName);
+    }
+
+    if (lastName) {
+      drawFittedText(lastName, CONFIG.text.solo.lastName);
+    }
+
+    if (showAverage && average) {
+      const averageOptions = averageOnly
+        ? {
+            ...CONFIG.text.solo.average,
+            y: CONFIG.text.solo.average.y + CONFIG.statShift.soloAverageOnlyY,
+          }
+        : CONFIG.text.solo.average;
+
+      drawFittedText(average, averageOptions);
+    }
+
+    if (showFinish && highestFinish) {
+      drawFittedText(highestFinish, CONFIG.text.solo.highestFinish);
+    }
+
     drawFittedText(date, CONFIG.text.solo.date);
     return;
   }
 
-  const firstName1 = sanitizeText(els.duoFirstName1.value || "Alexander");
-  const lastName1 = sanitizeText(els.duoLastName1.value || "Mustermann");
-  const firstName2 = sanitizeText(els.duoFirstName2.value || "Steven");
-  const lastName2 = sanitizeText(els.duoLastName2.value || "Musterfrau");
+  const firstName1 = sanitizeText(els.duoFirstName1.value);
+  const lastName1 = sanitizeText(els.duoLastName1.value);
+  const firstName2 = sanitizeText(els.duoFirstName2.value);
+  const lastName2 = sanitizeText(els.duoLastName2.value);
 
-  drawFittedText(firstName1, CONFIG.text.duo.player1FirstName);
-  drawFittedText(lastName1, CONFIG.text.duo.player1LastName);
-  drawFittedText(firstName2, CONFIG.text.duo.player2FirstName);
-  drawFittedText(lastName2, CONFIG.text.duo.player2LastName);
-  drawFittedText(average, CONFIG.text.duo.average);
-  drawFittedText(highestFinish, CONFIG.text.duo.highestFinish);
+  if (firstName1) {
+    drawFittedText(firstName1, CONFIG.text.duo.player1FirstName);
+  }
+
+  if (lastName1) {
+    drawFittedText(lastName1, CONFIG.text.duo.player1LastName);
+  }
+
+  if (firstName2) {
+    drawFittedText(firstName2, CONFIG.text.duo.player2FirstName);
+  }
+
+  if (lastName2) {
+    drawFittedText(lastName2, CONFIG.text.duo.player2LastName);
+  }
+
+  if (showAverage && average) {
+    const averageOptions = averageOnly
+      ? {
+          ...CONFIG.text.duo.average,
+          y: CONFIG.text.duo.average.y + CONFIG.statShift.duoAverageOnlyY,
+        }
+      : CONFIG.text.duo.average;
+
+    drawFittedText(average, averageOptions);
+  }
+
+  if (showFinish && highestFinish) {
+    drawFittedText(highestFinish, CONFIG.text.duo.highestFinish);
+  }
+
   drawFittedText(date, CONFIG.text.duo.date);
 }
 
@@ -695,14 +800,18 @@ function sanitizeText(text) {
 }
 
 function sanitizeNumberText(text) {
-  return String(text).trim().replace(/[^\d]/g, "") || "0";
+  return String(text).trim().replace(/[^\d]/g, "");
 }
 
 function formatAverage(value) {
-  const normalized = String(value).replace(",", ".");
+  const raw = String(value).trim();
+
+  if (!raw) return "";
+
+  const normalized = raw.replace(",", ".");
   const number = Number(normalized);
 
-  if (Number.isNaN(number)) return "0,0";
+  if (Number.isNaN(number)) return "";
 
   return number.toFixed(1).replace(".", ",");
 }

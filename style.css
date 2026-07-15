@@ -10,7 +10,9 @@
   --radius: 18px;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -22,7 +24,10 @@ body {
     var(--bg);
 }
 
-button, input { font: inherit; }
+button,
+input {
+  font: inherit;
+}
 
 .app-header {
   position: sticky;
@@ -46,18 +51,31 @@ button, input { font: inherit; }
   text-transform: uppercase;
 }
 
-.brand h1, .section-head h2 {
+.brand h1,
+.section-head h2 {
   margin: 0;
   line-height: 1.05;
 }
 
-.brand h1 { font-size: 1.05rem; }
+.brand h1 {
+  font-size: 1.05rem;
+}
 
-.section-head { margin-bottom: 16px; }
-.section-head.compact { margin-bottom: 12px; }
-.section-head h2 { font-size: 1.18rem; }
+.section-head {
+  margin-bottom: 16px;
+}
 
-.section-head p, .hint, .preview-help {
+.section-head.compact {
+  margin-bottom: 12px;
+}
+
+.section-head h2 {
+  font-size: 1.18rem;
+}
+
+.section-head p,
+.hint,
+.preview-help {
   margin: 7px 0 0;
   color: var(--muted);
   line-height: 1.45;
@@ -96,7 +114,9 @@ button, input { font: inherit; }
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
 }
 
-.nav.open { display: grid; }
+.nav.open {
+  display: grid;
+}
 
 .nav a {
   padding: 14px;
@@ -123,14 +143,17 @@ button, input { font: inherit; }
   gap: 12px;
 }
 
-.card, .preview-card {
+.card,
+.preview-card {
   background: rgba(21, 21, 25, 0.96);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
 }
 
-.card { padding: 16px; }
+.card {
+  padding: 16px;
+}
 
 .preview-card {
   position: sticky;
@@ -168,7 +191,9 @@ canvas {
   cursor: grab;
 }
 
-canvas:active { cursor: grabbing; }
+canvas:active {
+  cursor: grabbing;
+}
 
 .preview-help {
   margin: 8px 2px 0;
@@ -200,7 +225,9 @@ canvas:active { cursor: grabbing; }
   background: linear-gradient(135deg, var(--red), var(--red-dark));
 }
 
-.input-group { margin-bottom: 4px; }
+.input-group {
+  margin-bottom: 4px;
+}
 
 .mini-title {
   margin: 8px 0 8px;
@@ -216,7 +243,9 @@ canvas:active { cursor: grabbing; }
   gap: 10px;
 }
 
-.grid.two { grid-template-columns: 1fr 1fr; }
+.grid.two {
+  grid-template-columns: 1fr 1fr;
+}
 
 label {
   display: grid;
@@ -227,7 +256,8 @@ label {
   font-weight: 800;
 }
 
-input[type="text"], input[type="date"] {
+input[type="text"],
+input[type="date"] {
   width: 100%;
   min-height: 48px;
   padding: 0 14px;
@@ -241,6 +271,52 @@ input[type="text"], input[type="date"] {
 input:focus {
   border-color: rgba(227, 27, 47, 0.7);
   box-shadow: 0 0 0 4px rgba(227, 27, 47, 0.13);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.stat-card {
+  padding: 12px;
+  background: #101014;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+}
+
+.stat-card label:last-child {
+  margin-bottom: 0;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.check-row input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  accent-color: var(--red);
+}
+
+.check-row span {
+  font-weight: 900;
+}
+
+.is-disabled {
+  opacity: 0.42;
+}
+
+.is-disabled input[type="text"] {
+  pointer-events: none;
 }
 
 .upload-wrap {
@@ -261,18 +337,25 @@ input:focus {
   cursor: pointer;
 }
 
-.upload-box input { display: none; }
+.upload-box input {
+  display: none;
+}
 
-.upload-empty, .upload-selected {
+.upload-empty,
+.upload-selected {
   width: 100%;
   display: grid;
   gap: 4px;
   place-items: center;
 }
 
-.upload-empty strong, .upload-selected strong { color: white; }
+.upload-empty strong,
+.upload-selected strong {
+  color: white;
+}
 
-.upload-empty em, .upload-selected em {
+.upload-empty em,
+.upload-selected em {
   color: var(--muted);
   font-size: 0.84rem;
   font-style: normal;
@@ -329,7 +412,9 @@ input[type="range"] {
   font-weight: 900;
 }
 
-.date-details label { margin-top: 12px; }
+.date-details label {
+  margin-top: 12px;
+}
 
 .download-button {
   width: 100%;
@@ -347,7 +432,10 @@ input[type="range"] {
     align-items: start;
   }
 
-  .data-card, .controls-card { grid-column: 1; }
+  .data-card,
+  .controls-card {
+    grid-column: 1;
+  }
 
   .preview-card {
     grid-column: 2;
@@ -355,7 +443,11 @@ input[type="range"] {
     top: 84px;
   }
 
-  canvas { height: min(82svh, 840px); }
+  canvas {
+    height: min(82svh, 840px);
+  }
 
-  .app-header { padding-inline: 24px; }
+  .app-header {
+    padding-inline: 24px;
+  }
 }

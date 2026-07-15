@@ -41,12 +41,12 @@
         <div class="grid two">
           <label>
             Vorname
-            <input id="soloFirstName" type="text" placeholder="Alexander" value="Alexander" autocomplete="off" />
+            <input id="soloFirstName" type="text" placeholder="Vorname" maxlength="24" autocomplete="off" />
           </label>
 
           <label>
             Nachname
-            <input id="soloLastName" type="text" placeholder="Mustermann" value="Mustermann" autocomplete="off" />
+            <input id="soloLastName" type="text" placeholder="Nachname" maxlength="24" autocomplete="off" />
           </label>
         </div>
       </div>
@@ -56,12 +56,12 @@
         <div class="grid two">
           <label>
             Vorname
-            <input id="duoFirstName1" type="text" placeholder="Alexander" value="Alexander" autocomplete="off" />
+            <input id="duoFirstName1" type="text" placeholder="Vorname" maxlength="24" autocomplete="off" />
           </label>
 
           <label>
             Nachname
-            <input id="duoLastName1" type="text" placeholder="Mustermann" value="Mustermann" autocomplete="off" />
+            <input id="duoLastName1" type="text" placeholder="Nachname" maxlength="24" autocomplete="off" />
           </label>
         </div>
 
@@ -69,26 +69,40 @@
         <div class="grid two">
           <label>
             Vorname
-            <input id="duoFirstName2" type="text" placeholder="Steven" value="Steven" autocomplete="off" />
+            <input id="duoFirstName2" type="text" placeholder="Vorname" maxlength="24" autocomplete="off" />
           </label>
 
           <label>
             Nachname
-            <input id="duoLastName2" type="text" placeholder="Musterfrau" value="Musterfrau" autocomplete="off" />
+            <input id="duoLastName2" type="text" placeholder="Nachname" maxlength="24" autocomplete="off" />
           </label>
         </div>
       </div>
 
-      <div class="grid two">
-        <label>
-          Team / Game Average
-          <input id="average" type="text" inputmode="decimal" placeholder="56,3" value="56,3" autocomplete="off" />
-        </label>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <label class="check-row">
+            <input id="showAverage" type="checkbox" checked />
+            <span>Average</span>
+          </label>
 
-        <label>
-          Highest Finish
-          <input id="highestFinish" type="text" inputmode="numeric" placeholder="76" value="76" autocomplete="off" />
-        </label>
+          <label id="averageField">
+            Wert
+            <input id="average" type="text" inputmode="decimal" maxlength="4" placeholder="56,3" autocomplete="off" />
+          </label>
+        </div>
+
+        <div class="stat-card">
+          <label class="check-row">
+            <input id="showFinish" type="checkbox" checked />
+            <span>Finish</span>
+          </label>
+
+          <label id="finishField">
+            Wert
+            <input id="highestFinish" type="text" inputmode="numeric" maxlength="3" placeholder="76" autocomplete="off" />
+          </label>
+        </div>
       </div>
 
       <div class="upload-wrap">
