@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FC Lachendorf Darts – Story Generator</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="league.css" />
 </head>
 <body>
   <header class="app-header">
@@ -18,14 +19,15 @@
     </div>
 
     <nav class="nav" id="nav">
-      <a href="#" class="active">Trainingssieger</a>
+      <a href="#" class="active" data-tool-target="training">Trainingssieger</a>
+      <a href="#" data-tool-target="result">Ergebnis</a>
       <a href="#" aria-disabled="true">Spieltagsankündigung</a>
       <a href="#" aria-disabled="true">Tabelle</a>
       <a href="#" aria-disabled="true">Spielplan</a>
     </nav>
   </header>
 
-  <main class="layout">
+  <main class="layout tool-page" id="trainingTool" data-tool-page="training">
     <section class="card data-card">
       <div class="section-head">
         <h2>Trainingssieger</h2>
@@ -176,6 +178,89 @@
     </section>
   </main>
 
+  <main class="layout tool-page" id="resultTool" data-tool-page="result" hidden>
+    <section class="card data-card result-card">
+      <div class="section-head">
+        <h2>Ergebnis</h2>
+        <p>Team, Gegner und Endstand auswählen.</p>
+      </div>
+
+      <div class="mode-switch" role="group" aria-label="Ligamannschaft auswählen">
+        <button class="mode-button active" type="button" data-league-team="a" aria-pressed="true">A-Team</button>
+        <button class="mode-button" type="button" data-league-team="b" aria-pressed="false">B-Team</button>
+      </div>
+
+      <p class="result-subheading">Spielort</p>
+      <div class="mode-switch" role="group" aria-label="Heim- oder Auswärtsspiel auswählen">
+        <button class="mode-button active" type="button" data-match-location="home" aria-pressed="true">Heim</button>
+        <button class="mode-button" type="button" data-match-location="away" aria-pressed="false">Auswärts</button>
+      </div>
+
+      <label>
+        Gegner
+        <select id="resultOpponent">
+          <option value="">Gegner auswählen</option>
+        </select>
+      </label>
+
+      <label id="customOpponentWrap" hidden>
+        Mannschaftsname
+        <input id="resultCustomOpponent" type="text" maxlength="42" placeholder="z. B. DC Beispiel A" autocomplete="off" />
+      </label>
+
+      <div class="result-score-grid">
+        <label>
+          Unser Ergebnis
+          <input id="resultOurScore" type="number" inputmode="numeric" min="0" max="99" placeholder="7" />
+        </label>
+
+        <label>
+          Gegner-Ergebnis
+          <input id="resultOpponentScore" type="number" inputmode="numeric" min="0" max="99" placeholder="5" />
+        </label>
+      </div>
+
+      <p class="result-note"><strong>Automatische Reihenfolge:</strong> Bei Auswärtsspielen wird der Gegner im fertigen Ergebnis automatisch zuerst angezeigt.</p>
+
+      <div class="grid two">
+        <label>
+          Spieltag
+          <input id="resultMatchday" type="number" inputmode="numeric" min="1" max="99" placeholder="1" />
+        </label>
+
+        <label>
+          Datum
+          <input id="resultDate" type="date" />
+        </label>
+      </div>
+    </section>
+
+    <section class="preview-card result-preview-card">
+      <div class="preview-topline">
+        <span>Live-Vorschau</span>
+        <span>1080 × 1920 px</span>
+      </div>
+
+      <div class="canvas-shell">
+        <canvas id="resultCanvas" width="1080" height="1920"></canvas>
+      </div>
+
+      <p class="preview-help">Sieg, Unentschieden oder Niederlage wird automatisch aus dem Ergebnis ermittelt.</p>
+    </section>
+
+    <section class="card controls-card result-controls-card">
+      <div class="section-head compact">
+        <h2>Export</h2>
+        <p>Die Story wird in voller 1080 × 1920 px Auflösung gespeichert.</p>
+      </div>
+
+      <button class="download-button" id="resultDownloadButton" type="button">
+        Ergebnis-Story herunterladen
+      </button>
+    </section>
+  </main>
+
   <script src="app.js"></script>
+  <script src="league.js"></script>
 </body>
 </html>
