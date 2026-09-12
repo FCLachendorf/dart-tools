@@ -1,0 +1,91 @@
+.tool-page[hidden],
+[hidden] {
+  display: none !important;
+}
+
+select,
+input[type="number"] {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  color: var(--text);
+  background: #0f0f13;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  outline: none;
+}
+
+select:focus,
+input[type="number"]:focus {
+  border-color: rgba(227, 27, 47, 0.7);
+  box-shadow: 0 0 0 4px rgba(227, 27, 47, 0.13);
+}
+
+select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 19px) 21px,
+    calc(100% - 14px) 21px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 38px;
+}
+
+.result-card .mode-switch {
+  margin-bottom: 14px;
+}
+
+.result-subheading {
+  margin: 18px 0 8px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.result-score-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.result-score-grid input {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 950;
+}
+
+.result-note {
+  margin: 4px 0 14px;
+  padding: 11px 12px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  background: #101014;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+}
+
+.result-note strong {
+  color: var(--text);
+}
+
+.result-preview-card .canvas-shell {
+  background:
+    radial-gradient(circle at top right, rgba(227, 27, 47, 0.18), transparent 45%),
+    #050506;
+}
+
+.result-controls-card .download-button {
+  margin-top: 4px;
+}
+
+@media (max-width: 420px) {
+  .result-score-grid {
+    grid-template-columns: 1fr;
+  }
+}
