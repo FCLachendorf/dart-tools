@@ -3,7 +3,6 @@ const LEAGUE_CONFIG = {
     label: "A-Team",
     clubName: "FC Lachendorf A",
     logo: "assets/league/logos/fc-lachendorf-a.png",
-    theme: { accent: "#e31b2f", soft: "rgba(227,27,47,0.12)", line: "#e31b2f" },
     opponents: [
       { id: "dsv-hambuehren-d", name: "DSV Hambühren D", logo: "assets/league/logos/dsv-hambuehren-d.png" },
       { id: "mtv-beedenbostel-b", name: "MTV Beedenbostel B", logo: "assets/league/logos/mtv-beedenbostel-b.png" },
@@ -17,7 +16,6 @@ const LEAGUE_CONFIG = {
     label: "B-Team",
     clubName: "FC Lachendorf B",
     logo: "assets/league/logos/fc-lachendorf-b.png",
-    theme: { accent: "#111114", soft: "rgba(255,255,255,0.07)", line: "#d4d4dc" },
     opponents: [
       { id: "bulls-eye-c", name: "Bulls Eye C", logo: "assets/league/logos/bulls-eye-c.png" },
       { id: "dsv-hambuehren-c", name: "DSV Hambühren C", logo: "assets/league/logos/dsv-hambuehren-c.png" },
@@ -29,32 +27,108 @@ const LEAGUE_CONFIG = {
   },
 };
 
-const RESULT_FORMATS = {
-  story: {
-    label: "Story",
-    width: 1080,
-    height: 1920,
-    layerBase: "assets/league/result/story/",
+const RESULT_STORY = {
+  width: 1080,
+  height: 1920,
+  assetBase: "assets/league/result/story/",
+};
+
+/*
+ * ============================================================
+ * POSITIONEN / GRÖSSEN FÜR DIE ERGEBNIS-STORY
+ * ============================================================
+ * Hier kannst du später die Pixelwerte fein einstellen.
+ * Alle Werte beziehen sich auf 1080 x 1920 px.
+ */
+const RESULT_STORY_LAYOUT = {
+  matchday: {
+    x: 330,
+    y: 190,
+    fontSize: 38,
+    colorA: "#e82638",
+    colorB: "#d7d7dc",
+    align: "center",
   },
-  post: {
-    label: "Post",
-    width: 1080,
-    height: 1350,
-    layerBase: "assets/league/result/post/",
+
+  logos: {
+    home: { x: 270, y: 1390, size: 145 },
+    away: { x: 835, y: 1390, size: 145 },
+  },
+
+  scores: {
+    homeX: 470,
+    awayX: 650,
+    colonX: 560,
+    y: 1468,
+    fontSize: 132,
+    colonFontSize: 104,
+    color: "#f3f3f5",
+    colonColor: "#e31b2f",
+  },
+
+  teamNames: {
+    homeX: 270,
+    awayX: 835,
+    y: 1562,
+    maxWidth: 450,
+    fontSize: 45,
+    minFontSize: 25,
+    color: "#f3f3f5",
+  },
+
+  date: {
+    x: 540,
+    y: 1880,
+    fontSize: 30,
+    color: "#7a7a82",
+  },
+
+  stats: {
+    columnShift: 510,
+    valueFontSize: 31,
+    valueColorTop: "#ffffff",
+    valueColorBottom: "#ffffff",
+    slots: [
+      { key: "top-left", row: "top", col: 0, x: 470, y: 1717 },
+      { key: "top-right", row: "top", col: 1, x: 980, y: 1717 },
+      { key: "bottom-left", row: "bottom", col: 0, x: 470, y: 1803 },
+      { key: "bottom-right", row: "bottom", col: 1, x: 980, y: 1803 },
+    ],
   },
 };
 
-const RESULT_LAYER_FILES = ["bg.png", "overlay.png", "accents.png", "header.png", "footer.png"];
+const STORY_ASSET_FILES = [
+  "bg.png",
+  "overlaya.png",
+  "overlayb.png",
+  "footer.png",
+  "headera.png",
+  "headerb.png",
+  "seta.png",
+  "setb.png",
+  "win.png",
+  "draw.png",
+  "lose.png",
+  "legs-top-a.png",
+  "legs-top-b.png",
+  "short-top-a.png",
+  "short-top-b.png",
+  "fin-top-a.png",
+  "fin-top-b.png",
+  "fin-bottom.png",
+  "counter-top-a.png",
+  "counter-top-b.png",
+  "counter-bottom.png",
+];
 
 const leagueEls = {
   navLinks: [...document.querySelectorAll("[data-tool-target]")],
   pages: [...document.querySelectorAll("[data-tool-page]")],
   nav: document.getElementById("nav"),
+  resultTool: document.getElementById("resultTool"),
 
   teamButtons: [...document.querySelectorAll("[data-league-team]")],
   locationButtons: [...document.querySelectorAll("[data-match-location]")],
-  formatButtons: [...document.querySelectorAll("[data-result-format]")],
-  backgroundButtons: [...document.querySelectorAll("[data-result-background]")],
 
   opponent: document.getElementById("resultOpponent"),
   customOpponentWrap: document.getElementById("customOpponentWrap"),
@@ -65,39 +139,62 @@ const leagueEls = {
   date: document.getElementById("resultDate"),
   scoreHint: document.getElementById("resultScoreHint"),
   scoreGrid: document.querySelector(".result-score-grid"),
-  resultTool: document.getElementById("resultTool"),
 
-  photoControls: document.getElementById("resultPhotoControls"),
   photoInput: document.getElementById("resultPhotoInput"),
   photoLabel: document.getElementById("resultPhotoLabel"),
   photoRemove: document.getElementById("resultPhotoRemove"),
+  photoAdjust: document.getElementById("resultPhotoAdjust"),
+  photoZoom: document.getElementById("resultPhotoZoom"),
+  photoX: document.getElementById("resultPhotoX"),
+  photoY: document.getElementById("resultPhotoY"),
+
+  showLegs: document.getElementById("resultShowLegs"),
+  legs: document.getElementById("resultLegs"),
+  showShort: document.getElementById("resultShowShort"),
+  short: document.getElementById("resultShort"),
+  showFinish: document.getElementById("resultShowFinish"),
+  finish: document.getElementById("resultFinish"),
+  showCounter: document.getElementById("resultShowCounter"),
+  counter: document.getElementById("resultCounter"),
 
   canvas: document.getElementById("resultCanvas"),
-  previewSize: document.getElementById("resultPreviewSize"),
-  previewFormat: document.getElementById("resultPreviewFormat"),
   modalCanvas: document.getElementById("resultModalCanvas"),
   previewModal: document.getElementById("resultPreviewModal"),
   openPreviewButton: document.getElementById("openResultPreview"),
   modalCloseButtons: [...document.querySelectorAll("[data-result-modal-close]")],
-
   downloadStoryButton: document.getElementById("downloadResultStory"),
-  downloadPostButton: document.getElementById("downloadResultPost"),
 };
 
 const leagueState = {
   activeTool: "training",
   team: "a",
   location: "home",
-  format: "story",
-  backgroundMode: "standard",
+
   resultPhoto: null,
   resultPhotoName: "",
+  photoTransform: {
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+
   images: {
     logos: new Map(),
-    layers: {
-      story: {},
-      post: {},
-    },
+    story: {},
+  },
+
+  pointers: new Map(),
+  drag: {
+    active: false,
+    startClientX: 0,
+    startClientY: 0,
+    startX: 0,
+    startY: 0,
+  },
+  pinch: {
+    active: false,
+    startDistance: 0,
+    startZoom: 1,
   },
 };
 
@@ -108,14 +205,17 @@ if (leagueEls.canvas) {
 
 async function initLeagueTools() {
   leagueEls.date.value = toLeagueInputDate(new Date());
+
   bindLeagueEvents();
   populateOpponentSelect();
-  updateCanvasFormat();
+  updateScoreHint();
+  updateStatInputs();
 
   await Promise.all([loadLeagueFonts(), preloadLeagueImages()]);
 
   updateLeagueUi();
-  renderResult();
+  updatePhotoRanges();
+  renderResultStory();
 }
 
 function bindLeagueEvents() {
@@ -136,7 +236,7 @@ function bindLeagueEvents() {
       leagueState.team = team;
       populateOpponentSelect();
       updateLeagueUi();
-      renderResult();
+      renderResultStory();
     });
   });
 
@@ -144,27 +244,7 @@ function bindLeagueEvents() {
     button.addEventListener("click", () => {
       leagueState.location = button.dataset.matchLocation === "away" ? "away" : "home";
       updateLeagueUi();
-      renderResult();
-    });
-  });
-
-  leagueEls.formatButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const format = button.dataset.resultFormat;
-      if (!RESULT_FORMATS[format]) return;
-
-      leagueState.format = format;
-      updateCanvasFormat();
-      updateLeagueUi();
-      renderResult();
-    });
-  });
-
-  leagueEls.backgroundButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      leagueState.backgroundMode = button.dataset.resultBackground === "photo" ? "photo" : "standard";
-      updateLeagueUi();
-      renderResult();
+      renderResultStory();
     });
   });
 
@@ -175,29 +255,64 @@ function bindLeagueEvents() {
     leagueEls.opponentScore,
     leagueEls.matchday,
     leagueEls.date,
+    leagueEls.legs,
+    leagueEls.short,
+    leagueEls.finish,
+    leagueEls.counter,
   ].forEach((element) => {
     element?.addEventListener("input", handleResultInput);
     element?.addEventListener("change", handleResultInput);
   });
 
+  [
+    leagueEls.showLegs,
+    leagueEls.showShort,
+    leagueEls.showFinish,
+    leagueEls.showCounter,
+  ].forEach((element) => {
+    element?.addEventListener("change", () => {
+      updateStatInputs();
+      renderResultStory();
+    });
+  });
+
   leagueEls.photoInput?.addEventListener("change", handleResultPhoto);
   leagueEls.photoRemove?.addEventListener("click", removeResultPhoto);
 
-  leagueEls.openPreviewButton?.addEventListener("click", openResultPreview);
-  leagueEls.modalCloseButtons.forEach((button) => button.addEventListener("click", closeResultPreview));
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !leagueEls.previewModal?.hidden) closeResultPreview();
+  leagueEls.photoZoom?.addEventListener("input", () => {
+    leagueState.photoTransform.zoom = Number(leagueEls.photoZoom.value);
+    updatePhotoRanges();
+    renderResultStory();
   });
 
-  leagueEls.canvas?.addEventListener("click", openResultPreview);
-  leagueEls.downloadStoryButton?.addEventListener("click", () => downloadResult("story"));
-  leagueEls.downloadPostButton?.addEventListener("click", () => downloadResult("post"));
+  [leagueEls.photoX, leagueEls.photoY].forEach((element) => {
+    element?.addEventListener("input", () => {
+      syncPhotoTransformFromRanges();
+      renderResultStory();
+    });
+  });
+
+  leagueEls.openPreviewButton?.addEventListener("click", openResultPreview);
+  leagueEls.modalCloseButtons.forEach((button) => button.addEventListener("click", closeResultPreview));
+  leagueEls.downloadStoryButton?.addEventListener("click", downloadResultStory);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && leagueEls.previewModal && !leagueEls.previewModal.hidden) {
+      closeResultPreview();
+    }
+  });
+
+  leagueEls.canvas.addEventListener("pointerdown", onResultPointerDown);
+  leagueEls.canvas.addEventListener("pointermove", onResultPointerMove);
+  leagueEls.canvas.addEventListener("pointerup", onResultPointerUp);
+  leagueEls.canvas.addEventListener("pointercancel", onResultPointerUp);
+  leagueEls.canvas.addEventListener("pointerleave", onResultPointerUp);
 }
 
 function handleResultInput() {
   updateCustomOpponentUi();
   updateScoreHint();
-  renderResult();
+  renderResultStory();
 }
 
 function setActiveTool(tool) {
@@ -214,7 +329,7 @@ function setActiveTool(tool) {
   leagueEls.nav?.classList.remove("open");
 
   if (tool === "result") {
-    renderResult();
+    renderResultStory();
   }
 }
 
@@ -231,24 +346,11 @@ function updateLeagueUi() {
     button.setAttribute("aria-pressed", String(active));
   });
 
-  leagueEls.formatButtons.forEach((button) => {
-    const active = button.dataset.resultFormat === leagueState.format;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
-  });
-
-  leagueEls.backgroundButtons.forEach((button) => {
-    const active = button.dataset.resultBackground === leagueState.backgroundMode;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
-  });
-
-  if (leagueEls.resultTool) leagueEls.resultTool.dataset.team = leagueState.team;
-  if (leagueEls.photoControls) leagueEls.photoControls.hidden = leagueState.backgroundMode !== "photo";
-  if (leagueEls.photoRemove) leagueEls.photoRemove.hidden = !leagueState.resultPhoto;
+  if (leagueEls.resultTool) {
+    leagueEls.resultTool.dataset.team = leagueState.team;
+  }
 
   updateCustomOpponentUi();
-  updateScoreHint();
 }
 
 function populateOpponentSelect() {
@@ -280,11 +382,11 @@ function updateCustomOpponentUi() {
 function updateScoreHint() {
   if (!leagueEls.scoreHint || !leagueEls.scoreGrid) return;
 
-  const ours = parseOptionalScore(leagueEls.ourScore.value);
-  const theirs = parseOptionalScore(leagueEls.opponentScore.value);
+  const ours = parseOptionalNumber(leagueEls.ourScore.value);
+  const theirs = parseOptionalNumber(leagueEls.opponentScore.value);
 
-  leagueEls.scoreGrid.classList.remove("score-win", "score-loss", "score-draw", "score-check");
-  leagueEls.scoreHint.classList.remove("is-warning", "is-ok");
+  leagueEls.scoreGrid.classList.remove("score-check");
+  leagueEls.scoreHint.classList.remove("is-warning");
 
   if (ours === null || theirs === null) {
     leagueEls.scoreHint.hidden = true;
@@ -295,38 +397,28 @@ function updateScoreHint() {
   const total = ours + theirs;
   leagueEls.scoreHint.hidden = false;
 
-  if (total !== 12) {
-    leagueEls.scoreGrid.classList.add("score-check");
-    leagueEls.scoreHint.textContent = `Zusammen: ${total} Punkte · bitte prüfen (erwartet: 12).`;
-    leagueEls.scoreHint.classList.add("is-warning");
+  if (total === 12) {
+    leagueEls.scoreHint.textContent = "Zusammen: 12 Punkte.";
     return;
   }
 
-  const stateClass = ours > theirs ? "score-win" : ours < theirs ? "score-loss" : "score-draw";
-  leagueEls.scoreGrid.classList.add(stateClass);
-  leagueEls.scoreHint.textContent = "Zusammen: 12 Punkte · passt.";
-  leagueEls.scoreHint.classList.add("is-ok");
+  leagueEls.scoreGrid.classList.add("score-check");
+  leagueEls.scoreHint.classList.add("is-warning");
+  leagueEls.scoreHint.textContent = `Zusammen: ${total} Punkte · bitte prüfen (erwartet: 12).`;
 }
 
-function updateCanvasFormat() {
-  const format = RESULT_FORMATS[leagueState.format];
-  leagueEls.canvas.width = format.width;
-  leagueEls.canvas.height = format.height;
+function updateStatInputs() {
+  const pairs = [
+    [leagueEls.showLegs, leagueEls.legs],
+    [leagueEls.showShort, leagueEls.short],
+    [leagueEls.showFinish, leagueEls.finish],
+    [leagueEls.showCounter, leagueEls.counter],
+  ];
 
-  if (leagueEls.previewSize) {
-    leagueEls.previewSize.textContent = `${format.width} × ${format.height} px`;
-  }
-
-  if (leagueEls.previewFormat) {
-    leagueEls.previewFormat.textContent = format.label;
-  }
-
-  leagueEls.canvas.dataset.format = leagueState.format;
-
-  if (leagueEls.modalCanvas) {
-    leagueEls.modalCanvas.width = format.width;
-    leagueEls.modalCanvas.height = format.height;
-  }
+  pairs.forEach(([toggle, input]) => {
+    if (!toggle || !input) return;
+    input.disabled = !toggle.checked;
+  });
 }
 
 async function loadLeagueFonts() {
@@ -366,21 +458,14 @@ async function preloadLeagueImages() {
     })
   );
 
-  await Promise.all(
-    Object.entries(RESULT_FORMATS).map(async ([formatKey, format]) => {
-      const entries = await Promise.all(
-        RESULT_LAYER_FILES.map(async (fileName) => {
-          let image = await loadLeagueImage(`${format.layerBase}${fileName}`, true);
-          if (!image && fileName === "accents.png") {
-            image = await loadLeagueImage(`${format.layerBase}accent.png`, true);
-          }
-          return [fileName, image];
-        })
-      );
-
-      leagueState.images.layers[formatKey] = Object.fromEntries(entries);
+  const entries = await Promise.all(
+    STORY_ASSET_FILES.map(async (fileName) => {
+      const image = await loadLeagueImage(`${RESULT_STORY.assetBase}${fileName}`, false);
+      return [fileName, image];
     })
   );
+
+  leagueState.images.story = Object.fromEntries(entries);
 }
 
 function loadLeagueImage(src, optional = false) {
@@ -397,20 +482,25 @@ function loadLeagueImage(src, optional = false) {
   });
 }
 
-function renderResult(formatKey = leagueState.format) {
-  const format = RESULT_FORMATS[formatKey];
+function renderResultStory() {
   const ctx = leagueEls.ctx;
+  const width = RESULT_STORY.width;
+  const height = RESULT_STORY.height;
 
-  if (leagueEls.canvas.width !== format.width || leagueEls.canvas.height !== format.height) {
-    leagueEls.canvas.width = format.width;
-    leagueEls.canvas.height = format.height;
+  if (leagueEls.canvas.width !== width || leagueEls.canvas.height !== height) {
+    leagueEls.canvas.width = width;
+    leagueEls.canvas.height = height;
   }
 
+  ctx.clearRect(0, 0, width, height);
+
+  const assets = leagueState.images.story;
+  const teamSuffix = leagueState.team;
   const teamConfig = LEAGUE_CONFIG[leagueState.team];
   const opponent = getSelectedOpponent();
-  const ourScore = sanitizeLeagueScore(leagueEls.ourScore.value);
-  const opponentScore = sanitizeLeagueScore(leagueEls.opponentScore.value);
-  const resultLabel = getResultLabel(ourScore, opponentScore);
+
+  const ourScore = sanitizeScore(leagueEls.ourScore.value);
+  const opponentScore = sanitizeScore(leagueEls.opponentScore.value);
   const isHome = leagueState.location === "home";
 
   const ourTeam = {
@@ -428,363 +518,453 @@ function renderResult(formatKey = leagueState.format) {
   const homeScore = isHome ? ourScore : opponentScore;
   const awayScore = isHome ? opponentScore : ourScore;
 
-  drawResultBase(ctx, formatKey, format.width, format.height, teamConfig);
-  drawResultLayers(
-    ctx,
-    formatKey,
-    format.width,
-    format.height,
-    leagueState.backgroundMode === "photo" && Boolean(leagueState.resultPhoto)
+  drawFullAsset(ctx, assets["bg.png"]);
+
+  if (leagueState.resultPhoto) {
+    drawResultPhoto(ctx);
+  }
+
+  drawFullAsset(ctx, assets[`overlay${teamSuffix}.png`]);
+  drawFullAsset(ctx, assets["footer.png"]);
+  drawFullAsset(ctx, assets[`header${teamSuffix}.png`]);
+  drawFullAsset(ctx, assets[`set${teamSuffix}.png`]);
+
+  const outcomeFile = getOutcomeAssetFile(ourScore, opponentScore);
+  if (outcomeFile) {
+    drawFullAsset(ctx, assets[outcomeFile]);
+  }
+
+  drawMatchday(ctx);
+  drawTeamLogo(ctx, homeTeam.logo, RESULT_STORY_LAYOUT.logos.home);
+  drawTeamLogo(ctx, awayTeam.logo, RESULT_STORY_LAYOUT.logos.away);
+  drawScores(ctx, homeScore, awayScore);
+  drawTeamNames(ctx, homeTeam.name, awayTeam.name);
+  drawDate(ctx);
+  drawDynamicStats(ctx);
+
+  syncModalPreview();
+}
+
+function drawFullAsset(ctx, image, offsetX = 0, offsetY = 0) {
+  if (!image) return;
+  ctx.drawImage(image, offsetX, offsetY, RESULT_STORY.width, RESULT_STORY.height);
+}
+
+function drawResultPhoto(ctx) {
+  const image = leagueState.resultPhoto;
+  if (!image) return;
+
+  clampPhotoTransform();
+
+  const size = getResultPhotoCoverSize(image, leagueState.photoTransform.zoom);
+  const x = (RESULT_STORY.width - size.width) / 2 + leagueState.photoTransform.x;
+  const y = (RESULT_STORY.height - size.height) / 2 + leagueState.photoTransform.y;
+
+  ctx.drawImage(image, x, y, size.width, size.height);
+}
+
+function getResultPhotoCoverSize(image, zoom = 1) {
+  const imageRatio = image.width / image.height;
+  const canvasRatio = RESULT_STORY.width / RESULT_STORY.height;
+
+  let width;
+  let height;
+
+  if (imageRatio > canvasRatio) {
+    height = RESULT_STORY.height * zoom;
+    width = height * imageRatio;
+  } else {
+    width = RESULT_STORY.width * zoom;
+    height = width / imageRatio;
+  }
+
+  return { width, height };
+}
+
+function getResultPhotoBounds() {
+  if (!leagueState.resultPhoto) return { maxX: 0, maxY: 0 };
+
+  const size = getResultPhotoCoverSize(
+    leagueState.resultPhoto,
+    leagueState.photoTransform.zoom
   );
 
-  if (formatKey === "post") {
-    drawResultPost(ctx, {
-      width: format.width,
-      height: format.height,
-      teamConfig,
-      homeTeam,
-      awayTeam,
-      homeScore,
-      awayScore,
-      resultLabel,
-    });
-  } else {
-    drawResultStory(ctx, {
-      width: format.width,
-      height: format.height,
-      teamConfig,
-      homeTeam,
-      awayTeam,
-      homeScore,
-      awayScore,
-      resultLabel,
-    });
+  return {
+    maxX: Math.max(0, Math.round((size.width - RESULT_STORY.width) / 2)),
+    maxY: Math.max(0, Math.round((size.height - RESULT_STORY.height) / 2)),
+  };
+}
+
+function updatePhotoRanges() {
+  if (!leagueEls.photoX || !leagueEls.photoY) return;
+
+  const { maxX, maxY } = getResultPhotoBounds();
+
+  leagueEls.photoX.min = String(-maxX);
+  leagueEls.photoX.max = String(maxX);
+  leagueEls.photoY.min = String(-maxY);
+  leagueEls.photoY.max = String(maxY);
+
+  clampPhotoTransform();
+
+  leagueEls.photoX.value = String(Math.round(leagueState.photoTransform.x));
+  leagueEls.photoY.value = String(Math.round(leagueState.photoTransform.y));
+  leagueEls.photoZoom.value = String(leagueState.photoTransform.zoom);
+
+  leagueEls.photoX.disabled = maxX === 0;
+  leagueEls.photoY.disabled = maxY === 0;
+}
+
+function clampPhotoTransform() {
+  const { maxX, maxY } = getResultPhotoBounds();
+
+  leagueState.photoTransform.x = clamp(
+    Number(leagueState.photoTransform.x),
+    -maxX,
+    maxX
+  );
+
+  leagueState.photoTransform.y = clamp(
+    Number(leagueState.photoTransform.y),
+    -maxY,
+    maxY
+  );
+}
+
+function syncPhotoTransformFromRanges() {
+  leagueState.photoTransform.x = Number(leagueEls.photoX.value);
+  leagueState.photoTransform.y = Number(leagueEls.photoY.value);
+  clampPhotoTransform();
+}
+
+function handleResultPhoto(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const image = new Image();
+
+    image.onload = () => {
+      leagueState.resultPhoto = image;
+      leagueState.resultPhotoName = file.name;
+      leagueState.photoTransform = { zoom: 1, x: 0, y: 0 };
+
+      leagueEls.photoLabel.textContent = file.name;
+      leagueEls.photoRemove.hidden = false;
+      leagueEls.photoAdjust.hidden = false;
+
+      updatePhotoRanges();
+      renderResultStory();
+    };
+
+    image.src = reader.result;
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function removeResultPhoto() {
+  leagueState.resultPhoto = null;
+  leagueState.resultPhotoName = "";
+  leagueState.photoTransform = { zoom: 1, x: 0, y: 0 };
+
+  leagueEls.photoInput.value = "";
+  leagueEls.photoLabel.textContent = "Foto auswählen / aufnehmen";
+  leagueEls.photoRemove.hidden = true;
+  leagueEls.photoAdjust.hidden = true;
+  leagueEls.photoAdjust.open = false;
+
+  updatePhotoRanges();
+  renderResultStory();
+}
+
+function onResultPointerDown(event) {
+  if (!leagueState.resultPhoto) return;
+
+  leagueEls.canvas.setPointerCapture?.(event.pointerId);
+  leagueState.pointers.set(event.pointerId, event);
+
+  if (leagueState.pointers.size === 1) {
+    leagueState.drag.active = true;
+    leagueState.drag.startClientX = event.clientX;
+    leagueState.drag.startClientY = event.clientY;
+    leagueState.drag.startX = leagueState.photoTransform.x;
+    leagueState.drag.startY = leagueState.photoTransform.y;
   }
 
-  if (leagueEls.previewModal && !leagueEls.previewModal.hidden) {
-    syncModalPreview();
+  if (leagueState.pointers.size === 2) {
+    const [a, b] = [...leagueState.pointers.values()];
+    leagueState.pinch.active = true;
+    leagueState.pinch.startDistance = getPointerDistance(a, b);
+    leagueState.pinch.startZoom = leagueState.photoTransform.zoom;
+    leagueState.drag.active = false;
   }
 }
 
-function drawResultBase(ctx, formatKey, width, height, teamConfig) {
-  ctx.clearRect(0, 0, width, height);
+function onResultPointerMove(event) {
+  if (!leagueState.resultPhoto || !leagueState.pointers.has(event.pointerId)) return;
 
-  const usePhoto = leagueState.backgroundMode === "photo" && leagueState.resultPhoto;
+  event.preventDefault();
+  leagueState.pointers.set(event.pointerId, event);
 
-  if (usePhoto) {
-    drawCoverImage(ctx, leagueState.resultPhoto, 0, 0, width, height);
-    ctx.fillStyle = "rgba(0,0,0,0.48)";
-    ctx.fillRect(0, 0, width, height);
-  } else {
-    const background = ctx.createLinearGradient(0, 0, width, height);
-    background.addColorStop(0, "#070709");
-    background.addColorStop(0.52, "#15151a");
-    background.addColorStop(1, "#09090c");
-    ctx.fillStyle = background;
-    ctx.fillRect(0, 0, width, height);
+  if (leagueState.pinch.active && leagueState.pointers.size >= 2) {
+    const [a, b] = [...leagueState.pointers.values()];
+    const distance = getPointerDistance(a, b);
+    const ratio = distance / leagueState.pinch.startDistance;
 
-    ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.035)";
-    ctx.lineWidth = 1;
-    const step = formatKey === "story" ? 90 : 75;
-    for (let x = 0; x <= width; x += step) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
-    }
-    for (let y = 0; y <= height; y += step) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-    ctx.restore();
+    leagueState.photoTransform.zoom = clamp(
+      leagueState.pinch.startZoom * ratio,
+      Number(leagueEls.photoZoom.min),
+      Number(leagueEls.photoZoom.max)
+    );
+
+    updatePhotoRanges();
+    renderResultStory();
+    return;
   }
 
-  const theme = teamConfig.theme || LEAGUE_CONFIG.a.theme;
+  if (leagueState.drag.active && leagueState.pointers.size === 1) {
+    const rect = leagueEls.canvas.getBoundingClientRect();
+    const scaleX = RESULT_STORY.width / rect.width;
+    const scaleY = RESULT_STORY.height / rect.height;
+
+    leagueState.photoTransform.x =
+      leagueState.drag.startX +
+      (event.clientX - leagueState.drag.startClientX) * scaleX;
+
+    leagueState.photoTransform.y =
+      leagueState.drag.startY +
+      (event.clientY - leagueState.drag.startClientY) * scaleY;
+
+    clampPhotoTransform();
+    updatePhotoRanges();
+    renderResultStory();
+  }
+}
+
+function onResultPointerUp(event) {
+  leagueState.pointers.delete(event.pointerId);
+
+  if (leagueState.pointers.size < 2) {
+    leagueState.pinch.active = false;
+  }
+
+  if (leagueState.pointers.size === 1) {
+    const remaining = [...leagueState.pointers.values()][0];
+
+    leagueState.drag.active = true;
+    leagueState.drag.startClientX = remaining.clientX;
+    leagueState.drag.startClientY = remaining.clientY;
+    leagueState.drag.startX = leagueState.photoTransform.x;
+    leagueState.drag.startY = leagueState.photoTransform.y;
+  } else {
+    leagueState.drag.active = false;
+  }
+}
+
+function getPointerDistance(a, b) {
+  return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+}
+
+function drawMatchday(ctx) {
+  const value = sanitizeIntegerText(leagueEls.matchday.value);
+  if (!value) return;
+
+  const config = RESULT_STORY_LAYOUT.matchday;
 
   ctx.save();
-  ctx.fillStyle = theme.accent;
-  ctx.beginPath();
-  ctx.moveTo(width * 0.77, 0);
-  ctx.lineTo(width, 0);
-  ctx.lineTo(width, height * 0.18);
-  ctx.closePath();
-  ctx.fill();
-
-  if (leagueState.team === "b") {
-    ctx.strokeStyle = theme.line;
-    ctx.lineWidth = 5;
-    ctx.stroke();
-  }
-
-  ctx.fillStyle = theme.soft;
-  ctx.beginPath();
-  ctx.moveTo(0, height * 0.68);
-  ctx.lineTo(width, height * 0.53);
-  ctx.lineTo(width, height * 0.62);
-  ctx.lineTo(0, height * 0.78);
-  ctx.closePath();
-  ctx.fill();
+  ctx.textAlign = config.align;
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = leagueState.team === "a" ? config.colorA : config.colorB;
+  ctx.font = `900 ${config.fontSize}px "TacticSans", system-ui, sans-serif`;
+  ctx.fillText(value, config.x, config.y);
   ctx.restore();
 }
 
-function drawResultLayers(ctx, formatKey, width, height, skipBackground = false) {
-  const layers = leagueState.images.layers[formatKey] || {};
+function drawTeamLogo(ctx, logoPath, config) {
+  const image = getLeagueLogo(logoPath);
+  if (!image) return;
 
-  RESULT_LAYER_FILES.forEach((fileName) => {
-    if (skipBackground && fileName === "bg.png") return;
-    const image = layers[fileName];
-    if (!image) return;
-    ctx.drawImage(image, 0, 0, width, height);
-  });
+  const ratio = Math.min(config.size / image.width, config.size / image.height);
+  const width = image.width * ratio;
+  const height = image.height * ratio;
+
+  ctx.drawImage(
+    image,
+    config.x - width / 2,
+    config.y - height / 2,
+    width,
+    height
+  );
 }
 
-function drawCoverImage(ctx, image, x, y, width, height) {
-  const ratio = Math.max(width / image.width, height / image.height);
-  const drawWidth = image.width * ratio;
-  const drawHeight = image.height * ratio;
-  const drawX = x + (width - drawWidth) / 2;
-  const drawY = y + (height - drawHeight) / 2;
-  ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
-}
-function drawResultStory(ctx, data) {
-  const { width, teamConfig, homeTeam, awayTeam, homeScore, awayScore, resultLabel } = data;
-
-  drawHeader(ctx, teamConfig, 118, 250, 116);
-  drawMetaLine(ctx, width, 335, 31);
-
-  drawTeamIdentity(ctx, homeTeam, {
-    centerX: 270,
-    logoY: 470,
-    logoSize: 245,
-    role: "HEIM",
-    roleY: 765,
-    nameY: 835,
-    nameWidth: 420,
-    nameFont: 52,
-    nameMinFont: 28,
-  });
-
-  drawTeamIdentity(ctx, awayTeam, {
-    centerX: 810,
-    logoY: 470,
-    logoSize: 245,
-    role: "AUSWÄRTS",
-    roleY: 765,
-    nameY: 835,
-    nameWidth: 420,
-    nameFont: 52,
-    nameMinFont: 28,
-  });
-
-  drawScore(ctx, homeScore, awayScore, width, 1115, 205, 118);
-  drawResultBadge(ctx, resultLabel, width, 1260, 440, 112, 58);
-  drawFooter(ctx, width, 1715, 1825, 38);
-}
-
-function drawResultPost(ctx, data) {
-  const { width, teamConfig, homeTeam, awayTeam, homeScore, awayScore, resultLabel } = data;
-
-  drawHeader(ctx, teamConfig, 84, 178, 82);
-  drawMetaLine(ctx, width, 238, 26);
-
-  drawTeamIdentity(ctx, homeTeam, {
-    centerX: 270,
-    logoY: 335,
-    logoSize: 205,
-    role: "HEIM",
-    roleY: 575,
-    nameY: 632,
-    nameWidth: 410,
-    nameFont: 44,
-    nameMinFont: 25,
-  });
-
-  drawTeamIdentity(ctx, awayTeam, {
-    centerX: 810,
-    logoY: 335,
-    logoSize: 205,
-    role: "AUSWÄRTS",
-    roleY: 575,
-    nameY: 632,
-    nameWidth: 410,
-    nameFont: 44,
-    nameMinFont: 25,
-  });
-
-  drawScore(ctx, homeScore, awayScore, width, 835, 165, 96);
-  drawResultBadge(ctx, resultLabel, width, 930, 390, 92, 48);
-  drawFooter(ctx, width, 1150, 1265, 32);
-}
-
-function drawHeader(ctx, teamConfig, leagueY, titleY, titleFontSize) {
-  ctx.textAlign = "left";
-  ctx.fillStyle = teamConfig.theme?.line || "#e31b2f";
-  ctx.font = '900 30px "TacticSans", system-ui, sans-serif';
-  ctx.fillText(`DART LIGA - ${teamConfig.label.toUpperCase()}`, 72, leagueY);
-
-  ctx.fillStyle = "#ededf5";
-  ctx.font = `${titleFontSize}px "Topshow", Impact, sans-serif`;
-  ctx.fillText("ERGEBNIS", 70, titleY);
-}
-
-function drawMetaLine(ctx, width, y, fontSize) {
-  const matchday = sanitizeLeagueScore(leagueEls.matchday.value);
-  const parts = [leagueState.location === "home" ? "HEIMSPIEL" : "AUSWÄRTSSPIEL"];
-  if (matchday) parts.push(`${matchday}. SPIELTAG`);
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#9d9da8";
-  ctx.font = `${fontSize}px "TacticSans", system-ui, sans-serif`;
-  ctx.fillText(parts.join(" - "), width / 2, y);
-}
-
-function drawTeamIdentity(ctx, team, options) {
-  const logo = getLeagueLogo(team.logo);
-  drawLogoPlate(ctx, logo, options.centerX, options.logoY, options.logoSize, team.name);
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#e31b2f";
-  ctx.font = '900 25px "TacticSans", system-ui, sans-serif';
-  ctx.fillText(options.role, options.centerX, options.roleY);
-
-  drawTeamName(ctx, String(team.name).toUpperCase(), {
-    centerX: options.centerX,
-    y: options.nameY,
-    maxWidth: options.nameWidth,
-    fontSize: options.nameFont,
-    minFontSize: options.nameMinFont,
-    lineHeight: Math.round(options.nameFont * 1.05),
-  });
-}
-
-function drawLogoPlate(ctx, image, centerX, y, size, fallbackName) {
-  const x = centerX - size / 2;
+function drawScores(ctx, homeScore, awayScore) {
+  const config = RESULT_STORY_LAYOUT.scores;
 
   ctx.save();
-  ctx.fillStyle = "rgba(255,255,255,0.055)";
-  roundRect(ctx, x, y, size, size, size * 0.18);
-  ctx.fill();
-
-  ctx.strokeStyle = "rgba(255,255,255,0.1)";
-  ctx.lineWidth = 2;
-  roundRect(ctx, x, y, size, size, size * 0.18);
-  ctx.stroke();
-
-  if (image) {
-    const padding = size * 0.12;
-    drawContainedImage(ctx, image, x + padding, y + padding, size - padding * 2, size - padding * 2);
-  } else {
-    ctx.fillStyle = "rgba(255,255,255,0.78)";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = `700 ${Math.round(size * 0.12)}px system-ui, sans-serif`;
-    ctx.fillText(getInitials(fallbackName), centerX, y + size / 2);
-  }
-
-  ctx.restore();
-}
-
-function drawContainedImage(ctx, image, x, y, width, height) {
-  const ratio = Math.min(width / image.width, height / image.height);
-  const drawWidth = image.width * ratio;
-  const drawHeight = image.height * ratio;
-  const drawX = x + (width - drawWidth) / 2;
-  const drawY = y + (height - drawHeight) / 2;
-  ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
-}
-
-function drawTeamName(ctx, text, options) {
-  ctx.save();
-  ctx.fillStyle = "#ededf5";
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
 
-  let fontSize = options.fontSize;
-  let lines = [text];
+  ctx.fillStyle = config.color;
+  ctx.font = `${config.fontSize}px "Topshow", Impact, sans-serif`;
+  ctx.fillText(homeScore || "-", config.homeX, config.y);
+  ctx.fillText(awayScore || "-", config.awayX, config.y);
 
-  while (fontSize >= options.minFontSize) {
-    ctx.font = `${fontSize}px "Topshow", Impact, sans-serif`;
-    lines = createTeamNameLines(ctx, text, options.maxWidth);
-    const widest = Math.max(...lines.map((line) => ctx.measureText(line).width));
-
-    if (lines.length <= 2 && widest <= options.maxWidth) break;
-    fontSize -= 2;
-  }
-
-  const lineHeight = Math.round(fontSize * 1.05);
-  const startY = options.y - ((lines.length - 1) * lineHeight) / 2;
-
-  lines.slice(0, 2).forEach((line, index) => {
-    ctx.fillText(line, options.centerX, startY + index * lineHeight);
-  });
+  ctx.fillStyle = config.colonColor;
+  ctx.font = `${config.colonFontSize}px "Topshow", Impact, sans-serif`;
+  ctx.fillText(":", config.colonX, config.y - 10);
 
   ctx.restore();
 }
 
-function createTeamNameLines(ctx, text, maxWidth) {
-  if (ctx.measureText(text).width <= maxWidth) return [text];
+function drawTeamNames(ctx, homeName, awayName) {
+  const config = RESULT_STORY_LAYOUT.teamNames;
 
-  const words = text.split(/\s+/).filter(Boolean);
-  if (words.length <= 1) return [text];
+  drawFittedStoryText(ctx, String(homeName).toUpperCase(), {
+    x: config.homeX,
+    y: config.y,
+    maxWidth: config.maxWidth,
+    fontSize: config.fontSize,
+    minFontSize: config.minFontSize,
+    color: config.color,
+    align: "center",
+    family: "Topshow",
+  });
 
-  let best = null;
+  drawFittedStoryText(ctx, String(awayName).toUpperCase(), {
+    x: config.awayX,
+    y: config.y,
+    maxWidth: config.maxWidth,
+    fontSize: config.fontSize,
+    minFontSize: config.minFontSize,
+    color: config.color,
+    align: "center",
+    family: "Topshow",
+  });
+}
 
-  for (let split = 1; split < words.length; split += 1) {
-    const first = words.slice(0, split).join(" ");
-    const second = words.slice(split).join(" ");
-    const maxLineWidth = Math.max(ctx.measureText(first).width, ctx.measureText(second).width);
+function drawDate(ctx) {
+  const value = formatLeagueDate(leagueEls.date.value);
+  if (!value) return;
 
-    if (!best || maxLineWidth < best.maxLineWidth) {
-      best = { lines: [first, second], maxLineWidth };
+  const config = RESULT_STORY_LAYOUT.date;
+
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = config.color;
+  ctx.font = `${config.fontSize}px "TacticSans", system-ui, sans-serif`;
+  ctx.fillText(value, config.x, config.y);
+  ctx.restore();
+}
+
+function drawDynamicStats(ctx) {
+  const activeStats = getActiveStats();
+
+  activeStats.forEach((stat, index) => {
+    const slot = RESULT_STORY_LAYOUT.stats.slots[index];
+    if (!slot) return;
+
+    const assetInfo = getStatAssetInfo(stat.key, slot);
+    if (!assetInfo) return;
+
+    const image = leagueState.images.story[assetInfo.fileName];
+    const offsetX =
+      (slot.col - assetInfo.naturalColumn) *
+      RESULT_STORY_LAYOUT.stats.columnShift;
+
+    drawFullAsset(ctx, image, offsetX, 0);
+
+    const value = formatStatValue(stat.key, stat.value);
+    if (!value) return;
+
+    ctx.save();
+    ctx.textAlign = "right";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle =
+      slot.row === "top"
+        ? RESULT_STORY_LAYOUT.stats.valueColorTop
+        : RESULT_STORY_LAYOUT.stats.valueColorBottom;
+    ctx.font = `${RESULT_STORY_LAYOUT.stats.valueFontSize}px "TacticSans", system-ui, sans-serif`;
+    ctx.fillText(value, slot.x, slot.y);
+    ctx.restore();
+  });
+}
+
+function getActiveStats() {
+  /*
+   * Reihenfolge der Tabelle:
+   * 1. Legs
+   * 2. Short Game
+   * 3. Highest Finish
+   * 4. Counter / 180er
+   *
+   * Aktive Werte werden lückenlos von oben links nach unten rechts verteilt.
+   */
+  return [
+    { key: "legs", enabled: leagueEls.showLegs.checked, value: leagueEls.legs.value },
+    { key: "short", enabled: leagueEls.showShort.checked, value: leagueEls.short.value },
+    { key: "finish", enabled: leagueEls.showFinish.checked, value: leagueEls.finish.value },
+    { key: "counter", enabled: leagueEls.showCounter.checked, value: leagueEls.counter.value },
+  ].filter((stat) => stat.enabled);
+}
+
+function getStatAssetInfo(statKey, slot) {
+  const suffix = leagueState.team;
+
+  if (slot.row === "top") {
+    if (statKey === "legs") {
+      return { fileName: `legs-top-${suffix}.png`, naturalColumn: 0 };
+    }
+
+    if (statKey === "short") {
+      return { fileName: `short-top-${suffix}.png`, naturalColumn: 1 };
+    }
+
+    if (statKey === "finish") {
+      return { fileName: `fin-top-${suffix}.png`, naturalColumn: 0 };
+    }
+
+    if (statKey === "counter") {
+      return { fileName: `counter-top-${suffix}.png`, naturalColumn: 1 };
     }
   }
 
-  return best?.lines || [text];
+  if (slot.row === "bottom") {
+    if (statKey === "finish") {
+      return { fileName: "fin-bottom.png", naturalColumn: 0 };
+    }
+
+    if (statKey === "counter") {
+      return { fileName: "counter-bottom.png", naturalColumn: 1 };
+    }
+  }
+
+  return null;
 }
 
-function drawScore(ctx, homeScore, awayScore, width, y, scoreFontSize, colonFontSize) {
-  const left = homeScore || "-";
-  const right = awayScore || "-";
+function formatStatValue(statKey, rawValue) {
+  const raw = String(rawValue ?? "").trim();
+  if (!raw) return "";
 
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#ffffff";
-  ctx.font = `${scoreFontSize}px "Topshow", Impact, sans-serif`;
-  ctx.fillText(left, width / 2 - 175, y);
-  ctx.fillText(right, width / 2 + 175, y);
+  if (statKey === "legs") {
+    return normalizeLegs(raw) || raw;
+  }
 
-  ctx.fillStyle = "#e31b2f";
-  ctx.font = `${colonFontSize}px "Topshow", Impact, sans-serif`;
-  ctx.fillText(":", width / 2, y - scoreFontSize * 0.1);
+  return sanitizeIntegerText(raw);
 }
 
-function drawResultBadge(ctx, resultLabel, width, y, badgeWidth, badgeHeight, fontSize) {
-  const x = (width - badgeWidth) / 2;
+function getOutcomeAssetFile(ourScore, opponentScore) {
+  if (!ourScore || !opponentScore) return "";
 
-  ctx.fillStyle = resultLabel.color;
-  roundRect(ctx, x, y, badgeWidth, badgeHeight, badgeHeight * 0.25);
-  ctx.fill();
+  const ours = Number(ourScore);
+  const theirs = Number(opponentScore);
 
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
-  ctx.font = `${fontSize}px "Topshow", Impact, sans-serif`;
-  ctx.fillText(resultLabel.text, width / 2, y + badgeHeight * 0.68);
-}
-
-function drawFooter(ctx, width, dateY, brandY, brandFontSize) {
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#777781";
-  ctx.font = '30px "TacticSans", system-ui, sans-serif';
-  ctx.fillText(formatLeagueDate(leagueEls.date.value), width / 2, dateY);
-
-  ctx.fillStyle = "#ededf5";
-  ctx.font = `${brandFontSize}px "Topshow", Impact, sans-serif`;
-  ctx.fillText("FC LACHENDORF DARTS", width / 2, brandY);
-
-  ctx.fillStyle = "#e31b2f";
-  ctx.fillRect(width / 2 - 145, brandY + 38, 290, 7);
+  if (ours > theirs) return "win.png";
+  if (ours < theirs) return "lose.png";
+  return "draw.png";
 }
 
 function getSelectedOpponent() {
@@ -793,9 +973,11 @@ function getSelectedOpponent() {
     return name ? { id: "__custom__", name, logo: null } : null;
   }
 
-  return LEAGUE_CONFIG[leagueState.team].opponents.find(
-    (opponent) => opponent.id === leagueEls.opponent.value
-  ) || null;
+  return (
+    LEAGUE_CONFIG[leagueState.team].opponents.find(
+      (opponent) => opponent.id === leagueEls.opponent.value
+    ) || null
+  );
 }
 
 function getLeagueLogo(path) {
@@ -803,133 +985,101 @@ function getLeagueLogo(path) {
   return leagueState.images.logos.get(path) || null;
 }
 
-function getResultLabel(ourScore, opponentScore) {
-  if (ourScore === "" || opponentScore === "") {
-    return { text: "ERGEBNIS", color: "#34343c" };
+function drawFittedStoryText(ctx, text, options) {
+  let fontSize = options.fontSize;
+
+  ctx.save();
+  ctx.fillStyle = options.color;
+  ctx.textAlign = options.align;
+  ctx.textBaseline = "alphabetic";
+
+  while (fontSize > options.minFontSize) {
+    ctx.font = `${fontSize}px "${options.family}", Impact, sans-serif`;
+
+    if (ctx.measureText(text).width <= options.maxWidth) {
+      break;
+    }
+
+    fontSize -= 2;
   }
 
-  const ours = Number(ourScore);
-  const theirs = Number(opponentScore);
-
-  if (ours > theirs) return { text: "SIEG", color: "#b51224" };
-  if (ours < theirs) return { text: "NIEDERLAGE", color: "#34343c" };
-  return { text: "UNENTSCHIEDEN", color: "#7a1823" };
-}
-
-function parseOptionalScore(value) {
-  const raw = String(value ?? "").trim();
-  if (!raw) return null;
-  const number = Number(raw);
-  return Number.isFinite(number) ? number : null;
-}
-
-function sanitizeLeagueScore(value) {
-  return String(value ?? "").replace(/\D/g, "").slice(0, 2);
-}
-
-function formatLeagueDate(inputValue) {
-  if (!inputValue) return "";
-  const [year, month, day] = inputValue.split("-");
-  if (!year || !month || !day) return inputValue;
-  return `${day}.${month}.${year}`;
-}
-
-function toLeagueInputDate(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function downloadResult(formatKey) {
-  const format = RESULT_FORMATS[formatKey];
-  if (!format || !validateResultBeforeExport()) return;
-
-  renderResult(formatKey);
-  const dataUrl = leagueEls.canvas.toDataURL("image/png");
-
-  const teamConfig = LEAGUE_CONFIG[leagueState.team];
-  const opponent = getSelectedOpponent()?.name || "gegner";
-  const date = leagueEls.date.value || toLeagueInputDate(new Date());
-  const fileName = `ergebnis-${leagueSlugify(teamConfig.label)}-${leagueSlugify(opponent)}-${formatKey}-${date}.png`;
-
-  const link = document.createElement("a");
-  link.download = fileName;
-  link.href = dataUrl;
-  link.click();
-
-  renderResult(leagueState.format);
-}
-
-function handleResultPhoto(event) {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    const image = new Image();
-    image.onload = () => {
-      leagueState.resultPhoto = image;
-      leagueState.resultPhotoName = file.name;
-      leagueState.backgroundMode = "photo";
-
-      if (leagueEls.photoLabel) leagueEls.photoLabel.textContent = file.name;
-      updateLeagueUi();
-      renderResult();
-    };
-    image.src = reader.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-function removeResultPhoto() {
-  leagueState.resultPhoto = null;
-  leagueState.resultPhotoName = "";
-  if (leagueEls.photoInput) leagueEls.photoInput.value = "";
-  if (leagueEls.photoLabel) leagueEls.photoLabel.textContent = "Foto auswählen / aufnehmen";
-  updateLeagueUi();
-  renderResult();
+  ctx.font = `${fontSize}px "${options.family}", Impact, sans-serif`;
+  ctx.fillText(text, options.x, options.y);
+  ctx.restore();
 }
 
 function openResultPreview() {
   if (!leagueEls.previewModal) return;
+
   leagueEls.previewModal.hidden = false;
   document.body.classList.add("result-modal-open");
-  renderResult();
+  renderResultStory();
   syncModalPreview();
 }
 
 function closeResultPreview() {
   if (!leagueEls.previewModal) return;
+
   leagueEls.previewModal.hidden = true;
   document.body.classList.remove("result-modal-open");
 }
 
 function syncModalPreview() {
-  if (!leagueEls.modalCanvas || !leagueEls.canvas) return;
+  if (
+    !leagueEls.previewModal ||
+    leagueEls.previewModal.hidden ||
+    !leagueEls.modalCanvas ||
+    !leagueEls.canvas
+  ) {
+    return;
+  }
+
   const ctx = leagueEls.modalCanvas.getContext("2d");
-  leagueEls.modalCanvas.width = leagueEls.canvas.width;
-  leagueEls.modalCanvas.height = leagueEls.canvas.height;
-  ctx.clearRect(0, 0, leagueEls.modalCanvas.width, leagueEls.modalCanvas.height);
+
+  leagueEls.modalCanvas.width = RESULT_STORY.width;
+  leagueEls.modalCanvas.height = RESULT_STORY.height;
+
+  ctx.clearRect(0, 0, RESULT_STORY.width, RESULT_STORY.height);
   ctx.drawImage(leagueEls.canvas, 0, 0);
+}
+
+function downloadResultStory() {
+  if (!validateResultBeforeExport()) return;
+
+  renderResultStory();
+
+  const teamConfig = LEAGUE_CONFIG[leagueState.team];
+  const opponent = getSelectedOpponent()?.name || "gegner";
+  const date = leagueEls.date.value || toLeagueInputDate(new Date());
+
+  const link = document.createElement("a");
+  link.download = `ergebnis-${leagueSlugify(teamConfig.label)}-${leagueSlugify(opponent)}-${date}.png`;
+  link.href = leagueEls.canvas.toDataURL("image/png");
+  link.click();
 }
 
 function validateResultBeforeExport() {
   const opponent = getSelectedOpponent();
+
   if (!opponent) {
     window.alert("Bitte zuerst einen Gegner auswählen.");
     return false;
   }
 
-  const ours = parseOptionalScore(leagueEls.ourScore.value);
-  const theirs = parseOptionalScore(leagueEls.opponentScore.value);
+  const ours = parseOptionalNumber(leagueEls.ourScore.value);
+  const theirs = parseOptionalNumber(leagueEls.opponentScore.value);
 
   if (ours === null || theirs === null) {
     window.alert("Bitte beide Ergebnisfelder ausfüllen.");
     return false;
   }
 
+  if (!validateOptionalStats()) {
+    return false;
+  }
+
   const total = ours + theirs;
+
   if (total !== 12) {
     return window.confirm(
       `Der eingetragene Endstand ${ours}:${theirs} ergibt ${total} Punkte statt 12. Bitte überprüfe das Ergebnis.\n\nWenn es trotzdem richtig ist, kannst du mit „OK“ exportieren.`
@@ -937,6 +1087,94 @@ function validateResultBeforeExport() {
   }
 
   return true;
+}
+
+function validateOptionalStats() {
+  if (leagueEls.showLegs.checked) {
+    const legs = normalizeLegs(leagueEls.legs.value);
+
+    if (!legs) {
+      window.alert("Bitte Legs im Format 35:5 eingeben.");
+      return false;
+    }
+  }
+
+  if (leagueEls.showShort.checked) {
+    const shortGame = parseOptionalNumber(leagueEls.short.value);
+
+    if (shortGame === null || shortGame < 9 || shortGame > 18) {
+      window.alert("Short Game muss zwischen 9 und 18 Darts liegen.");
+      return false;
+    }
+  }
+
+  if (leagueEls.showFinish.checked) {
+    const finish = parseOptionalNumber(leagueEls.finish.value);
+
+    if (finish === null || finish < 1 || finish > 170) {
+      window.alert("Highest Finish muss zwischen 1 und 170 liegen.");
+      return false;
+    }
+  }
+
+  if (leagueEls.showCounter.checked) {
+    const counter = parseOptionalNumber(leagueEls.counter.value);
+
+    if (counter === null || counter < 1 || counter > 99) {
+      window.alert("Bitte die Anzahl der 180er als ganze Zahl eingeben.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function normalizeLegs(value) {
+  const match = String(value ?? "")
+    .trim()
+    .match(/^(\d{1,2})\s*[:\-]\s*(\d{1,2})$/);
+
+  if (!match) return "";
+
+  return `${Number(match[1])}:${Number(match[2])}`;
+}
+
+function sanitizeScore(value) {
+  const raw = sanitizeIntegerText(value);
+  return raw.slice(0, 2);
+}
+
+function sanitizeIntegerText(value) {
+  return String(value ?? "")
+    .trim()
+    .replace(/\D/g, "");
+}
+
+function parseOptionalNumber(value) {
+  const raw = String(value ?? "").trim();
+
+  if (!raw) return null;
+
+  const number = Number(raw);
+  return Number.isFinite(number) ? number : null;
+}
+
+function formatLeagueDate(inputValue) {
+  if (!inputValue) return "";
+
+  const [year, month, day] = inputValue.split("-");
+
+  if (!year || !month || !day) return inputValue;
+
+  return `${day}.${month}.${year}`;
+}
+
+function toLeagueInputDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function leagueSlugify(value) {
@@ -950,23 +1188,6 @@ function leagueSlugify(value) {
     .replace(/^-|-$/g, "");
 }
 
-function getInitials(value) {
-  return String(value || "?")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 3)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
-}
-
-function roundRect(ctx, x, y, width, height, radius) {
-  const r = Math.min(radius, width / 2, height / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + width, y, x + width, y + height, r);
-  ctx.arcTo(x + width, y + height, x, y + height, r);
-  ctx.arcTo(x, y + height, x, y, r);
-  ctx.arcTo(x, y, x + width, y, r);
-  ctx.closePath();
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
