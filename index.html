@@ -178,11 +178,10 @@
     </section>
   </main>
 
-  <main class="layout tool-page result-layout" id="resultTool" data-tool-page="result" hidden>
+  <main class="layout tool-page result-layout" id="resultTool" data-tool-page="result" data-team="a" hidden>
     <section class="card data-card result-card">
-      <div class="section-head">
+      <div class="section-head result-title">
         <h2>Ergebnis</h2>
-        <p>Einmal eintragen, danach als Story oder Instagram-Post exportieren.</p>
       </div>
 
       <p class="result-subheading">Mannschaft</p>
@@ -209,6 +208,23 @@
         <input id="resultCustomOpponent" type="text" maxlength="42" placeholder="z. B. DC Beispiel A" autocomplete="off" />
       </label>
 
+      <p class="result-subheading">Hintergrund</p>
+      <div class="mode-switch result-background-switch" role="group" aria-label="Hintergrund auswählen">
+        <button class="mode-button active" type="button" data-result-background="standard" aria-pressed="true">Standard</button>
+        <button class="mode-button" type="button" data-result-background="photo" aria-pressed="false">Foto</button>
+      </div>
+
+      <div class="result-photo-controls" id="resultPhotoControls" hidden>
+        <label class="result-photo-upload" for="resultPhotoInput">
+          <input id="resultPhotoInput" type="file" accept="image/*" />
+          <span>
+            <strong id="resultPhotoLabel">Foto auswählen / aufnehmen</strong>
+            <small>Wird automatisch passend zugeschnitten.</small>
+          </span>
+        </label>
+        <button class="result-photo-remove" id="resultPhotoRemove" type="button" hidden>Foto entfernen</button>
+      </div>
+
       <p class="result-subheading">Endstand</p>
       <div class="result-score-grid">
         <label>
@@ -222,21 +238,19 @@
         </label>
       </div>
 
-      <p class="result-score-hint" id="resultScoreHint">Beim aktuellen Spielsystem ergeben die zwölf Partien zusammen 12 Spielpunkte.</p>
+      <p class="result-score-hint" id="resultScoreHint" hidden></p>
 
       <div class="grid two result-meta-grid">
         <label>
-          Spieltag <span class="optional-label">optional</span>
+          <span class="result-field-title">Spieltag <small>optional</small></span>
           <input id="resultMatchday" type="number" inputmode="numeric" min="1" max="99" placeholder="1" />
         </label>
 
         <label>
-          Datum
+          <span class="result-field-title">Datum</span>
           <input id="resultDate" type="date" />
         </label>
       </div>
-
-      <p class="result-note"><strong>Automatisch:</strong> Bei Auswärtsspielen stehen Gegner und Ergebnis im Export automatisch auf der Heimseite. Sieg, Unentschieden oder Niederlage wird ebenfalls aus dem Endstand ermittelt.</p>
     </section>
 
     <section class="preview-card result-preview-card">
@@ -256,28 +270,48 @@
         <canvas class="result-canvas" id="resultCanvas" width="1080" height="1920"></canvas>
       </div>
 
-      <p class="preview-help">Die Vorschau nutzt schon eure echten Vereinslogos. Die Design-Layer können später unter <code>assets/league/result/…</code> ergänzt werden.</p>
+
     </section>
 
     <section class="card controls-card result-controls-card">
-      <div class="section-head compact">
-        <h2>Export</h2>
-        <p>Beide Formate werden aus denselben Angaben erzeugt.</p>
+      <button class="download-button result-preview-button" id="openResultPreview" type="button">
+        Vorschau &amp; Export
+      </button>
+    </section>
+  </main>
+
+  <div class="result-modal" id="resultPreviewModal" hidden>
+    <button class="result-modal-backdrop" type="button" data-result-modal-close aria-label="Vorschau schließen"></button>
+    <section class="result-modal-panel" role="dialog" aria-modal="true" aria-labelledby="resultModalTitle">
+      <div class="result-modal-head">
+        <div>
+          <span class="result-modal-kicker">Ergebnis</span>
+          <h2 id="resultModalTitle">Vorschau &amp; Export</h2>
+        </div>
+        <button class="result-modal-close" type="button" data-result-modal-close aria-label="Vorschau schließen">×</button>
       </div>
 
-      <div class="result-export-grid">
+      <div class="result-format-switch result-modal-format" role="group" aria-label="Exportformat auswählen">
+        <button class="result-format-button active" type="button" data-result-format="story" aria-pressed="true">Story · 9:16</button>
+        <button class="result-format-button" type="button" data-result-format="post" aria-pressed="false">Post · 4:5</button>
+      </div>
+
+      <div class="result-modal-canvas-shell">
+        <canvas id="resultModalCanvas" width="1080" height="1920"></canvas>
+      </div>
+
+      <div class="result-modal-actions">
         <button class="download-button" id="downloadResultStory" type="button">
           Story herunterladen
           <span>1080 × 1920</span>
         </button>
-
         <button class="download-button secondary-download" id="downloadResultPost" type="button">
           Post herunterladen
           <span>1080 × 1350</span>
         </button>
       </div>
     </section>
-  </main>
+  </div>
 
   <script src="app.js"></script>
   <script src="league.js"></script>
