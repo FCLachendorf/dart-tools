@@ -276,12 +276,15 @@
         <summary>Zusatzwerte <span>optional</span></summary>
 
         <div class="result-stat-options">
-          <div class="result-stat-option">
+          <div class="result-stat-option result-stat-option-pair">
             <label class="result-stat-check">
               <input id="resultShowLegs" type="checkbox" />
               <span>Legs</span>
             </label>
-            <input id="resultLegs" type="text" inputmode="numeric" maxlength="5" placeholder="35:5" disabled />
+            <div class="result-stat-pair">
+              <input id="resultLegsHome" type="number" inputmode="numeric" min="0" max="99" placeholder="Heim" disabled />
+              <input id="resultLegsAway" type="number" inputmode="numeric" min="0" max="99" placeholder="Ausw." disabled />
+            </div>
           </div>
 
           <div class="result-stat-option">
