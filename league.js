@@ -149,7 +149,8 @@ const leagueEls = {
   photoY: document.getElementById("resultPhotoY"),
 
   showLegs: document.getElementById("resultShowLegs"),
-  legs: document.getElementById("resultLegs"),
+  legsHome: document.getElementById("resultLegsHome"),
+  legsAway: document.getElementById("resultLegsAway"),
   showShort: document.getElementById("resultShowShort"),
   short: document.getElementById("resultShort"),
   showFinish: document.getElementById("resultShowFinish"),
@@ -255,7 +256,8 @@ function bindLeagueEvents() {
     leagueEls.opponentScore,
     leagueEls.matchday,
     leagueEls.date,
-    leagueEls.legs,
+    leagueEls.legsHome,
+    leagueEls.legsAway,
     leagueEls.short,
     leagueEls.finish,
     leagueEls.counter,
@@ -408,19 +410,21 @@ function updateScoreHint() {
 }
 
 function updateStatInputs() {
-  const pairs = [
-    [leagueEls.showLegs, leagueEls.legs],
+  const singlePairs = [
     [leagueEls.showShort, leagueEls.short],
     [leagueEls.showFinish, leagueEls.finish],
     [leagueEls.showCounter, leagueEls.counter],
   ];
 
-  pairs.forEach(([toggle, input]) => {
+  singlePairs.forEach(([toggle, input]) => {
     if (!toggle || !input) return;
     input.disabled = !toggle.checked;
   });
-}
 
+  const legsEnabled = Boolean(leagueEls.showLegs?.checked);
+  if (leagueEls.legsHome) leagueEls.legsHome.disabled = !legsEnabled;
+  if (leagueEls.legsAway) leagueEls.legsAway.disabled = !legsEnabled;
+}
 async function loadLeagueFonts() {
   try {
     const definitions = [
@@ -806,19 +810,14 @@ function drawScores(ctx, homeScore, awayScore) {
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
-
   ctx.fillStyle = config.color;
   ctx.font = `${config.fontSize}px "Topshow", Impact, sans-serif`;
+
   ctx.fillText(homeScore || "-", config.homeX, config.y);
   ctx.fillText(awayScore || "-", config.awayX, config.y);
 
-  ctx.fillStyle = config.colonColor;
-  ctx.font = `${config.colonFontSize}px "Topshow", Impact, sans-serif`;
-  ctx.fillText(":", config.colonX, config.y - 10);
-
   ctx.restore();
 }
-
 function drawTeamNames(ctx, homeName, awayName) {
   const config = RESULT_STORY_LAYOUT.teamNames;
 
