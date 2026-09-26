@@ -184,16 +184,22 @@
         <h2>Ergebnis</h2>
       </div>
 
-      <p class="result-subheading">Mannschaft</p>
-      <div class="mode-switch" role="group" aria-label="Ligamannschaft auswählen">
-        <button class="mode-button active" type="button" data-league-team="a" aria-pressed="true">A-Team</button>
-        <button class="mode-button" type="button" data-league-team="b" aria-pressed="false">B-Team</button>
-      </div>
+      <div class="result-dual-switches">
+        <div>
+          <p class="result-subheading">Mannschaft</p>
+          <div class="mode-switch" role="group" aria-label="Ligamannschaft auswählen">
+            <button class="mode-button active" type="button" data-league-team="a" aria-pressed="true">A-Team</button>
+            <button class="mode-button" type="button" data-league-team="b" aria-pressed="false">B-Team</button>
+          </div>
+        </div>
 
-      <p class="result-subheading">Spielort</p>
-      <div class="mode-switch" role="group" aria-label="Heim- oder Auswärtsspiel auswählen">
-        <button class="mode-button active" type="button" data-match-location="home" aria-pressed="true">Heim</button>
-        <button class="mode-button" type="button" data-match-location="away" aria-pressed="false">Auswärts</button>
+        <div>
+          <p class="result-subheading">Spielort</p>
+          <div class="mode-switch" role="group" aria-label="Heim- oder Auswärtsspiel auswählen">
+            <button class="mode-button active" type="button" data-match-location="home" aria-pressed="true">Heim</button>
+            <button class="mode-button" type="button" data-match-location="away" aria-pressed="false">Auswärts</button>
+          </div>
+        </div>
       </div>
 
       <label>
@@ -207,23 +213,6 @@
         Mannschaftsname
         <input id="resultCustomOpponent" type="text" maxlength="42" placeholder="z. B. DC Beispiel A" autocomplete="off" />
       </label>
-
-      <p class="result-subheading">Hintergrund</p>
-      <div class="mode-switch result-background-switch" role="group" aria-label="Hintergrund auswählen">
-        <button class="mode-button active" type="button" data-result-background="standard" aria-pressed="true">Standard</button>
-        <button class="mode-button" type="button" data-result-background="photo" aria-pressed="false">Foto</button>
-      </div>
-
-      <div class="result-photo-controls" id="resultPhotoControls" hidden>
-        <label class="result-photo-upload" for="resultPhotoInput">
-          <input id="resultPhotoInput" type="file" accept="image/*" />
-          <span>
-            <strong id="resultPhotoLabel">Foto auswählen / aufnehmen</strong>
-            <small>Wird automatisch passend zugeschnitten.</small>
-          </span>
-        </label>
-        <button class="result-photo-remove" id="resultPhotoRemove" type="button" hidden>Foto entfernen</button>
-      </div>
 
       <p class="result-subheading">Endstand</p>
       <div class="result-score-grid">
@@ -240,9 +229,9 @@
 
       <p class="result-score-hint" id="resultScoreHint" hidden></p>
 
-      <div class="grid two result-meta-grid">
+      <div class="result-meta-grid">
         <label>
-          <span class="result-field-title">Spieltag <small>optional</small></span>
+          <span class="result-field-title">Spieltag</span>
           <input id="resultMatchday" type="number" inputmode="numeric" min="1" max="99" placeholder="1" />
         </label>
 
@@ -251,26 +240,86 @@
           <input id="resultDate" type="date" />
         </label>
       </div>
+
+      <p class="result-subheading">Foto</p>
+      <div class="result-photo-row">
+        <label class="result-photo-upload" for="resultPhotoInput">
+          <input id="resultPhotoInput" type="file" accept="image/*" />
+          <span>
+            <strong id="resultPhotoLabel">Foto auswählen / aufnehmen</strong>
+            <small>JPG oder PNG</small>
+          </span>
+        </label>
+        <button class="result-photo-remove" id="resultPhotoRemove" type="button" hidden>Entfernen</button>
+      </div>
+
+      <details class="result-compact-details" id="resultPhotoAdjust" hidden>
+        <summary>Bild ausrichten</summary>
+
+        <label>
+          Zoom
+          <input id="resultPhotoZoom" type="range" min="1" max="3" step="0.01" value="1" />
+        </label>
+
+        <label>
+          Horizontal
+          <input id="resultPhotoX" type="range" min="0" max="0" step="1" value="0" />
+        </label>
+
+        <label>
+          Vertikal
+          <input id="resultPhotoY" type="range" min="0" max="0" step="1" value="0" />
+        </label>
+      </details>
+
+      <details class="result-compact-details result-stats-details">
+        <summary>Zusatzwerte <span>optional</span></summary>
+
+        <div class="result-stat-options">
+          <div class="result-stat-option">
+            <label class="result-stat-check">
+              <input id="resultShowLegs" type="checkbox" />
+              <span>Legs</span>
+            </label>
+            <input id="resultLegs" type="text" inputmode="numeric" maxlength="5" placeholder="35:5" disabled />
+          </div>
+
+          <div class="result-stat-option">
+            <label class="result-stat-check">
+              <input id="resultShowShort" type="checkbox" />
+              <span>Short Game</span>
+            </label>
+            <input id="resultShort" type="number" inputmode="numeric" min="9" max="18" placeholder="14" disabled />
+          </div>
+
+          <div class="result-stat-option">
+            <label class="result-stat-check">
+              <input id="resultShowFinish" type="checkbox" />
+              <span>Highest Finish</span>
+            </label>
+            <input id="resultFinish" type="number" inputmode="numeric" min="1" max="170" placeholder="101" disabled />
+          </div>
+
+          <div class="result-stat-option">
+            <label class="result-stat-check">
+              <input id="resultShowCounter" type="checkbox" />
+              <span>180er</span>
+            </label>
+            <input id="resultCounter" type="number" inputmode="numeric" min="1" max="99" placeholder="2" disabled />
+          </div>
+        </div>
+      </details>
     </section>
 
     <section class="preview-card result-preview-card">
-      <div class="result-preview-header">
-        <div class="preview-topline result-preview-topline">
-          <span>Live-Vorschau · <strong id="resultPreviewFormat">Story</strong></span>
-          <span id="resultPreviewSize">1080 × 1920 px</span>
-        </div>
-
-        <div class="result-format-switch" role="group" aria-label="Vorschauformat auswählen">
-          <button class="result-format-button active" type="button" data-result-format="story" aria-pressed="true">Story · 9:16</button>
-          <button class="result-format-button" type="button" data-result-format="post" aria-pressed="false">Post · 4:5</button>
-        </div>
+      <div class="preview-topline result-preview-topline">
+        <span>Story-Vorschau</span>
+        <span>1080 × 1920 px</span>
       </div>
 
       <div class="canvas-shell result-canvas-shell">
         <canvas class="result-canvas" id="resultCanvas" width="1080" height="1920"></canvas>
       </div>
-
-
     </section>
 
     <section class="card controls-card result-controls-card">
@@ -285,31 +334,20 @@
     <section class="result-modal-panel" role="dialog" aria-modal="true" aria-labelledby="resultModalTitle">
       <div class="result-modal-head">
         <div>
-          <span class="result-modal-kicker">Ergebnis</span>
+          <span class="result-modal-kicker">Ergebnis-Story</span>
           <h2 id="resultModalTitle">Vorschau &amp; Export</h2>
         </div>
         <button class="result-modal-close" type="button" data-result-modal-close aria-label="Vorschau schließen">×</button>
-      </div>
-
-      <div class="result-format-switch result-modal-format" role="group" aria-label="Exportformat auswählen">
-        <button class="result-format-button active" type="button" data-result-format="story" aria-pressed="true">Story · 9:16</button>
-        <button class="result-format-button" type="button" data-result-format="post" aria-pressed="false">Post · 4:5</button>
       </div>
 
       <div class="result-modal-canvas-shell">
         <canvas id="resultModalCanvas" width="1080" height="1920"></canvas>
       </div>
 
-      <div class="result-modal-actions">
-        <button class="download-button" id="downloadResultStory" type="button">
-          Story herunterladen
-          <span>1080 × 1920</span>
-        </button>
-        <button class="download-button secondary-download" id="downloadResultPost" type="button">
-          Post herunterladen
-          <span>1080 × 1350</span>
-        </button>
-      </div>
+      <button class="download-button result-modal-download" id="downloadResultStory" type="button">
+        Story herunterladen
+        <span>1080 × 1920</span>
+      </button>
     </section>
   </div>
 
