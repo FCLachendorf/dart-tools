@@ -42,43 +42,43 @@ const RESULT_STORY = {
  */
 const RESULT_STORY_LAYOUT = {
   matchday: {
-    x: 330,
-    y: 190,
-    fontSize: 38,
-    colorA: "#e82638",
-    colorB: "#d7d7dc",
+    x: 174,
+    y: 207,
+    fontSize: 35,
+    colorA: "#cc2331",
+    colorB: "#ededf5",
     align: "center",
   },
 
   logos: {
-    home: { x: 270, y: 1390, size: 145 },
-    away: { x: 835, y: 1390, size: 145 },
+    home: { x: 217, y: 1399, size: 160 },
+    away: { x: 855, y: 1399, size: 160 },
   },
 
   scores: {
-    homeX: 470,
-    awayX: 650,
-    colonX: 560,
+    homeX: 410,
+    awayX: 630,
+    colonX: 530,
     y: 1468,
-    fontSize: 132,
-    colonFontSize: 104,
+    fontSize: 200,
+    colonFontSize: 0,
     color: "#f3f3f5",
     colonColor: "#e31b2f",
   },
 
   teamNames: {
-    homeX: 270,
-    awayX: 835,
+    homeX: 217,
+    awayX: 855,
     y: 1562,
-    maxWidth: 450,
-    fontSize: 45,
+    maxWidth: 440,
+    fontSize: 40,
     minFontSize: 25,
     color: "#f3f3f5",
   },
 
   date: {
     x: 540,
-    y: 1880,
+    y: 1900,
     fontSize: 30,
     color: "#7a7a82",
   },
@@ -89,10 +89,10 @@ const RESULT_STORY_LAYOUT = {
     valueColorTop: "#ffffff",
     valueColorBottom: "#ffffff",
     slots: [
-      { key: "top-left", row: "top", col: 0, x: 470, y: 1717 },
-      { key: "top-right", row: "top", col: 1, x: 980, y: 1717 },
-      { key: "bottom-left", row: "bottom", col: 0, x: 470, y: 1803 },
-      { key: "bottom-right", row: "bottom", col: 1, x: 980, y: 1803 },
+      { key: "top-left", row: "top", col: 0, x: 505, y: 1737 },
+      { key: "top-right", row: "top", col: 1, x: 1025, y: 1737 },
+      { key: "bottom-left", row: "bottom", col: 0, x: 505, y: 1808 },
+      { key: "bottom-right", row: "bottom", col: 1, x: 1025, y: 1808 },
     ],
   },
 };
