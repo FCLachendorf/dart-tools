@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FC Lachendorf Darts – Story Generator</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="league.css" />
 </head>
 <body>
   <header class="app-header">
@@ -18,14 +19,15 @@
     </div>
 
     <nav class="nav" id="nav">
-      <a href="#" class="active">Trainingssieger</a>
+      <a href="#" class="active" data-tool-target="training">Trainingssieger</a>
+      <a href="#" data-tool-target="result">Ergebnis</a>
       <a href="#" aria-disabled="true">Spieltagsankündigung</a>
       <a href="#" aria-disabled="true">Tabelle</a>
       <a href="#" aria-disabled="true">Spielplan</a>
     </nav>
   </header>
 
-  <main class="layout">
+  <main class="layout tool-page" id="trainingTool" data-tool-page="training">
     <section class="card data-card">
       <div class="section-head">
         <h2>Trainingssieger</h2>
@@ -176,6 +178,142 @@
     </section>
   </main>
 
+  <main class="layout tool-page result-layout" id="resultTool" data-tool-page="result" data-team="a" hidden>
+    <section class="card data-card result-card">
+      <div class="section-head result-title">
+        <h2>Ergebnis</h2>
+      </div>
+
+      <p class="result-subheading">Mannschaft</p>
+      <div class="mode-switch" role="group" aria-label="Ligamannschaft auswählen">
+        <button class="mode-button active" type="button" data-league-team="a" aria-pressed="true">A-Team</button>
+        <button class="mode-button" type="button" data-league-team="b" aria-pressed="false">B-Team</button>
+      </div>
+
+      <p class="result-subheading">Spielort</p>
+      <div class="mode-switch" role="group" aria-label="Heim- oder Auswärtsspiel auswählen">
+        <button class="mode-button active" type="button" data-match-location="home" aria-pressed="true">Heim</button>
+        <button class="mode-button" type="button" data-match-location="away" aria-pressed="false">Auswärts</button>
+      </div>
+
+      <label>
+        Gegner
+        <select id="resultOpponent">
+          <option value="">Gegner auswählen</option>
+        </select>
+      </label>
+
+      <label id="customOpponentWrap" hidden>
+        Mannschaftsname
+        <input id="resultCustomOpponent" type="text" maxlength="42" placeholder="z. B. DC Beispiel A" autocomplete="off" />
+      </label>
+
+      <p class="result-subheading">Hintergrund</p>
+      <div class="mode-switch result-background-switch" role="group" aria-label="Hintergrund auswählen">
+        <button class="mode-button active" type="button" data-result-background="standard" aria-pressed="true">Standard</button>
+        <button class="mode-button" type="button" data-result-background="photo" aria-pressed="false">Foto</button>
+      </div>
+
+      <div class="result-photo-controls" id="resultPhotoControls" hidden>
+        <label class="result-photo-upload" for="resultPhotoInput">
+          <input id="resultPhotoInput" type="file" accept="image/*" />
+          <span>
+            <strong id="resultPhotoLabel">Foto auswählen / aufnehmen</strong>
+            <small>Wird automatisch passend zugeschnitten.</small>
+          </span>
+        </label>
+        <button class="result-photo-remove" id="resultPhotoRemove" type="button" hidden>Foto entfernen</button>
+      </div>
+
+      <p class="result-subheading">Endstand</p>
+      <div class="result-score-grid">
+        <label>
+          Unser Ergebnis
+          <input id="resultOurScore" type="number" inputmode="numeric" min="0" max="12" placeholder="9" />
+        </label>
+
+        <label>
+          Gegner-Ergebnis
+          <input id="resultOpponentScore" type="number" inputmode="numeric" min="0" max="12" placeholder="3" />
+        </label>
+      </div>
+
+      <p class="result-score-hint" id="resultScoreHint" hidden></p>
+
+      <div class="grid two result-meta-grid">
+        <label>
+          <span class="result-field-title">Spieltag <small>optional</small></span>
+          <input id="resultMatchday" type="number" inputmode="numeric" min="1" max="99" placeholder="1" />
+        </label>
+
+        <label>
+          <span class="result-field-title">Datum</span>
+          <input id="resultDate" type="date" />
+        </label>
+      </div>
+    </section>
+
+    <section class="preview-card result-preview-card">
+      <div class="result-preview-header">
+        <div class="preview-topline result-preview-topline">
+          <span>Live-Vorschau · <strong id="resultPreviewFormat">Story</strong></span>
+          <span id="resultPreviewSize">1080 × 1920 px</span>
+        </div>
+
+        <div class="result-format-switch" role="group" aria-label="Vorschauformat auswählen">
+          <button class="result-format-button active" type="button" data-result-format="story" aria-pressed="true">Story · 9:16</button>
+          <button class="result-format-button" type="button" data-result-format="post" aria-pressed="false">Post · 4:5</button>
+        </div>
+      </div>
+
+      <div class="canvas-shell result-canvas-shell">
+        <canvas class="result-canvas" id="resultCanvas" width="1080" height="1920"></canvas>
+      </div>
+
+
+    </section>
+
+    <section class="card controls-card result-controls-card">
+      <button class="download-button result-preview-button" id="openResultPreview" type="button">
+        Vorschau &amp; Export
+      </button>
+    </section>
+  </main>
+
+  <div class="result-modal" id="resultPreviewModal" hidden>
+    <button class="result-modal-backdrop" type="button" data-result-modal-close aria-label="Vorschau schließen"></button>
+    <section class="result-modal-panel" role="dialog" aria-modal="true" aria-labelledby="resultModalTitle">
+      <div class="result-modal-head">
+        <div>
+          <span class="result-modal-kicker">Ergebnis</span>
+          <h2 id="resultModalTitle">Vorschau &amp; Export</h2>
+        </div>
+        <button class="result-modal-close" type="button" data-result-modal-close aria-label="Vorschau schließen">×</button>
+      </div>
+
+      <div class="result-format-switch result-modal-format" role="group" aria-label="Exportformat auswählen">
+        <button class="result-format-button active" type="button" data-result-format="story" aria-pressed="true">Story · 9:16</button>
+        <button class="result-format-button" type="button" data-result-format="post" aria-pressed="false">Post · 4:5</button>
+      </div>
+
+      <div class="result-modal-canvas-shell">
+        <canvas id="resultModalCanvas" width="1080" height="1920"></canvas>
+      </div>
+
+      <div class="result-modal-actions">
+        <button class="download-button" id="downloadResultStory" type="button">
+          Story herunterladen
+          <span>1080 × 1920</span>
+        </button>
+        <button class="download-button secondary-download" id="downloadResultPost" type="button">
+          Post herunterladen
+          <span>1080 × 1350</span>
+        </button>
+      </div>
+    </section>
+  </div>
+
   <script src="app.js"></script>
+  <script src="league.js"></script>
 </body>
 </html>
