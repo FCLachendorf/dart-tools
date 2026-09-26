@@ -27,6 +27,8 @@ const LEAGUE_CONFIG = {
   },
 };
 
+const RESULT_BUILD_VERSION = "20260926-1915";
+
 const RESULT_STORY = {
   width: 1080,
   height: 1920,
@@ -482,7 +484,8 @@ function loadLeagueImage(src, optional = false) {
       resolve(null);
     };
 
-    image.src = src;
+    const separator = src.includes("?") ? "&" : "?";
+    image.src = `${src}${separator}v=${RESULT_BUILD_VERSION}`;
   });
 }
 
@@ -782,7 +785,7 @@ function drawMatchday(ctx) {
   ctx.textAlign = config.align;
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = leagueState.team === "a" ? config.colorA : config.colorB;
-  ctx.font = `900 ${config.fontSize}px "TacticSans", system-ui, sans-serif`;
+  ctx.font = `${config.fontSize}px "Topshow", Impact, sans-serif`;
   ctx.fillText(value, config.x, config.y);
   ctx.restore();
 }
