@@ -860,13 +860,13 @@ function drawDate(ctx) {
 }
 
 function drawDynamicStats(ctx) {
-  const activeStats = getActiveStats();
+  const placedStats = getPlacedStats();
 
-  activeStats.forEach((stat, index) => {
+  placedStats.forEach((item, index) => {
     const slot = RESULT_STORY_LAYOUT.stats.slots[index];
     if (!slot) return;
 
-    const assetInfo = getStatAssetInfo(stat.key, slot);
+    const assetInfo = getStatAssetInfo(item.key, slot);
     if (!assetInfo) return;
 
     const image = leagueState.images.story[assetInfo.fileName];
@@ -876,7 +876,7 @@ function drawDynamicStats(ctx) {
 
     drawFullAsset(ctx, image, offsetX, 0);
 
-    const value = formatStatValue(stat.key, stat.value);
+    const value = formatStatValue(item.key, item.value);
     if (!value) return;
 
     ctx.save();
@@ -892,22 +892,36 @@ function drawDynamicStats(ctx) {
   });
 }
 
-function getActiveStats() {
-  /*
-   * Reihenfolge der Tabelle:
-   * 1. Legs
-   * 2. Short Game
-   * 3. Highest Finish
-   * 4. Counter / 180er
-   *
-   * Aktive Werte werden lückenlos von oben links nach unten rechts verteilt.
-   */
-  return [
-    { key: "legs", enabled: leagueEls.showLegs.checked, value: leagueEls.legs.value },
-    { key: "short", enabled: leagueEls.showShort.checked, value: leagueEls.short.value },
-    { key: "finish", enabled: leagueEls.showFinish.checked, value: leagueEls.finish.value },
-    { key: "counter", enabled: leagueEls.showCounter.checked, value: leagueEls.counter.value },
-  ].filter((stat) => stat.enabled);
+function getPlacedStats() {
+  const leftTop = leagueEls.showLegs.checked
+    ? {
+        key: "legs",
+        value: {
+          home: leagueEls.legsHome.value,
+          away: leagueEls.legsAway.value,
+        },
+      }
+    : leagueEls.showFinish.checked
+      ? { key: "finish", value: leagueEls.finish.value }
+      : null;
+
+  const rightTop = leagueEls.showShort.checked
+    ? { key: "short", value: leagueEls.short.value }
+    : leagueEls.showCounter.checked
+      ? { key: "counter", value: leagueEls.counter.value }
+      : null;
+
+  const leftBottom =
+    leagueEls.showLegs.checked && leagueEls.showFinish.checked
+      ? { key: "finish", value: leagueEls.finish.value }
+      : null;
+
+  const rightBottom =
+    leagueEls.showShort.checked && leagueEls.showCounter.checked
+      ? { key: "counter", value: leagueEls.counter.value }
+      : null;
+
+  return [leftTop, rightTop, leftBottom, rightBottom].filter(Boolean);
 }
 
 function getStatAssetInfo(statKey, slot) {
@@ -945,16 +959,19 @@ function getStatAssetInfo(statKey, slot) {
 }
 
 function formatStatValue(statKey, rawValue) {
+  if (statKey === "legs") {
+    const home = sanitizeIntegerText(rawValue?.home);
+    const away = sanitizeIntegerText(rawValue?.away);
+
+    if (!home || !away) return "";
+    return `${home}:${away}`;
+  }
+
   const raw = String(rawValue ?? "").trim();
   if (!raw) return "";
 
-  if (statKey === "legs") {
-    return normalizeLegs(raw) || raw;
-  }
-
   return sanitizeIntegerText(raw);
 }
-
 function getOutcomeAssetFile(ourScore, opponentScore) {
   if (!ourScore || !opponentScore) return "";
 
@@ -1090,10 +1107,11 @@ function validateResultBeforeExport() {
 
 function validateOptionalStats() {
   if (leagueEls.showLegs.checked) {
-    const legs = normalizeLegs(leagueEls.legs.value);
+    const homeLegs = parseOptionalNumber(leagueEls.legsHome.value);
+    const awayLegs = parseOptionalNumber(leagueEls.legsAway.value);
 
-    if (!legs) {
-      window.alert("Bitte Legs im Format 35:5 eingeben.");
+    if (homeLegs === null || awayLegs === null) {
+      window.alert("Bitte Heim- und Auswärts-Legs eingeben.");
       return false;
     }
   }
@@ -1126,16 +1144,6 @@ function validateOptionalStats() {
   }
 
   return true;
-}
-
-function normalizeLegs(value) {
-  const match = String(value ?? "")
-    .trim()
-    .match(/^(\d{1,2})\s*[:\-]\s*(\d{1,2})$/);
-
-  if (!match) return "";
-
-  return `${Number(match[1])}:${Number(match[2])}`;
 }
 
 function sanitizeScore(value) {
