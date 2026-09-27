@@ -101,33 +101,33 @@ const RESULT_STORY_LAYOUT = {
 
 const RESULT_STORY_LAYOUT_NO_IMAGE = {
   matchday: {
-    x: 175,
-    y: 205,
-    fontSize: 48,
+    x: 240,
+    y: 265,
+    fontSize: 72,
     colorA: "#cc2331",
     colorB: "#ededf5",
     align: "center",
   },
 
   logos: {
-    home: { x: 235, y: 760, size: 170 },
-    away: { x: 845, y: 760, size: 170 },
+    home: { x: 235, y: 751, size: 180 },
+    away: { x: 834, y: 751, size: 180 },
   },
 
   scores: {
-    homeX: 275,
+    homeX: 215,
     awayX: 805,
-    y: 1280,
-    fontSize: 240,
+    y: 1220,
+    fontSize: 300,
     color: "#f3f3f5",
   },
 
   teamNames: {
     homeX: 235,
-    awayX: 845,
-    y: 980,
+    awayX: 834,
+    y: 950,
     maxWidth: 430,
-    fontSize: 38,
+    fontSize: 44,
     minFontSize: 24,
     color: "#f3f3f5",
   },
@@ -140,14 +140,14 @@ const RESULT_STORY_LAYOUT_NO_IMAGE = {
   },
 
   stats: {
-    rowShift: 78,
+    rowShift: 71,
     valueFontSize: 31,
     valueColor: "#ffffff",
     slots: [
-      { index: 0, style: "color", x: 1005, y: 1570 },
-      { index: 1, style: "mono",  x: 1005, y: 1648 },
-      { index: 2, style: "color", x: 1005, y: 1726 },
-      { index: 3, style: "mono",  x: 1005, y: 1804 },
+      { index: 0, style: "color", x: 757, y: 1513 },
+      { index: 1, style: "mono",  x: 757, y: 1584 },
+      { index: 2, style: "color", x: 757, y: 1655 },
+      { index: 3, style: "mono",  x: 757, y: 1726 },
     ],
   },
 };
