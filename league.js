@@ -1282,7 +1282,7 @@ function syncModalPreview() {
   ctx.drawImage(leagueEls.canvas, 0, 0);
 }
 
-function downloadResultStory() {
+async function downloadResultStory() {
   if (!validateResultBeforeExport()) return;
 
   renderResultStory();
@@ -1290,11 +1290,9 @@ function downloadResultStory() {
   const teamConfig = LEAGUE_CONFIG[leagueState.team];
   const opponent = getSelectedOpponent()?.name || "gegner";
   const date = leagueEls.date.value || toLeagueInputDate(new Date());
+  const fileName = `ergebnis-${leagueSlugify(teamConfig.label)}-${leagueSlugify(opponent)}-${date}.png`;
 
-  const link = document.createElement("a");
-  link.download = `ergebnis-${leagueSlugify(teamConfig.label)}-${leagueSlugify(opponent)}-${date}.png`;
-  link.href = leagueEls.canvas.toDataURL("image/png");
-  link.click();
+  await window.exportCanvasPng(leagueEls.canvas, fileName);
 }
 
 function validateResultBeforeExport() {
