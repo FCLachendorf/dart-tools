@@ -587,6 +587,8 @@ function renderResultStory() {
   const teamSuffix = leagueState.team;
   const teamConfig = LEAGUE_CONFIG[leagueState.team];
   const opponent = getSelectedOpponent();
+  const withPhoto = hasResultPhoto();
+  const layout = getActiveStoryLayout();
 
   const ourScore = sanitizeScore(leagueEls.ourScore.value);
   const opponentScore = sanitizeScore(leagueEls.opponentScore.value);
@@ -607,25 +609,43 @@ function renderResultStory() {
   const homeScore = isHome ? ourScore : opponentScore;
   const awayScore = isHome ? opponentScore : ourScore;
 
-  drawFullAsset(ctx, assets["bg.png"]);
+  const backgroundFile = withPhoto
+    ? "bg.png"
+    : teamSuffix === "a"
+      ? "bg.png"
+      : "bgb.png";
 
-  if (leagueState.resultPhoto) {
+  const overlayFile = withPhoto
+    ? `overlay${teamSuffix}.png`
+    : `overlay${teamSuffix}-no.png`;
+
+  const headerFile = withPhoto
+    ? `header${teamSuffix}.png`
+    : `header${teamSuffix}-no.png`;
+
+  const setFile = withPhoto
+    ? `set${teamSuffix}.png`
+    : `set${teamSuffix}-no.png`;
+
+  drawFullAsset(ctx, assets[backgroundFile]);
+
+  if (withPhoto) {
     drawResultPhoto(ctx);
   }
 
-  drawFullAsset(ctx, assets[`overlay${teamSuffix}.png`]);
+  drawFullAsset(ctx, assets[overlayFile]);
   drawFullAsset(ctx, assets["footer.png"]);
-  drawFullAsset(ctx, assets[`header${teamSuffix}.png`]);
-  drawFullAsset(ctx, assets[`set${teamSuffix}.png`]);
+  drawFullAsset(ctx, assets[headerFile]);
+  drawFullAsset(ctx, assets[setFile]);
 
-  const outcomeFile = getOutcomeAssetFile(ourScore, opponentScore);
+  const outcomeFile = getOutcomeAssetFile(ourScore, opponentScore, withPhoto);
   if (outcomeFile) {
     drawFullAsset(ctx, assets[outcomeFile]);
   }
 
   drawMatchday(ctx);
-  drawTeamLogo(ctx, homeTeam.logo, RESULT_STORY_LAYOUT.logos.home);
-  drawTeamLogo(ctx, awayTeam.logo, RESULT_STORY_LAYOUT.logos.away);
+  drawTeamLogo(ctx, homeTeam.logo, layout.logos.home);
+  drawTeamLogo(ctx, awayTeam.logo, layout.logos.away);
   drawScores(ctx, homeScore, awayScore);
   drawTeamNames(ctx, homeTeam.name, awayTeam.name);
   drawDate(ctx);
@@ -633,7 +653,6 @@ function renderResultStory() {
 
   syncModalPreview();
 }
-
 function drawFullAsset(ctx, image, offsetX = 0, offsetY = 0) {
   if (!image) return;
   ctx.drawImage(image, offsetX, offsetY, RESULT_STORY.width, RESULT_STORY.height);
