@@ -27,7 +27,7 @@ const LEAGUE_CONFIG = {
   },
 };
 
-const RESULT_BUILD_VERSION = "20260927-result-post-1";
+const RESULT_BUILD_VERSION = "20260927-result-post-2";
 
 const RESULT_STORY = {
   width: 1080,
@@ -42,7 +42,7 @@ const RESULT_POST = {
 };
 
 const POST_ASSET_FILES = [
-  "bg.png", "bgb.png", "overlay.png", "headera.png", "headerb.png",
+  "bg.png", "bgb.png", "overlaya.png", "overlayb.png", "headera.png", "headerb.png",
   "seta.png", "setb.png", "win.png", "draw.png", "lose.png",
 ];
 
@@ -687,7 +687,7 @@ function renderResultStory() {
       ? "bg.png"
       : "bgb.png";
 
-  const overlayFile = isPost ? "overlay.png" : withPhoto
+  const overlayFile = isPost || withPhoto
     ? `overlay${teamSuffix}.png`
     : `overlay${teamSuffix}-no.png`;
 
