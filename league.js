@@ -49,8 +49,8 @@ const POST_ASSET_FILES = [
 // Pixel positions for the supplied 1080 × 1350 post layers.
 const RESULT_POST_LAYOUT = {
   matchday: { x: 104, y: 115, fontSize: 48, colorA: "#cc2331", colorB: "#ededf5", align: "center" },
-  logos: { home: { x: 215, y: 1040, size: 180 }, away: { x: 864, y: 1040, size: 180 } },
-  scores: { homeX: 425, awayX: 655, y: 1105, fontSize: 175, color: "#f3f3f5" },
+  logos: { home: { x: 215, y: 1040, size: 195 }, away: { x: 864, y: 1040, size: 195 } },
+  scores: { homeX: 425, awayX: 625, y: 1105, fontSize: 175, color: "#f3f3f5" },
   teamNames: { homeX: 215, awayX: 864, y: 1230, maxWidth: 410, fontSize: 32, minFontSize: 20, color: "#f3f3f5" },
   date: { x: 540, y: 1335, fontSize: 24, color: "#a0a0a8" },
   legs: { x: 540, y: 1160, fontSize: 28, color: "#f3f3f5" },
