@@ -27,7 +27,7 @@ const LEAGUE_CONFIG = {
   },
 };
 
-const RESULT_BUILD_VERSION = "20260926-1915";
+const RESULT_BUILD_VERSION = "20260927-noimage-1";
 
 const RESULT_STORY = {
   width: 1080,
@@ -99,28 +99,110 @@ const RESULT_STORY_LAYOUT = {
   },
 };
 
+const RESULT_STORY_LAYOUT_NO_IMAGE = {
+  matchday: {
+    x: 175,
+    y: 205,
+    fontSize: 48,
+    colorA: "#cc2331",
+    colorB: "#ededf5",
+    align: "center",
+  },
+
+  logos: {
+    home: { x: 235, y: 760, size: 170 },
+    away: { x: 845, y: 760, size: 170 },
+  },
+
+  scores: {
+    homeX: 275,
+    awayX: 805,
+    y: 1280,
+    fontSize: 240,
+    color: "#f3f3f5",
+  },
+
+  teamNames: {
+    homeX: 235,
+    awayX: 845,
+    y: 980,
+    maxWidth: 430,
+    fontSize: 38,
+    minFontSize: 24,
+    color: "#f3f3f5",
+  },
+
+  date: {
+    x: 540,
+    y: 1890,
+    fontSize: 30,
+    color: "#7a7a82",
+  },
+
+  stats: {
+    rowShift: 78,
+    valueFontSize: 31,
+    valueColor: "#ffffff",
+    slots: [
+      { index: 0, style: "color", x: 1005, y: 1570 },
+      { index: 1, style: "mono",  x: 1005, y: 1648 },
+      { index: 2, style: "color", x: 1005, y: 1726 },
+      { index: 3, style: "mono",  x: 1005, y: 1804 },
+    ],
+  },
+};
+
+function hasResultPhoto() {
+  return Boolean(leagueState.resultPhoto);
+}
+
+function getActiveStoryLayout() {
+  return hasResultPhoto() ? RESULT_STORY_LAYOUT : RESULT_STORY_LAYOUT_NO_IMAGE;
+}
+
 const STORY_ASSET_FILES = [
   "bg.png",
+  "bgb.png",
   "overlaya.png",
   "overlayb.png",
+  "overlaya-no.png",
+  "overlayb-no.png",
   "footer.png",
   "headera.png",
   "headerb.png",
+  "headera-no.png",
+  "headerb-no.png",
   "seta.png",
   "setb.png",
+  "seta-no.png",
+  "setb-no.png",
   "win.png",
   "draw.png",
   "lose.png",
+  "win-no.png",
+  "draw-no.png",
+  "lose-no.png",
   "legs-top-a.png",
   "legs-top-b.png",
+  "legs-top-a-no.png",
+  "legs-top-b-no.png",
   "short-top-a.png",
   "short-top-b.png",
+  "short-top-a-no.png",
+  "short-top-b-no.png",
+  "short-bottom-no.png",
   "fin-top-a.png",
   "fin-top-b.png",
   "fin-bottom.png",
+  "fin-top-a-no.png",
+  "fin-top-b-no.png",
+  "fin-bottom-no.png",
   "counter-top-a.png",
   "counter-top-b.png",
   "counter-bottom.png",
+  "counter-top-a-no.png",
+  "counter-top-b-no.png",
+  "counter-bottom-no.png",
 ];
 
 const leagueEls = {
