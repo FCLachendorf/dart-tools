@@ -27,7 +27,7 @@ const LEAGUE_CONFIG = {
   },
 };
 
-const RESULT_BUILD_VERSION = "20260927-noimage-1";
+const RESULT_BUILD_VERSION = "20260927-noimage-2";
 
 const RESULT_STORY = {
   width: 1080,
