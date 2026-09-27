@@ -44,9 +44,9 @@ const RESULT_STORY = {
  */
 const RESULT_STORY_LAYOUT = {
   matchday: {
-    x: 174,
-    y: 207,
-    fontSize: 35,
+    x: 170,
+    y: 212,
+    fontSize: 50,
     colorA: "#cc2331",
     colorB: "#ededf5",
     align: "center",
@@ -86,7 +86,7 @@ const RESULT_STORY_LAYOUT = {
   },
 
   stats: {
-    columnShift: 510,
+    columnShift: 519,
     valueFontSize: 31,
     valueColorTop: "#ffffff",
     valueColorBottom: "#ffffff",
