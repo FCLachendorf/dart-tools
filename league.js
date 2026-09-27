@@ -1129,38 +1129,52 @@ function getNoPhotoStatAssetInfo(statKey, slot) {
   const suffix = leagueState.team;
   const colored = slot.style === "color";
 
+  // Alle No-Image-Assets liegen bereits an ihrer natürlichen Grundposition:
+  // Legs = Zeile 0, Finish = Zeile 1, Short Game = Zeile 2, Counter = Zeile 3.
+  // Deshalb darf bei allen vier aktiven Stats überhaupt keine Verschiebung
+  // stattfinden. Erst wenn ein vorheriger Stat fehlt, wird nach oben geschoben.
+  const naturalIndex = {
+    legs: 0,
+    finish: 1,
+    short: 2,
+    counter: 3,
+  }[statKey];
+
+  if (naturalIndex === undefined) return null;
+
   if (colored) {
     if (statKey === "legs") {
-      return { fileName: `legs-top-${suffix}-no.png`, naturalIndex: 0 };
+      return { fileName: `legs-top-${suffix}-no.png`, naturalIndex };
     }
 
     if (statKey === "finish") {
-      return { fileName: `fin-top-${suffix}-no.png`, naturalIndex: 0 };
+      return { fileName: `fin-top-${suffix}-no.png`, naturalIndex };
     }
 
     if (statKey === "short") {
-      return { fileName: `short-top-${suffix}-no.png`, naturalIndex: 0 };
+      return { fileName: `short-top-${suffix}-no.png`, naturalIndex };
     }
 
     if (statKey === "counter") {
-      return { fileName: `counter-top-${suffix}-no.png`, naturalIndex: 0 };
+      return { fileName: `counter-top-${suffix}-no.png`, naturalIndex };
     }
   }
 
   if (statKey === "finish") {
-    return { fileName: "fin-bottom-no.png", naturalIndex: 1 };
+    return { fileName: "fin-bottom-no.png", naturalIndex };
   }
 
   if (statKey === "short") {
-    return { fileName: "short-bottom-no.png", naturalIndex: 1 };
+    return { fileName: "short-bottom-no.png", naturalIndex };
   }
 
   if (statKey === "counter") {
-    return { fileName: "counter-bottom-no.png", naturalIndex: 1 };
+    return { fileName: "counter-bottom-no.png", naturalIndex };
   }
 
+  // Legs ist immer der erste aktive Stat und kann daher nur farbig oben stehen.
   if (statKey === "legs") {
-    return { fileName: `legs-top-${suffix}-no.png`, naturalIndex: 0 };
+    return { fileName: `legs-top-${suffix}-no.png`, naturalIndex };
   }
 
   return null;
