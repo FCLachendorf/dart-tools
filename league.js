@@ -880,7 +880,7 @@ function drawMatchday(ctx) {
   const value = sanitizeIntegerText(leagueEls.matchday.value);
   if (!value) return;
 
-  const config = RESULT_STORY_LAYOUT.matchday;
+  const config = getActiveStoryLayout().matchday;
 
   ctx.save();
   ctx.textAlign = config.align;
@@ -909,7 +909,7 @@ function drawTeamLogo(ctx, logoPath, config) {
 }
 
 function drawScores(ctx, homeScore, awayScore) {
-  const config = RESULT_STORY_LAYOUT.scores;
+  const config = getActiveStoryLayout().scores;
 
   ctx.save();
   ctx.textAlign = "center";
@@ -922,8 +922,9 @@ function drawScores(ctx, homeScore, awayScore) {
 
   ctx.restore();
 }
+
 function drawTeamNames(ctx, homeName, awayName) {
-  const config = RESULT_STORY_LAYOUT.teamNames;
+  const config = getActiveStoryLayout().teamNames;
 
   drawFittedStoryText(ctx, String(homeName).toUpperCase(), {
     x: config.homeX,
@@ -952,7 +953,7 @@ function drawDate(ctx) {
   const value = formatLeagueDate(leagueEls.date.value);
   if (!value) return;
 
-  const config = RESULT_STORY_LAYOUT.date;
+  const config = getActiveStoryLayout().date;
 
   ctx.save();
   ctx.textAlign = "center";
