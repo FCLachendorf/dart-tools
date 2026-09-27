@@ -46,7 +46,7 @@ const POST_ASSET_FILES = [
   "seta.png", "setb.png", "win.png", "draw.png", "lose.png",
 ];
 
-// Pixel positions for the supplied 1080 × 1350 post layers.
+
 const RESULT_POST_LAYOUT = {
   matchday: { x: 104, y: 115, fontSize: 48, colorA: "#cc2331", colorB: "#ededf5", align: "center" },
   logos: { home: { x: 215, y: 1040, size: 195 }, away: { x: 864, y: 1040, size: 195 } },
@@ -60,13 +60,6 @@ function getResultFormat() {
   return leagueState.resultFormat === "post" ? RESULT_POST : RESULT_STORY;
 }
 
-/*
- * ============================================================
- * POSITIONEN / GRÖSSEN FÜR DIE ERGEBNIS-STORY
- * ============================================================
- * Hier kannst du später die Pixelwerte fein einstellen.
- * Alle Werte beziehen sich auf 1080 x 1920 px.
- */
 const RESULT_STORY_LAYOUT = {
   matchday: {
     x: 170,
@@ -1218,10 +1211,6 @@ function getNoPhotoStatAssetInfo(statKey, slot) {
   const suffix = leagueState.team;
   const colored = slot.style === "color";
 
-  // Alle No-Image-Assets liegen bereits an ihrer natürlichen Grundposition:
-  // Legs = Zeile 0, Finish = Zeile 1, Short Game = Zeile 2, Counter = Zeile 3.
-  // Deshalb darf bei allen vier aktiven Stats überhaupt keine Verschiebung
-  // stattfinden. Erst wenn ein vorheriger Stat fehlt, wird nach oben geschoben.
   const naturalIndex = {
     legs: 0,
     finish: 1,
@@ -1261,7 +1250,6 @@ function getNoPhotoStatAssetInfo(statKey, slot) {
     return { fileName: "counter-bottom-no.png", naturalIndex };
   }
 
-  // Legs ist immer der erste aktive Stat und kann daher nur farbig oben stehen.
   if (statKey === "legs") {
     return { fileName: `legs-top-${suffix}-no.png`, naturalIndex };
   }
