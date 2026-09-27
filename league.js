@@ -965,6 +965,14 @@ function drawDate(ctx) {
 }
 
 function drawDynamicStats(ctx) {
+  if (hasResultPhoto()) {
+    drawDynamicStatsWithPhoto(ctx);
+  } else {
+    drawDynamicStatsNoPhoto(ctx);
+  }
+}
+
+function drawDynamicStatsWithPhoto(ctx) {
   const placedStats = getPlacedStats();
 
   placedStats.forEach((item, index) => {
@@ -992,6 +1000,37 @@ function drawDynamicStats(ctx) {
         ? RESULT_STORY_LAYOUT.stats.valueColorTop
         : RESULT_STORY_LAYOUT.stats.valueColorBottom;
     ctx.font = `${RESULT_STORY_LAYOUT.stats.valueFontSize}px "TacticSans", system-ui, sans-serif`;
+    ctx.fillText(value, slot.x, slot.y);
+    ctx.restore();
+  });
+}
+
+function drawDynamicStatsNoPhoto(ctx) {
+  const activeStats = getNoPhotoStats();
+  const config = RESULT_STORY_LAYOUT_NO_IMAGE.stats;
+
+  activeStats.forEach((item, index) => {
+    const slot = config.slots[index];
+    if (!slot) return;
+
+    const assetInfo = getNoPhotoStatAssetInfo(item.key, slot);
+    if (!assetInfo) return;
+
+    const image = leagueState.images.story[assetInfo.fileName];
+    const offsetY =
+      (slot.index - assetInfo.naturalIndex) *
+      config.rowShift;
+
+    drawFullAsset(ctx, image, 0, offsetY);
+
+    const value = formatStatValue(item.key, item.value);
+    if (!value) return;
+
+    ctx.save();
+    ctx.textAlign = "right";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = config.valueColor;
+    ctx.font = `${config.valueFontSize}px "TacticSans", system-ui, sans-serif`;
     ctx.fillText(value, slot.x, slot.y);
     ctx.restore();
   });
@@ -1029,6 +1068,29 @@ function getPlacedStats() {
   return [leftTop, rightTop, leftBottom, rightBottom].filter(Boolean);
 }
 
+function getNoPhotoStats() {
+  return [
+    leagueEls.showLegs.checked
+      ? {
+          key: "legs",
+          value: {
+            home: leagueEls.legsHome.value,
+            away: leagueEls.legsAway.value,
+          },
+        }
+      : null,
+    leagueEls.showFinish.checked
+      ? { key: "finish", value: leagueEls.finish.value }
+      : null,
+    leagueEls.showShort.checked
+      ? { key: "short", value: leagueEls.short.value }
+      : null,
+    leagueEls.showCounter.checked
+      ? { key: "counter", value: leagueEls.counter.value }
+      : null,
+  ].filter(Boolean);
+}
+
 function getStatAssetInfo(statKey, slot) {
   const suffix = leagueState.team;
 
@@ -1063,6 +1125,47 @@ function getStatAssetInfo(statKey, slot) {
   return null;
 }
 
+function getNoPhotoStatAssetInfo(statKey, slot) {
+  const suffix = leagueState.team;
+  const colored = slot.style === "color";
+
+  if (colored) {
+    if (statKey === "legs") {
+      return { fileName: `legs-top-${suffix}-no.png`, naturalIndex: 0 };
+    }
+
+    if (statKey === "finish") {
+      return { fileName: `fin-top-${suffix}-no.png`, naturalIndex: 0 };
+    }
+
+    if (statKey === "short") {
+      return { fileName: `short-top-${suffix}-no.png`, naturalIndex: 0 };
+    }
+
+    if (statKey === "counter") {
+      return { fileName: `counter-top-${suffix}-no.png`, naturalIndex: 0 };
+    }
+  }
+
+  if (statKey === "finish") {
+    return { fileName: "fin-bottom-no.png", naturalIndex: 1 };
+  }
+
+  if (statKey === "short") {
+    return { fileName: "short-bottom-no.png", naturalIndex: 1 };
+  }
+
+  if (statKey === "counter") {
+    return { fileName: "counter-bottom-no.png", naturalIndex: 1 };
+  }
+
+  if (statKey === "legs") {
+    return { fileName: `legs-top-${suffix}-no.png`, naturalIndex: 0 };
+  }
+
+  return null;
+}
+
 function formatStatValue(statKey, rawValue) {
   if (statKey === "legs") {
     const home = sanitizeIntegerText(rawValue?.home);
@@ -1077,15 +1180,16 @@ function formatStatValue(statKey, rawValue) {
 
   return sanitizeIntegerText(raw);
 }
-function getOutcomeAssetFile(ourScore, opponentScore) {
+function getOutcomeAssetFile(ourScore, opponentScore, withPhoto = hasResultPhoto()) {
   if (!ourScore || !opponentScore) return "";
 
   const ours = Number(ourScore);
   const theirs = Number(opponentScore);
+  const suffix = withPhoto ? "" : "-no";
 
-  if (ours > theirs) return "win.png";
-  if (ours < theirs) return "lose.png";
-  return "draw.png";
+  if (ours > theirs) return `win${suffix}.png`;
+  if (ours < theirs) return `lose${suffix}.png`;
+  return `draw${suffix}.png`;
 }
 
 function getSelectedOpponent() {
