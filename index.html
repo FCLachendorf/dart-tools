@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FC Lachendorf Darts – Story Generator</title>
+  <title>FC Lachendorf Darts – Social Media Tools</title>
   <link rel="stylesheet" href="style.css?v=20260927-ios-export-1" />
   <link rel="stylesheet" href="league.css?v=20260927-ios-export-1" />
 </head>
@@ -15,7 +15,7 @@
 
     <div class="brand">
       <p>FC Lachendorf Darts</p>
-      <h1>Story Generator</h1>
+      <h1>Social Media Tools</h1>
     </div>
 
     <nav class="nav" id="nav">
@@ -184,6 +184,11 @@
         <h2>Ergebnis</h2>
       </div>
 
+      <div class="mode-switch result-format-switch" role="group" aria-label="Ergebnisformat auswählen">
+        <button class="mode-button active" type="button" data-result-format="story" aria-pressed="true">Story · 9:16</button>
+        <button class="mode-button" type="button" data-result-format="post" aria-pressed="false">Post · 4:5</button>
+      </div>
+
       <div class="result-dual-switches">
         <div>
           <p class="result-subheading">Mannschaft</p>
@@ -316,8 +321,8 @@
 
     <section class="preview-card result-preview-card">
       <div class="preview-topline result-preview-topline">
-        <span>Story-Vorschau</span>
-        <span>1080 × 1920 px</span>
+        <span id="resultPreviewLabel">Story-Vorschau</span>
+        <span id="resultPreviewSize">1080 × 1920 px</span>
       </div>
 
       <div class="canvas-shell result-canvas-shell">
@@ -355,6 +360,6 @@
   </div>
 
   <script src="app.js?v=20260927-ios-export-1"></script>
-  <script src="league.js?v=20260927-ios-export-1"></script>
+  <script src="league.js?v=20260927-result-post-1"></script>
 </body>
 </html>
