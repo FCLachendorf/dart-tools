@@ -7,7 +7,7 @@
   const fields = Object.fromEntries(["Opponent", "CustomOpponent", "Matchday", "Date", "Time", "Venue", "Address", "Compare"].map(name => [name, $("preview" + name)]));
   const metrics = [
     { key:"place", label:"Tabellenplatz", max:99 }, { key:"points", label:"Punkte", max:999 },
-    { key:"games", label:"Spiele", max:99 }, { key:"finish", label:"Highfinish (101+)", max:170 },
+    { key:"games", label:"Spiele", max:99 }, { key:"finish", label:"Highfinish ab 101", max:170 },
     { key:"counter", label:"180er", max:999 }
   ];
   const state = { team:"a", location:"home", images:new Map(), ready:false, request:0, stamp:null, edited:false, controller:null };
@@ -17,6 +17,13 @@
   }]));
   function opponent() { return teams[state.team].opponents.find(o => o.id === fields.Opponent.value); }
   function status(text, error = false) { $("previewDataStatus").textContent = text; $("previewDataStatus").dataset.error = String(error); }
+  function updateSourceStatus() {
+    $("previewSourceStatus").textContent = !fields.Compare.checked ? "" : state.controller
+      ? "3K-Daten werden geladen …"
+      : state.stamp
+        ? `Quelle: 3K · Stand ${state.stamp.toLocaleDateString("de-DE")} ${state.stamp.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${state.edited ? " · manuell angepasst" : ""}`
+        : state.edited ? "Manuelle Angaben" : "";
+  }
   function populate() {
     fields.Opponent.replaceChildren(new Option("Gegner auswählen", ""), ...teams[state.team].opponents.map(o => new Option(o.name,o.id)), new Option("Anderer Gegner", "custom"));
   }
@@ -88,6 +95,7 @@
     ctx.drawImage(image,x-image.width*scale/2,694-image.height*scale/2,image.width*scale,image.height*scale);
   }
   function render() {
+    updateSourceStatus();
     ctx.clearRect(0,0,1080,1920);
     if(!state.ready) { ctx.fillStyle="#18181c";ctx.fillRect(0,0,1080,1920);text("Design wird geladen …",540,960,38);return; }
     for(const name of [state.team==="a"?"bg":"bgb","overlay"+state.team,"header"+state.team,"set"+state.team]) ctx.drawImage(state.images.get(name),0,0,1080,1920);
@@ -98,27 +106,27 @@
     logo(home.logo,259);logo(away.logo,810);
     text("VS",535,695,72,160,"#fff","Topshow");
     text(home.name,259,919,34,420);text(away.name,810,919,34,420);
-    const matchday=fields.Matchday.value ? `${fields.Matchday.value}. SPIELTAG · ` : "";
-    text(matchday+(state.location==="home"?"HEIMSPIEL":"AUSWÄRTSSPIEL"),540,1022,37,900,"#fff","Topshow");
+    const matchday=fields.Matchday.value.replace(/\D/g, "").slice(0,2);
+    if(matchday) text(matchday,134,254,58,64,state.team==="a"?"#cc2331":"#ededf5","Topshow");
+    text(state.location==="home"?"HEIMSPIEL":"AUSWÄRTSSPIEL",540,1022,37,900,"#fff","Topshow");
     box(98,1070,884,166);
     const date=fields.Date.value ? new Date(fields.Date.value+"T12:00:00").toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}) : "DATUM AUSWÄHLEN";
     text(date,540,1120,57,800);
     text(fields.Time.value ? `ANWURF ${fields.Time.value} UHR` : "ANWURF EINTRAGEN",540,1190,36,800);
-    text(fields.Venue.value.trim()||"Spielstätte eintragen",540,1300,39,884);
-    if(fields.Address.value.trim())text(fields.Address.value.trim(),540,1352,29,884);
+    text("SPIELORT",540,1258,25,884,"#fff","Topshow");
+    text(fields.Venue.value.trim()||"Spielstätte eintragen",540,1293,36,884);
+    if(fields.Address.value.trim())text(fields.Address.value.trim(),540,1330,26,884);
     const active=fields.Compare.checked ? metrics.filter(m=>$("previewShow-"+m.key).checked) : [];
     if(active.length) {
       const rowHeight=57, start=1435;
-      text("SAISONVERGLEICH",540,1407,25,800);
+      ctx.drawImage(state.images.get("comp"+state.team),0,0,1080,1920);
       active.forEach((metric,index)=> {
         const y=start+index*rowHeight;box(98,y,884,rowHeight-5);
         const ownValue=$("previewStat-"+metric.key+"-own").value||"—",otherValue=$("previewStat-"+metric.key+"-opponent").value||"—";
         text(state.location==="home"?ownValue:otherValue,259,y+26,34,180);
-        text(metric.label,535,y+26,26,320,"#ccc");
+        text(metric.label.toUpperCase(),535,y+26,32,320,"#fff","Topshow");
         text(state.location==="home"?otherValue:ownValue,810,y+26,34,180);
       });
-      const source=state.controller ? "3K-Daten werden geladen …" : state.stamp ? `3K · Stand ${state.stamp.toLocaleDateString("de-DE")} ${state.stamp.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${state.edited?" · angepasst":""}` : "Manuelle Angaben";
-      text(source,540,start+active.length*rowHeight+20,21,850);
     }
     if(!$("previewModal").hidden) { const target=$("previewModalCanvas").getContext("2d");target.clearRect(0,0,1080,1920);target.drawImage(canvas,0,0); }
   }
@@ -160,8 +168,8 @@
   }
   async function initImages() {
     try {
-      const definitions=[...["bg","bgb","overlaya","overlayb","headera","headerb","seta","setb"].map(name=>[name,`assets/league/preview/story/${name}.png`]),...Object.values(teams).flatMap(t=>[[t.logo,t.logo],...t.opponents.map(o=>[o.logo,o.logo])])];
-      await Promise.all([...new Map(definitions)].map(([name,path])=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{state.images.set(name,image);resolve();};image.onerror=()=>reject(new Error(path));image.src=path+"?v=20260928-preview-1";})));
+      const definitions=[...["bg","bgb","overlaya","overlayb","headera","headerb","seta","setb","compa","compb"].map(name=>[name,`assets/league/preview/story/${name}.png`]),...Object.values(teams).flatMap(t=>[[t.logo,t.logo],...t.opponents.map(o=>[o.logo,o.logo])])];
+      await Promise.all([...new Map(definitions)].map(([name,path])=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{state.images.set(name,image);resolve();};image.onerror=()=>reject(new Error(path));image.src=path+"?v=20260928-preview-2";})));
       await Promise.all([new FontFace("PreviewTopshow","url(fonts/topshow.otf)").load().then(f=>document.fonts.add(f)),new FontFace("PreviewTacticSans","url(fonts/tacticsans.otf)").load().then(f=>document.fonts.add(f))]);
       state.ready=true;$("openPreviewStory").disabled=false;$("previewAssetStatus").textContent="";render();
     } catch(error) { $("previewAssetStatus").textContent="Das Design konnte nicht vollständig geladen werden. Bitte die Seite neu laden.";console.warn("Ankündigungsdesign",error); }
