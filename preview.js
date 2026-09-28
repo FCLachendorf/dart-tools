@@ -132,7 +132,7 @@
     const away=state.location==="home"?{name:otherName,logo:other?.logo}:{name:own.clubName,logo:own.logo};
     logo(home.logo,259);logo(away.logo,810);
     text("VS",535,695,72,160,"#fff","Topshow");
-    text(home.name,259,919,34,420);text(away.name,810,919,34,420);
+    text(home.name,259,919,34,420,"#fff","Topshow");text(away.name,810,919,34,420,"#fff","Topshow");
     const matchday=fields.Matchday.value.replace(/\D/g, "").slice(0,2);
     if(matchday) text(matchday,134,254,58,64,state.team==="a"?"#cc2331":"#ededf5","Topshow");
     text(state.location==="home"?"HEIMSPIEL":"AUSWÄRTSSPIEL",540,1022,37,900,"#fff","Topshow");
