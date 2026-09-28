@@ -7,7 +7,7 @@
   const fields = Object.fromEntries(["Opponent", "CustomOpponent", "Matchday", "Date", "Time", "Venue", "Address", "Compare"].map(name => [name, $("preview" + name)]));
   const metrics = [
     { key:"place", label:"Tabellenplatz", max:99 }, { key:"points", label:"Punkte", max:999 },
-    { key:"games", label:"Spiele", max:99 }, { key:"finish", label:"Highfinish ab 101", max:170 },
+    { key:"games", label:"Spiele", max:99 }, { key:"finish", label:"Highest Finish", max:170 },
     { key:"counter", label:"180er", max:999 }
   ];
   const state = { team:"a", location:"home", images:new Map(), ready:false, request:0, stamp:null, edited:false, controller:null };
