@@ -109,7 +109,7 @@
       if (request===state.request) { state.controller=null; $("previewRefresh").disabled=false; $("downloadPreviewStory").disabled=false; $("previewComparison").setAttribute("aria-busy","false"); render(); }
     }
   }
-  function text(value,x,y,size,max=920,color="#fff",family="Topshow") {
+  function text(value,x,y,size,max=920,color="#fff",family="TacticSans") {
     ctx.save(); ctx.fillStyle=color; ctx.textAlign="center"; ctx.textBaseline="middle";
     let actual=size;
     do { ctx.font=`${actual}px "Preview${family}", Arial, sans-serif`; if(ctx.measureText(value).width<=max) break; actual-=1; } while(actual>18);
