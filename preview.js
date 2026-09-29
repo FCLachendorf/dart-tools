@@ -79,7 +79,7 @@
   async function loadStats(refresh=false) {
     clearStats(); render();
     if (!fields.Compare.checked) return;
-    if (!opponent()) { status("Für automatische Werte bitte einen Ligagegner auswählen. Werte können auch von Hand eingetragen werden."); return; }
+    if (!opponent()) { status(""); return; }
     const request=state.request, selected=opponent(), config=DartPreviewData.leagues[state.team];
     const controller=new AbortController(); state.controller=controller;
     const timeout=setTimeout(()=>controller.abort(),15000);
@@ -101,7 +101,7 @@
       for (const metric of metrics) ["own","opponent"].forEach((side,index)=> { $("previewStat-"+metric.key+"-"+side).value = values[index][metric.key] ?? ""; });
       state.stamp=new Date();
       const partial=performance.some(p=>p.status!=="fulfilled");
-      status(partial ? "Tabelle geladen. Bestleistungen teilweise nicht verfügbar; fehlende Werte bleiben leer." : "3K-Werte geladen. Leere Highfinish-Felder bedeuten: kein erfasster Wert ab 101. Du kannst alle Werte anpassen.",partial);
+      status(partial ? "Tabelle geladen. Bestleistungen teilweise nicht verfügbar; fehlende Werte bleiben leer." : "",partial);
     } catch (error) {
       if (request===state.request) status("3K ist gerade nicht erreichbar oder die Daten haben sich geändert. Bitte erneut laden oder Werte von Hand eintragen.",true);
     } finally {
