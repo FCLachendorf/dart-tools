@@ -115,7 +115,12 @@
       const labelScale = .82;
       ctx.drawImage(asset, layout.statX, sourceY, 469, spec.height,
         layout.statX, y + spec.height * (1 - labelScale) / 2, 469 * labelScale, spec.height * labelScale);
-      text(el(spec.id).value.trim().replace(".", ",") || "–", layout.statX + 456, y + spec.height / 2, 31, 104, "RankingNumbers", "right");
+      const rawValue = el(spec.id).value.trim();
+      const number = Number(rawValue.replace(",", "."));
+      const displayValue = !rawValue || !Number.isFinite(number) ? "–"
+        : spec.id === "Avg" ? number.toFixed(1).replace(".", ",")
+        : Number.isInteger(number) ? String(number) : "–";
+      text(displayValue, layout.statX + 456, y + spec.height / 2, 31, 104, "RankingNumbers", "right");
       y += spec.height;
     });
     if (!state.photo) text("SIEGERFOTO AUSWÄHLEN", 540, canvas.height * .48, 54, 900, "RankingTop", "center");
@@ -208,7 +213,7 @@
       const input = el(spec.id);
       const value = input.value.trim();
       const average = Number(value.replace(",", "."));
-      const valid = value && (spec.id === "Avg" ? /^\d{1,3}([.,]\d{1,2})?$/.test(value) && average > 0 && average <= 180 : input.checkValidity());
+      const valid = value && (spec.id === "Avg" ? /^\d{1,3}([.,]\d)?$/.test(value) && average > 0 && average <= 180 : Number.isInteger(Number(value)) && input.checkValidity());
       if (!valid) { el("Status").textContent = "Bitte für die aktivierten Statistiken gültige Werte eintragen."; input.focus(); return; }
     }
     try {
