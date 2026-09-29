@@ -363,7 +363,11 @@
 
   <main class="layout tool-page result-layout" id="previewTool" data-tool-page="preview" data-team="a" hidden>
     <section class="card data-card result-card">
-      <div class="section-head result-title"><h2>Spieltagsankündigung</h2><p>Story · 1080 × 1920</p></div>
+      <div class="section-head result-title"><h2>Spieltagsankündigung</h2><p id="previewFormatDescription">Story · 1080 × 1920</p></div>
+      <div class="mode-switch" role="group" aria-label="Ankündigungsformat auswählen">
+        <button class="mode-button active" type="button" data-preview-format="story" aria-pressed="true">Story · 9:16</button>
+        <button class="mode-button" type="button" data-preview-format="post" aria-pressed="false">Post · 4:5</button>
+      </div>
       <div id="previewForm">
         <div class="result-dual-switches">
           <div><p class="result-subheading">Mannschaft</p><div class="mode-switch" role="group" aria-label="Ankündigung: Mannschaft">
@@ -381,7 +385,7 @@
           <label>Spieltag <small>optional</small><input id="previewMatchday" type="number" min="1" max="99" inputmode="numeric" placeholder="1" /></label>
           <label>Datum<input id="previewDate" type="date" required /></label>
         </div>
-        <label>Anwurf<input id="previewTime" type="time" required /></label>
+        <label>Anwurf<input id="previewTime" type="time" value="19:00" required /></label>
         <label>Spielstätte<input id="previewVenue" type="text" maxlength="90" required placeholder="Name der Spielstätte" /></label>
         <label>Ort / Adresse<input id="previewAddress" type="text" maxlength="110" required placeholder="Straße, Hausnummer, Ort" /></label>
         <div class="result-compact-details">
@@ -398,7 +402,7 @@
       </div>
     </section>
     <section class="preview-card result-preview-card">
-      <div class="preview-topline result-preview-topline"><span>Story-Vorschau</span><span>1080 × 1920 px</span></div>
+      <div class="preview-topline result-preview-topline"><span id="previewFormatLabel">Story-Vorschau</span><span id="previewFormatSize">1080 × 1920 px</span></div>
       <div class="canvas-shell result-canvas-shell"><canvas class="result-canvas" id="previewCanvas" width="1080" height="1920" role="img" aria-label="Vorschau der Spieltagsankündigung"></canvas></div>
       <p id="previewAssetStatus" class="preview-status" role="status">Design wird geladen …</p>
     </section>
@@ -410,7 +414,7 @@
     <button class="result-modal-backdrop" type="button" data-preview-close aria-label="Ankündigung schließen" tabindex="-1"></button>
     <section class="result-modal-panel" role="dialog" aria-modal="true" aria-labelledby="previewModalTitle">
       <div class="result-modal-head">
-        <div><span class="result-modal-kicker">Spieltagsankündigung · Story</span><h2 id="previewModalTitle">Vorschau &amp; Export</h2></div>
+        <div><span class="result-modal-kicker" id="previewModalFormat">Spieltagsankündigung · Story</span><h2 id="previewModalTitle">Vorschau &amp; Export</h2></div>
         <button class="result-modal-close" id="closePreviewStory" type="button" data-preview-close aria-label="Vorschau schließen">×</button>
       </div>
       <div class="result-modal-canvas-shell"><canvas id="previewModalCanvas" width="1080" height="1920" role="img" aria-label="Große Vorschau der Spieltagsankündigung"></canvas></div>
@@ -421,6 +425,6 @@
   <script src="app.js?v=20260927-ios-export-1"></script>
   <script src="league.js?v=20260927-result-post-2"></script>
   <script src="preview-data.js?v=20260928-preview-1"></script>
-  <script src="preview.js?v=20260928-preview-4"></script>
+  <script src="preview.js?v=20260929-preview-post-1"></script>
 </body>
 </html>
