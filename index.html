@@ -42,6 +42,8 @@
         <label>Vorname<input id="rankingFirst" type="text" maxlength="32" placeholder="Vorname" autocomplete="off" /></label>
         <label>Nachname<input id="rankingLast" type="text" maxlength="32" placeholder="Nachname" autocomplete="off" /></label>
       </div>
+      <details class="result-compact-details result-stats-details">
+        <summary>Zusatzwerte <span>optional</span></summary>
       <div class="stat-grid ranking-stats">
         <div class="stat-card">
           <label class="check-row"><input id="rankingShowAvg" type="checkbox" /><span>Game Average</span></label>
@@ -56,6 +58,7 @@
           <label id="rankingShortField" hidden>Darts<input id="rankingShort" type="number" min="9" max="99" step="1" placeholder="18" /></label>
         </div>
       </div>
+      </details>
       <div class="upload-wrap">
         <label class="upload-box" for="rankingPhoto">
           <input id="rankingPhoto" type="file" accept="image/*" />
@@ -325,7 +328,7 @@
   </div>
 
   <script src="app.js?v=20260929-ranking-1"></script>
-  <script src="ranking.js?v=20260929-ranking-2"></script>
+  <script src="ranking.js?v=20260929-ranking-3"></script>
   <script src="league.js?v=20260929-ranking-1"></script>
   <script src="preview-data.js?v=20260928-preview-1"></script>
   <script src="preview.js?v=20260929-preview-post-1"></script>
