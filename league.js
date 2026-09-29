@@ -271,7 +271,7 @@ const leagueEls = {
 };
 
 const leagueState = {
-  activeTool: "training",
+  activeTool: "ranking",
   resultFormat: "story",
   photoTransforms: { story: { zoom: 1, x: 0, y: 0 }, post: { zoom: 1, x: 0, y: 0 } },
   team: "a",

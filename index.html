@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css?v=20260927-ios-export-1" />
   <link rel="stylesheet" href="league.css?v=20260927-ios-export-1" />
   <link rel="stylesheet" href="preview.css?v=20260928-preview-1" />
+  <link rel="stylesheet" href="ranking.css?v=20260929-ranking-1" />
 </head>
 <body>
   <header class="app-header">
@@ -20,7 +21,7 @@
     </div>
 
     <nav class="nav" id="nav">
-      <a href="#" class="active" data-tool-target="training">Trainingssieger</a>
+      <a href="#" class="active" data-tool-target="ranking">Ranglistenturnier</a>
       <a href="#" data-tool-target="result">Ergebnis</a>
       <a href="#" data-tool-target="preview">Spieltagsankündigung</a>
       <a href="#" aria-disabled="true">Tabelle</a>
@@ -28,154 +29,55 @@
     </nav>
   </header>
 
-  <main class="layout tool-page" id="trainingTool" data-tool-page="training">
+  <main class="layout tool-page" id="rankingTool" data-tool-page="ranking">
     <section class="card data-card">
-      <div class="section-head">
-        <h2>Trainingssieger</h2>
-        <p>Solo oder Duo auswählen.</p>
+      <div class="section-head"><h2>Ranglistenturnier</h2><p>Der Turniersieger des Monats.</p></div>
+      <div class="mode-switch" role="group" aria-label="Turnierformat">
+        <button class="mode-button active" type="button" data-ranking-format="story" aria-pressed="true">Story · 9:16</button>
+        <button class="mode-button" type="button" data-ranking-format="post" aria-pressed="false">Post · 4:5</button>
       </div>
-
-      <div class="mode-switch" role="group" aria-label="Modus auswählen">
-        <button class="mode-button active" id="soloModeButton" type="button" data-mode="solo">Solo</button>
-        <button class="mode-button" id="duoModeButton" type="button" data-mode="duo">Duo</button>
+      <div class="grid two">
+        <label>Monat<select id="rankingMonth" aria-label="Turniermonat"></select></label>
+        <label>Datum<input id="rankingDate" type="date" /></label>
+        <label>Vorname<input id="rankingFirst" type="text" maxlength="32" placeholder="Vorname" autocomplete="off" /></label>
+        <label>Nachname<input id="rankingLast" type="text" maxlength="32" placeholder="Nachname" autocomplete="off" /></label>
       </div>
-
-      <div class="input-group" id="soloFields">
-        <div class="grid two">
-          <label>
-            Vorname
-            <input id="soloFirstName" type="text" placeholder="Vorname" maxlength="24" autocomplete="off" />
-          </label>
-
-          <label>
-            Nachname
-            <input id="soloLastName" type="text" placeholder="Nachname" maxlength="24" autocomplete="off" />
-          </label>
-        </div>
-      </div>
-
-      <div class="input-group" id="duoFields" hidden>
-        <p class="mini-title">Spieler 1</p>
-        <div class="grid two">
-          <label>
-            Vorname
-            <input id="duoFirstName1" type="text" placeholder="Vorname" maxlength="24" autocomplete="off" />
-          </label>
-
-          <label>
-            Nachname
-            <input id="duoLastName1" type="text" placeholder="Nachname" maxlength="24" autocomplete="off" />
-          </label>
-        </div>
-
-        <p class="mini-title">Spieler 2</p>
-        <div class="grid two">
-          <label>
-            Vorname
-            <input id="duoFirstName2" type="text" placeholder="Vorname" maxlength="24" autocomplete="off" />
-          </label>
-
-          <label>
-            Nachname
-            <input id="duoLastName2" type="text" placeholder="Nachname" maxlength="24" autocomplete="off" />
-          </label>
-        </div>
-      </div>
-
-      <div class="stat-grid">
+      <div class="stat-grid ranking-stats">
         <div class="stat-card">
-          <label class="check-row">
-            <input id="showAverage" type="checkbox" checked />
-            <span>Average</span>
-          </label>
-
-          <label id="averageField">
-            Wert
-            <input id="average" type="text" inputmode="decimal" maxlength="4" placeholder="56,3" autocomplete="off" />
-          </label>
+          <label class="check-row"><input id="rankingShowAvg" type="checkbox" /><span>Game Average</span></label>
+          <label id="rankingAvgField" hidden>Average<input id="rankingAvg" type="text" inputmode="decimal" maxlength="6" placeholder="56,32" /></label>
         </div>
-
         <div class="stat-card">
-          <label class="check-row">
-            <input id="showFinish" type="checkbox" checked />
-            <span>Finish</span>
-          </label>
-
-          <label id="finishField">
-            Wert
-            <input id="highestFinish" type="text" inputmode="numeric" maxlength="3" placeholder="76" autocomplete="off" />
-          </label>
+          <label class="check-row"><input id="rankingShowFin" type="checkbox" /><span>Highest Finish</span></label>
+          <label id="rankingFinField" hidden>Finish<input id="rankingFin" type="number" min="2" max="170" step="1" placeholder="101" /></label>
+        </div>
+        <div class="stat-card">
+          <label class="check-row"><input id="rankingShowShort" type="checkbox" /><span>Shortest Game</span></label>
+          <label id="rankingShortField" hidden>Darts<input id="rankingShort" type="number" min="9" max="99" step="1" placeholder="18" /></label>
         </div>
       </div>
-
       <div class="upload-wrap">
-        <label class="upload-box" for="photoInput" id="uploadBox">
-          <input id="photoInput" type="file" accept="image/*" />
-
-          <span class="upload-empty" id="uploadEmpty">
-            <strong>Foto auswählen</strong>
-            <em>JPG oder PNG hochladen</em>
-          </span>
-
-          <span class="upload-selected" id="uploadSelected" hidden>
-            <img id="uploadThumb" alt="" />
-            <span>
-              <strong id="uploadFileName">Foto ausgewählt</strong>
-              <em>Tippen, um ein anderes Foto auszuwählen</em>
-            </span>
-          </span>
+        <label class="upload-box" for="rankingPhoto">
+          <input id="rankingPhoto" type="file" accept="image/*" />
+          <span class="upload-empty" id="rankingUploadEmpty"><strong>Siegerfoto auswählen</strong><em>Ein Foto ist für den Export erforderlich.</em></span>
+          <span class="upload-selected" id="rankingUploadSelected" hidden><img id="rankingThumb" alt="" /><span><strong id="rankingFileName"></strong><em>Tippen, um das Foto auszutauschen</em></span></span>
         </label>
-
-        <button class="remove-photo" id="removePhotoButton" type="button" aria-label="Foto entfernen" hidden>
-          ×
-        </button>
+        <button class="remove-photo" id="rankingRemove" type="button" aria-label="Siegerfoto entfernen" hidden>×</button>
       </div>
+      <p class="hint" id="rankingStatus" role="status" aria-live="polite"></p>
     </section>
-
     <section class="preview-card">
-      <div class="preview-topline">
-        <span>Live-Vorschau</span>
-        <span>1080 × 1920 px</span>
-      </div>
-
-      <div class="canvas-shell">
-        <canvas id="postCanvas" width="1080" height="1920"></canvas>
-      </div>
-
+      <div class="preview-topline"><span>Live-Vorschau</span><span id="rankingDimensions">1080 × 1920 px</span></div>
+      <div class="canvas-shell"><canvas id="rankingCanvas" width="1080" height="1920" role="img" aria-label="Vorschau des Ranglistenturniers"></canvas></div>
       <p class="preview-help">Foto ziehen oder mit zwei Fingern zoomen.</p>
     </section>
-
     <section class="card controls-card">
-      <div class="section-head compact">
-        <h2>Bild ausrichten</h2>
-      </div>
-
-      <label>
-        Zoom
-        <input id="photoZoom" type="range" min="1" max="3" step="0.01" value="1" />
-      </label>
-
-      <label>
-        Bild horizontal
-        <input id="photoX" type="range" min="0" max="0" step="1" value="0" />
-      </label>
-
-      <label>
-        Bild vertikal
-        <input id="photoY" type="range" min="0" max="0" step="1" value="0" />
-      </label>
-
-      <details class="date-details">
-        <summary>Datum ändern</summary>
-        <label>
-          Datum
-          <input id="date" type="date" />
-        </label>
-      </details>
-
-      <button class="download-button" id="downloadButton" type="button">
-        Story herunterladen
-      </button>
+      <div class="section-head compact"><h2>Bild ausrichten</h2></div>
+      <label>Zoom<input id="rankingZoom" type="range" min="1" max="3" step="0.01" value="1" disabled /></label>
+      <label>Bild horizontal<input id="rankingX" type="range" min="0" max="0" step="1" value="0" disabled /></label>
+      <label>Bild vertikal<input id="rankingY" type="range" min="0" max="0" step="1" value="0" disabled /></label>
+      <button class="mode-button" id="rankingReset" type="button" disabled>Bildausschnitt zurücksetzen</button>
+      <button class="download-button" id="rankingDownload" type="button" disabled>Story herunterladen</button>
     </section>
   </main>
 
@@ -422,8 +324,9 @@
     </section>
   </div>
 
-  <script src="app.js?v=20260927-ios-export-1"></script>
-  <script src="league.js?v=20260927-result-post-2"></script>
+  <script src="app.js?v=20260929-ranking-1"></script>
+  <script src="ranking.js?v=20260929-ranking-1"></script>
+  <script src="league.js?v=20260929-ranking-1"></script>
   <script src="preview-data.js?v=20260928-preview-1"></script>
   <script src="preview.js?v=20260929-preview-post-1"></script>
 </body>

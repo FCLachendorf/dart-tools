@@ -1,0 +1,11 @@
+#rankingCanvas { width: auto; height: auto; max-width: 100%; max-height: min(48svh, 560px); touch-action: none; cursor: grab; }
+#rankingCanvas:active { cursor: grabbing; }
+.ranking-stats { grid-template-columns: 1fr; margin-top: 18px; }
+.ranking-stats .stat-card { padding: 12px; }
+#rankingTool select { width: 100%; min-height: 48px; font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
+#rankingTool button:disabled { opacity: .45; cursor: not-allowed; }
+#rankingReset { margin-top: 12px; }
+#rankingTool input[type="number"] { width: 100%; min-width: 0; padding: 14px 12px; min-height: 48px; border: 1px solid var(--border); border-radius: 12px; background: #0e0e12; color: var(--text); }
+#rankingUploadSelected > span { min-width: 0; }
+#rankingUploadSelected strong, #rankingUploadSelected em { display: block; overflow-wrap: anywhere; }
+@media (min-width: 860px) { #rankingCanvas { max-height: min(82svh, 840px); } }
