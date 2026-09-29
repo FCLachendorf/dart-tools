@@ -8,7 +8,7 @@
   // Positionen in Originalpixeln: Y-Werte erhöhen, um Text nach unten zu setzen.
   const layouts = {
     story: { height: 1920, headerY: 0, nameX: 180, firstY: 1704, lastY: 1780, dateY: 1871, statsBottom: 1688, statX: 528 },
-    post: { height: 1350, headerY: -20, nameX: 180, firstY: 1134, lastY: 1210, dateY: 1301, statsBottom: 1115, statX: 540 },
+    post: { height: 1350, headerY: -60, nameX: 180, firstY: 1134, lastY: 1210, dateY: 1301, statsBottom: 1115, statX: 540 },
   };
   const specs = [
     { id: "Avg", file: "avg", sourceY: { story: 1471, post: 899 }, height: 77 },
