@@ -5,12 +5,40 @@
   if (!root) return;
   const canvas = $("previewCanvas"), ctx = canvas.getContext("2d");
   const fields = Object.fromEntries(["Opponent", "CustomOpponent", "Matchday", "Date", "Time", "Venue", "Address", "Compare"].map(name => [name, $("preview" + name)]));
+  // Layout in Pixeln: y/start größer = weiter nach unten; fontSize größer = größere Schrift.
+  // Saisonvergleich: labelOffsetY und valueOffsetY verschieben Text innerhalb der Zeilen.
+  const PREVIEW_LAYOUTS = {
+    story: {
+      width:1080, height:1920,
+      logos:{ y:694, size:220 }, vs:{ y:695, fontSize:72 },
+      teamNames:{ y:919, fontSize:42, maxWidth:420 },
+      matchday:{ x:134, y:254, fontSize:58, maxWidth:64 },
+      location:{ y:1022, fontSize:37 },
+      dateBox:{ x:98, y:1070, width:884, height:166 },
+      date:{ y:1120, fontSize:57 }, time:{ y:1190, fontSize:36 },
+      venueLabelY:1258, venue:{ y:1293, fontSize:36 }, address:{ y:1330, fontSize:26 },
+      comparison:{ start:1435, rowHeight:57, boxGap:5, labelOffsetY:29, valueOffsetY:29, labelFontSize:32, valueFontSize:34 },
+    },
+    post: {
+      width:1080, height:1350,
+      logos:{ y:504, size:220 }, vs:{ y:505, fontSize:72 },
+      teamNames:{ y:704, fontSize:42, maxWidth:420 },
+      matchday:{ x:134, y:148, fontSize:58, maxWidth:64 },
+      location:{ y:741, fontSize:28 },
+      dateBox:{ x:98, y:765, width:884, height:92 },
+      date:{ y:790, fontSize:44 }, time:{ y:834, fontSize:28 },
+      venueLabelY:null, venue:{ y:879, fontSize:28 }, address:{ y:906, fontSize:24 },
+      comparison:{ start:1010, rowHeight:57, boxGap:5, labelOffsetY:29, valueOffsetY:29, labelFontSize:32, valueFontSize:34 },
+    },
+  };
+  function layout() { return PREVIEW_LAYOUTS[state.format]; }
+  function asset(name) { return state.images.get(`${state.format}/${name}`); }
   const metrics = [
     { key:"place", label:"Tabellenplatz", max:99 }, { key:"points", label:"Punkte", max:999 },
     { key:"games", label:"Spiele", max:99 }, { key:"finish", label:"Highest Finish", max:170 },
     { key:"counter", label:"180er", max:999 }
   ];
-  const state = { team:"a", location:"home", images:new Map(), ready:false, request:0, stamp:null, edited:false, controller:null };
+  const state = { team:"a", location:"home", format:"story", images:new Map(), ready:false, request:0, stamp:null, edited:false, controller:null };
   const cache = new Map();
   // Shared venues for A/B or C/D teams; addresses supplied by the club.
   const venues = {
@@ -61,6 +89,17 @@
   }
   function update() {
     root.dataset.team = state.team;
+    root.querySelectorAll("[data-preview-format]").forEach(b => {
+      const active=b.dataset.previewFormat===state.format;
+      b.classList.toggle("active",active); b.setAttribute("aria-pressed",String(active));
+    });
+    const label=state.format==="post" ? "Post" : "Story";
+    const dimensions=`${layout().width} × ${layout().height}`;
+    $("previewFormatDescription").textContent=`${label} · ${dimensions}`;
+    $("previewFormatLabel").textContent=`${label}-Vorschau`;
+    $("previewFormatSize").textContent=`${dimensions} px`;
+    $("previewModalFormat").textContent=`Spieltagsankündigung · ${label}`;
+    $("downloadPreviewStory").replaceChildren(document.createTextNode(`${label} herunterladen`), Object.assign(document.createElement("span"),{textContent:dimensions}));
     root.querySelectorAll("[data-preview-team]").forEach(b => { const active=b.dataset.previewTeam===state.team; b.classList.toggle("active",active); b.setAttribute("aria-pressed",active); });
     root.querySelectorAll("[data-preview-location]").forEach(b => { const active=b.dataset.previewLocation===state.location; b.classList.toggle("active",active); b.setAttribute("aria-pressed",active); });
     $("previewCustomWrap").hidden = fields.Opponent.value !== "custom";
@@ -118,48 +157,51 @@
   function box(x,y,w,h) { ctx.fillStyle="rgba(9,9,13,.87)"; ctx.fillRect(x,y,w,h); }
   function logo(path,x) {
     const image=state.images.get(path);if(!image)return;
-    const scale=Math.min(220/image.width,220/image.height);
-    ctx.drawImage(image,x-image.width*scale/2,694-image.height*scale/2,image.width*scale,image.height*scale);
+    const config=layout().logos;
+    const scale=Math.min(config.size/image.width,config.size/image.height);
+    ctx.drawImage(image,x-image.width*scale/2,config.y-image.height*scale/2,image.width*scale,image.height*scale);
   }
   function render() {
     updateSourceStatus();
-    ctx.clearRect(0,0,1080,1920);
-    if(!state.ready) { ctx.fillStyle="#18181c";ctx.fillRect(0,0,1080,1920);text("Design wird geladen …",540,960,38);return; }
-    for(const name of [state.team==="a"?"bg":"bgb","overlay"+state.team,"header"+state.team,"set"+state.team]) ctx.drawImage(state.images.get(name),0,0,1080,1920);
+    const l=layout();
+    if(canvas.width!==l.width || canvas.height!==l.height) { canvas.width=l.width; canvas.height=l.height; }
+    ctx.clearRect(0,0,l.width,l.height);
+    if(!state.ready) { ctx.fillStyle="#18181c";ctx.fillRect(0,0,l.width,l.height);text("Design wird geladen …",540,l.height/2,38);return; }
+    for(const name of [state.team==="a"?"bg":"bgb","overlay"+state.team,"header"+state.team,"set"+state.team]) ctx.drawImage(asset(name),0,0,l.width,l.height);
     const own=teams[state.team], other=opponent();
     const otherName=other?.name || fields.CustomOpponent.value.trim() || "Gegner auswählen";
     const home=state.location==="home"?{name:own.clubName,logo:own.logo}:{name:otherName,logo:other?.logo};
     const away=state.location==="home"?{name:otherName,logo:other?.logo}:{name:own.clubName,logo:own.logo};
     logo(home.logo,259);logo(away.logo,810);
-    text("VS",535,695,72,160,"#fff","Topshow");
-    text(home.name,259,919,34,420,"#fff","Topshow");text(away.name,810,919,34,420,"#fff","Topshow");
+    text("VS",535,l.vs.y,l.vs.fontSize,160,"#fff","Topshow");
+    text(home.name,259,l.teamNames.y,l.teamNames.fontSize,l.teamNames.maxWidth,"#fff","Topshow");text(away.name,810,l.teamNames.y,l.teamNames.fontSize,l.teamNames.maxWidth,"#fff","Topshow");
     const matchday=fields.Matchday.value.replace(/\D/g, "").slice(0,2);
-    if(matchday) text(matchday,134,254,58,64,state.team==="a"?"#cc2331":"#ededf5","Topshow");
-    text(state.location==="home"?"HEIMSPIEL":"AUSWÄRTSSPIEL",540,1022,37,900,"#fff","Topshow");
-    box(98,1070,884,166);
+    if(matchday) text(matchday,l.matchday.x,l.matchday.y,l.matchday.fontSize,l.matchday.maxWidth,state.team==="a"?"#cc2331":"#ededf5","Topshow");
+    text(state.location==="home"?"HEIMSPIEL":"AUSWÄRTSSPIEL",540,l.location.y,l.location.fontSize,900,"#fff","Topshow");
+    box(l.dateBox.x,l.dateBox.y,l.dateBox.width,l.dateBox.height);
     const date=fields.Date.value ? new Date(fields.Date.value+"T12:00:00").toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}) : "DATUM AUSWÄHLEN";
-    text(date,540,1120,57,800,"#fff",fields.Date.value ? "TacticSans" : "Topshow");
-    text(fields.Time.value ? `ANWURF ${fields.Time.value} UHR` : "ANWURF EINTRAGEN",540,1190,36,800,"#fff","TacticSans");
-    text("SPIELORT",540,1258,25,884,"#fff","Topshow");
-    text(fields.Venue.value.trim()||"Spielstätte eintragen",540,1293,36,884);
-    if(fields.Address.value.trim())text(fields.Address.value.trim(),540,1330,26,884);
+    text(date,540,l.date.y,l.date.fontSize,800,"#fff",fields.Date.value ? "TacticSans" : "Topshow");
+    text(fields.Time.value ? `ANWURF ${fields.Time.value} UHR` : "ANWURF EINTRAGEN",540,l.time.y,l.time.fontSize,800,"#fff","TacticSans");
+    if(l.venueLabelY!==null) text("SPIELORT",540,l.venueLabelY,25,884,"#fff","Topshow");
+    text(fields.Venue.value.trim()||"Spielstätte eintragen",540,l.venue.y,l.venue.fontSize,884);
+    if(fields.Address.value.trim())text(fields.Address.value.trim(),540,l.address.y,l.address.fontSize,884);
     const active=fields.Compare.checked ? metrics.filter(m=>$("previewShow-"+m.key).checked) : [];
     if(active.length) {
-      const rowHeight=57, start=1435;
-      ctx.drawImage(state.images.get("comp"+state.team),0,0,1080,1920);
+      const {rowHeight,start,boxGap,labelOffsetY,valueOffsetY,labelFontSize,valueFontSize}=l.comparison;
+      ctx.drawImage(asset("comp"+state.team),0,0,l.width,l.height);
       active.forEach((metric,index)=> {
-        const y=start+index*rowHeight;box(98,y,884,rowHeight-5);
+        const y=start+index*rowHeight;box(98,y,884,rowHeight-boxGap);
         const ownValue=$("previewStat-"+metric.key+"-own").value||"-",otherValue=$("previewStat-"+metric.key+"-opponent").value||"-";
-        text(state.location==="home"?ownValue:otherValue,259,y+26,34,180,"#fff","TacticSans");
-        text(metric.label.toUpperCase(),535,y+26,32,320,"#fff","Topshow");
-        text(state.location==="home"?otherValue:ownValue,810,y+26,34,180,"#fff","TacticSans");
+        text(state.location==="home"?ownValue:otherValue,259,y+valueOffsetY,valueFontSize,180,"#fff","TacticSans");
+        text(metric.label.toUpperCase(),535,y+labelOffsetY,labelFontSize,320,"#fff","Topshow");
+        text(state.location==="home"?otherValue:ownValue,810,y+valueOffsetY,valueFontSize,180,"#fff","TacticSans");
       });
     }
-    if(!$("previewModal").hidden) { const target=$("previewModalCanvas").getContext("2d");target.clearRect(0,0,1080,1920);target.drawImage(canvas,0,0); }
+    if(!$("previewModal").hidden) { const modalCanvas=$("previewModalCanvas"); modalCanvas.width=l.width; modalCanvas.height=l.height; const target=modalCanvas.getContext("2d");target.drawImage(canvas,0,0); }
   }
   function closeModal() { $("previewModal").hidden=true;document.body.classList.remove("result-modal-open");$("openPreviewStory").focus(); }
   function setup() {
-    populate();fields.Date.value=toLeagueInputDate(new Date());updateVenue();
+    populate();fields.Date.value=toLeagueInputDate(new Date());fields.Time.value="19:00";updateVenue();
     for(const metric of metrics) {
       const row=document.createElement("div");row.className="preview-stat-row";
       const label=document.createElement("label");label.className="result-stat-check";
@@ -168,6 +210,10 @@
       for(const side of ["own","opponent"]) { const input=document.createElement("input");input.type="number";input.id="previewStat-"+metric.key+"-"+side;input.min=metric.key==="finish"?101:metric.key==="place"?1:metric.key==="points"?-999:0;input.max=metric.max;input.step=metric.key==="points"?"any":"1";input.placeholder="—";input.setAttribute("aria-label",`${metric.label} ${side==="own"?"eigenes Team":"Gegner"}`);input.addEventListener("input",()=>{state.edited=true;render();});row.append(input); }
       check.addEventListener("change",update);$("previewStatRows").append(row);
     }
+    root.querySelectorAll("[data-preview-format]").forEach(button=>button.addEventListener("click",()=>{
+      if(!PREVIEW_LAYOUTS[button.dataset.previewFormat])return;
+      state.format=button.dataset.previewFormat;update();
+    }));
     root.querySelectorAll("[data-preview-team]").forEach(button=>button.addEventListener("click",()=>{
       if(state.team===button.dataset.previewTeam)return;state.team=button.dataset.previewTeam;populate();updateVenue();clearStats();status("Bitte Gegner auswählen.");$("previewRefresh").disabled=false;update();
     }));
@@ -189,14 +235,14 @@
       const invalid=[...$("previewForm").querySelectorAll("input,select")].find(el=>!el.disabled&&el.willValidate&&!el.checkValidity());
       if(invalid) { closeModal();invalid.reportValidity();return; }
       if(!state.ready)return;
-      render();await window.exportCanvasPng(canvas,`spielankuendigung-${state.team}-${leagueSlugify(opponent()?.name||fields.CustomOpponent.value)}-${fields.Date.value}.png`);
+      render();await window.exportCanvasPng(canvas,`spielankuendigung-${state.format}-${state.team}-${leagueSlugify(opponent()?.name||fields.CustomOpponent.value)}-${fields.Date.value}.png`);
     });
     update();
   }
   async function initImages() {
     try {
-      const definitions=[...["bg","bgb","overlaya","overlayb","headera","headerb","seta","setb","compa","compb"].map(name=>[name,`assets/league/preview/story/${name}.png`]),...Object.values(teams).flatMap(t=>[[t.logo,t.logo],...t.opponents.map(o=>[o.logo,o.logo])])];
-      await Promise.all([...new Map(definitions)].map(([name,path])=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{state.images.set(name,image);resolve();};image.onerror=()=>reject(new Error(path));image.src=path+"?v=20260928-preview-2";})));
+      const definitions=[...Object.keys(PREVIEW_LAYOUTS).flatMap(format=>["bg","bgb","overlaya","overlayb","headera","headerb","seta","setb","compa","compb"].map(name=>[`${format}/${name}`,`assets/league/preview/${format}/${name}.png`])),...Object.values(teams).flatMap(t=>[[t.logo,t.logo],...t.opponents.map(o=>[o.logo,o.logo])])];
+      await Promise.all([...new Map(definitions)].map(([name,path])=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{state.images.set(name,image);resolve();};image.onerror=()=>reject(new Error(path));image.src=path+"?v=20260929-preview-post-1";})));
       await Promise.all([new FontFace("PreviewTopshow","url(fonts/topshow.otf)").load().then(f=>document.fonts.add(f)),new FontFace("PreviewTacticSans","url(fonts/tacticsans.otf)").load().then(f=>document.fonts.add(f))]);
       state.ready=true;$("openPreviewStory").disabled=false;$("previewAssetStatus").textContent="";render();
     } catch(error) { $("previewAssetStatus").textContent="Das Design konnte nicht vollständig geladen werden. Bitte die Seite neu laden.";console.warn("Ankündigungsdesign",error); }
