@@ -1,5 +1,156 @@
 {
-  "version": 1,
-  "updatedAt": null,
-  "events": {}
+  "events": {
+    "1422": {
+      "participants": {
+        "172473": {
+          "counter": 1,
+          "displayName": "DSV Hambühren C",
+          "finish": null,
+          "games": 3,
+          "participantId": 172473,
+          "performanceKnown": true,
+          "place": "2",
+          "points": 6.0
+        },
+        "172475": {
+          "counter": 0,
+          "displayName": "FC Lachendorf Darts B",
+          "finish": null,
+          "games": 2,
+          "participantId": 172475,
+          "performanceKnown": true,
+          "place": "6",
+          "points": 0.0
+        },
+        "172477": {
+          "counter": 0,
+          "displayName": "Team Utd. Südheide C",
+          "finish": null,
+          "games": 3,
+          "participantId": 172477,
+          "performanceKnown": true,
+          "place": "4",
+          "points": 2.0
+        },
+        "172478": {
+          "counter": 0,
+          "displayName": "VfL Schickeria A",
+          "finish": null,
+          "games": 2,
+          "participantId": 172478,
+          "performanceKnown": true,
+          "place": "3",
+          "points": 2.0
+        },
+        "172487": {
+          "counter": 0,
+          "displayName": "Bulls Eye C",
+          "finish": null,
+          "games": 2,
+          "participantId": 172487,
+          "performanceKnown": true,
+          "place": "7",
+          "points": 0.0
+        },
+        "172488": {
+          "counter": 2,
+          "displayName": "MTV Beedenbostel A",
+          "finish": null,
+          "games": 3,
+          "participantId": 172488,
+          "performanceKnown": true,
+          "place": "5",
+          "points": 2.0
+        },
+        "172491": {
+          "counter": 0,
+          "displayName": "TuS Eschede B",
+          "finish": null,
+          "games": 3,
+          "participantId": 172491,
+          "performanceKnown": true,
+          "place": "1",
+          "points": 6.0
+        }
+      },
+      "updatedAt": "2026-09-30T21:11:26Z"
+    },
+    "1428": {
+      "participants": {
+        "171880": {
+          "counter": 0,
+          "displayName": "MTV Beedenbostel B",
+          "finish": null,
+          "games": 3,
+          "participantId": 171880,
+          "performanceKnown": true,
+          "place": "7",
+          "points": 0.0
+        },
+        "171883": {
+          "counter": 6,
+          "displayName": "TuS Eschede A",
+          "finish": 116,
+          "games": 3,
+          "participantId": 171883,
+          "performanceKnown": true,
+          "place": "1",
+          "points": 6.0
+        },
+        "172474": {
+          "counter": 0,
+          "displayName": "FC Lachendorf Darts A",
+          "finish": 101,
+          "games": 2,
+          "participantId": 172474,
+          "performanceKnown": true,
+          "place": "3",
+          "points": 4.0
+        },
+        "172476": {
+          "counter": 0,
+          "displayName": "PSV Celle B",
+          "finish": null,
+          "games": 2,
+          "participantId": 172476,
+          "performanceKnown": true,
+          "place": "4",
+          "points": 2.0
+        },
+        "172479": {
+          "counter": 0,
+          "displayName": "Vorwerk Fun Force A",
+          "finish": null,
+          "games": 3,
+          "participantId": 172479,
+          "performanceKnown": true,
+          "place": "5",
+          "points": 2.0
+        },
+        "172503": {
+          "counter": 1,
+          "displayName": "DSV Hambühren D",
+          "finish": 120,
+          "games": 2,
+          "participantId": 172503,
+          "performanceKnown": true,
+          "place": "2",
+          "points": 4.0
+        },
+        "172509": {
+          "counter": 0,
+          "displayName": "Scheuener Heidedarter A",
+          "finish": null,
+          "games": 3,
+          "participantId": 172509,
+          "performanceKnown": true,
+          "place": "6",
+          "points": 0.0
+        }
+      },
+      "updatedAt": "2026-09-30T21:11:21Z"
+    }
+  },
+  "updatedAt": "2026-09-30T21:11:26Z",
+  "version": 1
 }
