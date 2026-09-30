@@ -1,0 +1,47 @@
+name: Refresh 3K fallback cache
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/refresh-3k-cache.yml"
+      - "scripts/update_3k_cache.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-3k-cache
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Refresh cached 3K values
+        run: python scripts/update_3k_cache.py
+
+      - name: Commit changed cache
+        shell: bash
+        run: |
+          if git diff --quiet -- data/3k-cache.json; then
+            echo "3K cache unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/3k-cache.json
+          git commit -m "Update 3K fallback cache"
+          git push
