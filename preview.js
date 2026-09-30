@@ -195,7 +195,7 @@
     return {
       values:[pick(own),pick(other)],
       stamp,
-      partial:Boolean(own.performanceStale || other.performanceStale),
+      partial:!own.performanceKnown || !other.performanceKnown,
     };
   }
   function fallbackStatus(prefix, stamp, partial=false) {
