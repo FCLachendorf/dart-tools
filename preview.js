@@ -38,8 +38,10 @@
     { key:"games", label:"Spiele", max:99 }, { key:"finish", label:"Highest Finish", max:170 },
     { key:"counter", label:"180er", max:999 }
   ];
-  const state = { team:"a", location:"home", format:"story", images:new Map(), ready:false, request:0, stamp:null, edited:false, controller:null };
+  const state = { team:"a", location:"home", format:"story", images:new Map(), ready:false, request:0, stamp:null, source:null, edited:false, controller:null };
   const cache = new Map();
+  const SNAPSHOT_URL = "data/3k-cache.json";
+  const LOCAL_CACHE_KEY = "fcl-darts-preview-3k-v1";
   // Shared venues for A/B or C/D teams; addresses supplied by the club.
   const venues = {
     lachendorf: { name:"Zum Oche an der Lachte", address:"Rehrkamp 33, 29331 Lachendorf" },
@@ -73,17 +75,31 @@
   function opponent() { return teams[state.team].opponents.find(o => o.id === fields.Opponent.value); }
   function status(text, error = false) { $("previewDataStatus").textContent = text; $("previewDataStatus").dataset.error = String(error); }
   function updateSourceStatus() {
-    $("previewSourceStatus").textContent = !fields.Compare.checked ? "" : state.controller
-      ? "3K-Daten werden geladen …"
-      : state.stamp
-        ? `Quelle: 3K · Stand ${state.stamp.toLocaleDateString("de-DE")} ${state.stamp.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${state.edited ? " · manuell angepasst" : ""}`
-        : state.edited ? "Manuelle Angaben" : "";
+    if (!fields.Compare.checked) {
+      $("previewSourceStatus").textContent = "";
+      return;
+    }
+    if (state.controller) {
+      $("previewSourceStatus").textContent = "3K-Daten werden geladen …";
+      return;
+    }
+    if (state.stamp) {
+      const labels = {
+        live: "3K live",
+        snapshot: "gespeicherter 3K-Stand",
+        local: "lokaler letzter Stand",
+      };
+      const label = labels[state.source] || "3K";
+      $("previewSourceStatus").textContent = `Quelle: ${label} · Stand ${state.stamp.toLocaleDateString("de-DE")} ${state.stamp.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${state.edited ? " · manuell angepasst" : ""}`;
+      return;
+    }
+    $("previewSourceStatus").textContent = state.edited ? "Manuelle Angaben" : "";
   }
   function populate() {
     fields.Opponent.replaceChildren(new Option("Gegner auswählen", ""), ...teams[state.team].opponents.map(o => new Option(o.name,o.id)), new Option("Anderer Gegner", "custom"));
   }
   function clearStats() {
-    ++state.request; state.controller?.abort(); state.controller = null; state.stamp = null; state.edited = false;
+    ++state.request; state.controller?.abort(); state.controller = null; state.stamp = null; state.source = null; state.edited = false;
     $("previewRefresh").disabled=false; $("downloadPreviewStory").disabled=false; $("previewComparison").setAttribute("aria-busy","false");
     for (const metric of metrics) for (const side of ["own","opponent"]) $("previewStat-" + metric.key + "-" + side).value = "";
   }
@@ -112,8 +128,85 @@
     const url=DartPreviewData.base + path, saved=cache.get(url);
     if (!refresh && saved && Date.now()-saved.time<300000) return saved.data;
     const response=await fetch(url,{signal, credentials:"omit"});
-    if (!response.ok) throw new Error("3K-Abruf fehlgeschlagen");
+    if (!response.ok) throw new Error(`3K-Abruf fehlgeschlagen (HTTP ${response.status})`);
     const data=await response.json(); cache.set(url,{time:Date.now(),data}); return data;
+  }
+  function normalizeTeamName(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/ß/g,"ss")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g,"")
+      .replace(/[^a-z0-9]+/g,"")
+      .trim();
+  }
+  function applyStatValues(values) {
+    for (const metric of metrics) ["own","opponent"].forEach((side,index)=> {
+      $("previewStat-"+metric.key+"-"+side).value = values[index]?.[metric.key] ?? "";
+    });
+  }
+  function compactValues(values) {
+    return values.map(value => Object.fromEntries(metrics.map(metric => [metric.key, value?.[metric.key] ?? null])));
+  }
+  function readLocalCache(team, opponentId) {
+    try {
+      const all=JSON.parse(localStorage.getItem(LOCAL_CACHE_KEY) || "{}");
+      const entry=all[`${team}:${opponentId}`];
+      if (!entry || !Array.isArray(entry.values) || entry.values.length!==2) return null;
+      const stamp=new Date(entry.updatedAt);
+      if (Number.isNaN(stamp.getTime())) return null;
+      return { values:entry.values, stamp };
+    } catch {
+      return null;
+    }
+  }
+  function saveLocalCache(team, opponentId, values, stamp) {
+    try {
+      const all=JSON.parse(localStorage.getItem(LOCAL_CACHE_KEY) || "{}");
+      all[`${team}:${opponentId}`] = { updatedAt:stamp.toISOString(), values:compactValues(values) };
+      localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(all));
+    } catch {
+      // Private browsing/storage limits must never break the generator.
+    }
+  }
+  async function loadSnapshot(config, selected) {
+    const response=await fetch(`${SNAPSHOT_URL}?v=${Date.now()}`,{cache:"no-store",credentials:"same-origin"});
+    if (!response.ok) return null;
+    const snapshot=await response.json();
+    const event=snapshot?.events?.[String(config.event)];
+    const participants=event?.participants;
+    if (!participants || typeof participants!=="object") return null;
+
+    const entries=Object.values(participants);
+    const own=participants[String(config.own)] || entries.find(p=>Number(p?.participantId)===Number(config.own));
+    const wanted=normalizeTeamName(selected.name);
+    const other=entries.find(p=>normalizeTeamName(p?.displayName)===wanted);
+    if (!own || !other) return null;
+
+    const pick=p=>({
+      place:p.place ?? null,
+      points:p.points ?? null,
+      games:p.games ?? null,
+      finish:p.finish ?? null,
+      counter:p.counter ?? null,
+    });
+    const stamp=new Date(event.updatedAt || snapshot.updatedAt || 0);
+    if (Number.isNaN(stamp.getTime())) return null;
+    return {
+      values:[pick(own),pick(other)],
+      stamp,
+      partial:Boolean(own.performanceStale || other.performanceStale),
+    };
+  }
+  function fallbackStatus(prefix, stamp, partial=false) {
+    const when=`${stamp.toLocaleDateString("de-DE")} ${stamp.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}`;
+    return `${prefix} Stand vom ${when} geladen.${partial ? " Bestleistungen können älter sein." : ""}`;
+  }
+  function liveErrorMessage(error) {
+    if (error?.name==="AbortError") return "3K antwortet gerade zu langsam und es ist noch kein gespeicherter Stand verfügbar.";
+    if (error instanceof TypeError) return "Die Verbindung zu 3K konnte gerade nicht aufgebaut werden und es ist noch kein gespeicherter Stand verfügbar.";
+    if (/Teamzuordnung|Teams|Tabelle|Datenformat|gefunden/i.test(String(error?.message || ""))) return "Die 3K-Daten haben sich möglicherweise geändert und es ist noch kein gespeicherter Stand verfügbar.";
+    return "3K ist gerade nicht erreichbar und es ist noch kein gespeicherter Stand verfügbar.";
   }
   async function loadStats(refresh=false) {
     clearStats(); render();
@@ -121,7 +214,7 @@
     if (!opponent()) { status(""); return; }
     const request=state.request, selected=opponent(), config=DartPreviewData.leagues[state.team];
     const controller=new AbortController(); state.controller=controller;
-    const timeout=setTimeout(()=>controller.abort(),15000);
+    const timeout=setTimeout(()=>controller.abort(),10000);
     status("Teamvergleich wird von 3K geladen …");
     $("previewRefresh").disabled=true;
     $("downloadPreviewStory").disabled=true;
@@ -137,12 +230,35 @@
       const performance=await Promise.allSettled([own,other].map(p=>json(`${config.event}/performance?teamId=${p.team.id}`,controller.signal,refresh).then(DartPreviewData.performances)));
       if (request!==state.request) return;
       performance.forEach((result,index)=> { if(result.status==="fulfilled") Object.assign(values[index],result.value); });
-      for (const metric of metrics) ["own","opponent"].forEach((side,index)=> { $("previewStat-"+metric.key+"-"+side).value = values[index][metric.key] ?? ""; });
+      applyStatValues(values);
       state.stamp=new Date();
+      state.source="live";
+      saveLocalCache(state.team,fields.Opponent.value,values,state.stamp);
       const partial=performance.some(p=>p.status!=="fulfilled");
-      status(partial ? "Tabelle geladen. Bestleistungen teilweise nicht verfügbar; fehlende Werte bleiben leer." : "",partial);
+      status(partial ? "Tabelle live geladen. Bestleistungen teilweise nicht verfügbar; fehlende Werte bleiben leer." : "",partial);
     } catch (error) {
-      if (request===state.request) status("3K ist gerade nicht erreichbar oder die Daten haben sich geändert. Bitte erneut laden oder Werte von Hand eintragen.",true);
+      if (request!==state.request) return;
+      let fallback=null;
+      try { fallback=await loadSnapshot(config,selected); } catch { fallback=null; }
+      if (request!==state.request) return;
+
+      if (fallback) {
+        applyStatValues(fallback.values);
+        state.stamp=fallback.stamp;
+        state.source="snapshot";
+        saveLocalCache(state.team,fields.Opponent.value,fallback.values,fallback.stamp);
+        status(fallbackStatus("3K live ist gerade nicht erreichbar. Gespeicherten",fallback.stamp,fallback.partial),true);
+      } else {
+        const local=readLocalCache(state.team,fields.Opponent.value);
+        if (local) {
+          applyStatValues(local.values);
+          state.stamp=local.stamp;
+          state.source="local";
+          status(fallbackStatus("3K live ist gerade nicht erreichbar. Letzten lokalen",local.stamp),true);
+        } else {
+          status(liveErrorMessage(error),true);
+        }
+      }
     } finally {
       clearTimeout(timeout);
       if (request===state.request) { state.controller=null; $("previewRefresh").disabled=false; $("downloadPreviewStory").disabled=false; $("previewComparison").setAttribute("aria-busy","false"); render(); }
