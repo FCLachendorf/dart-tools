@@ -41,7 +41,8 @@
   const state = { team:"a", location:"home", format:"story", images:new Map(), ready:false, request:0, stamp:null, source:null, edited:false, controller:null };
   const cache = new Map();
   const SNAPSHOT_URL = "data/3k-cache.json";
-  const LOCAL_CACHE_KEY = "fcl-darts-preview-3k-v1";
+  const LOCAL_CACHE_KEY = "fcl-darts-preview-3k-v2";
+  const LEAGUE_LINK_KEY = "fcl-darts-preview-league-links-v1";
   // Shared venues for A/B or C/D teams; addresses supplied by the club.
   const venues = {
     lachendorf: { name:"Zum Oche an der Lachte", address:"Rehrkamp 33, 29331 Lachendorf" },
@@ -73,6 +74,59 @@
     opponents: value.opponents.map(o => ({ ...o, name:o.id === "team-utd-suedseite-c" ? "Team Utd. Südheide C" : o.name }))
   }]));
   function opponent() { return teams[state.team].opponents.find(o => o.id === fields.Opponent.value); }
+  function readLeagueLinks() {
+    try {
+      const saved=JSON.parse(localStorage.getItem(LEAGUE_LINK_KEY) || "{}");
+      return saved && typeof saved==="object" ? saved : {};
+    } catch {
+      return {};
+    }
+  }
+  function writeLeagueLinks(links) {
+    try { localStorage.setItem(LEAGUE_LINK_KEY,JSON.stringify(links)); } catch {}
+  }
+  function leagueConfig(team=state.team) {
+    const base=DartPreviewData.leagues[team];
+    const saved=readLeagueLinks()[team];
+    const customEvent=DartPreviewData.eventFromUrl(saved);
+    return { ...base, event:customEvent || base.event };
+  }
+  function syncLeagueSettings(message="", error=false) {
+    const links=readLeagueLinks();
+    const saved=links[state.team] || "";
+    const config=leagueConfig();
+    $("previewLeagueTeamLabel").textContent=state.team==="a" ? "A-Team" : "B-Team";
+    $("previewLeagueUrl").value=saved;
+    $("previewLeagueUrl").placeholder=`3K-Liga-Link einfügen · aktuell Event ${config.event}`;
+    $("previewLeagueStatus").textContent=message || (saved
+      ? `Eigener Liga-Link aktiv · Event ${config.event}`
+      : `Standard-Liga aktiv · Event ${config.event}`);
+    $("previewLeagueStatus").dataset.error=String(error);
+  }
+  function saveLeagueLink() {
+    const value=$("previewLeagueUrl").value.trim();
+    const event=DartPreviewData.eventFromUrl(value);
+    if (!event) {
+      syncLeagueSettings("In diesem Link konnte keine 3K-Event-ID erkannt werden.",true);
+      return;
+    }
+    const links=readLeagueLinks();
+    links[state.team]=value;
+    writeLeagueLinks(links);
+    cache.clear();
+    clearStats();
+    syncLeagueSettings(`Liga-Link gespeichert · Event ${event}`);
+    if (fields.Compare.checked && opponent()) loadStats(true);
+  }
+  function resetLeagueLink() {
+    const links=readLeagueLinks();
+    delete links[state.team];
+    writeLeagueLinks(links);
+    cache.clear();
+    clearStats();
+    syncLeagueSettings("Standard-Liga wiederhergestellt.");
+    if (fields.Compare.checked && opponent()) loadStats(true);
+  }
   function status(text, error = false) { $("previewDataStatus").textContent = text; $("previewDataStatus").dataset.error = String(error); }
   function updateSourceStatus() {
     if (!fields.Compare.checked) {
@@ -125,11 +179,29 @@
     render();
   }
   async function json(path, signal, refresh) {
-    const url=DartPreviewData.base + path, saved=cache.get(url);
+    const saved=cache.get(path);
     if (!refresh && saved && Date.now()-saved.time<300000) return saved.data;
-    const response=await fetch(url,{signal, credentials:"omit"});
-    if (!response.ok) throw new Error(`3K-Abruf fehlgeschlagen (HTTP ${response.status})`);
-    const data=await response.json(); cache.set(url,{time:Date.now(),data}); return data;
+
+    const candidates=[];
+    if (DartPreviewData.proxyBase) {
+      candidates.push(`${DartPreviewData.proxyBase}?path=${encodeURIComponent(path)}`);
+    }
+    candidates.push(DartPreviewData.base + path);
+
+    let lastError=null;
+    for (const url of candidates) {
+      try {
+        const response=await fetch(url,{signal,credentials:"omit",cache:refresh?"no-store":"default"});
+        if (!response.ok) throw new Error(`3K-Abruf fehlgeschlagen (HTTP ${response.status})`);
+        const data=await response.json();
+        cache.set(path,{time:Date.now(),data});
+        return data;
+      } catch (error) {
+        if (error?.name==="AbortError") throw error;
+        lastError=error;
+      }
+    }
+    throw lastError || new Error("3K-Abruf fehlgeschlagen");
   }
   function normalizeTeamName(value) {
     return String(value || "")
@@ -148,10 +220,10 @@
   function compactValues(values) {
     return values.map(value => Object.fromEntries(metrics.map(metric => [metric.key, value?.[metric.key] ?? null])));
   }
-  function readLocalCache(team, opponentId) {
+  function readLocalCache(team, event, opponentId) {
     try {
       const all=JSON.parse(localStorage.getItem(LOCAL_CACHE_KEY) || "{}");
-      const entry=all[`${team}:${opponentId}`];
+      const entry=all[`${team}:${event}:${opponentId}`];
       if (!entry || !Array.isArray(entry.values) || entry.values.length!==2) return null;
       const stamp=new Date(entry.updatedAt);
       if (Number.isNaN(stamp.getTime())) return null;
@@ -160,10 +232,10 @@
       return null;
     }
   }
-  function saveLocalCache(team, opponentId, values, stamp) {
+  function saveLocalCache(team, event, opponentId, values, stamp) {
     try {
       const all=JSON.parse(localStorage.getItem(LOCAL_CACHE_KEY) || "{}");
-      all[`${team}:${opponentId}`] = { updatedAt:stamp.toISOString(), values:compactValues(values) };
+      all[`${team}:${event}:${opponentId}`] = { updatedAt:stamp.toISOString(), values:compactValues(values) };
       localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(all));
     } catch {
       // Private browsing/storage limits must never break the generator.
@@ -178,7 +250,7 @@
     if (!participants || typeof participants!=="object") return null;
 
     const entries=Object.values(participants);
-    const own=participants[String(config.own)] || entries.find(p=>Number(p?.participantId)===Number(config.own));
+    const own=participants[String(config.own)] || entries.find(p=>Number(p?.participantId)===Number(config.own)) || entries.find(p=>normalizeTeamName(p?.displayName)===normalizeTeamName(config.ownName));
     const wanted=normalizeTeamName(selected.name);
     const other=entries.find(p=>normalizeTeamName(p?.displayName)===wanted);
     if (!own || !other) return null;
@@ -212,7 +284,7 @@
     clearStats(); render();
     if (!fields.Compare.checked) return;
     if (!opponent()) { status(""); return; }
-    const request=state.request, selected=opponent(), config=DartPreviewData.leagues[state.team];
+    const request=state.request, selected=opponent(), config=leagueConfig();
     const controller=new AbortController(); state.controller=controller;
     const timeout=setTimeout(()=>controller.abort(),10000);
     status("Teamvergleich wird von 3K geladen …");
@@ -223,7 +295,8 @@
       const [table, participants]=await Promise.all([json(`${config.event}/phase/0/round/0/table`,controller.signal,refresh),json(`${config.event}/participant`,controller.signal,refresh)]);
       if (request!==state.request) return;
       if (!Array.isArray(participants)) throw new Error("Ungültige Teams");
-      const own=participants.find(p=>p.id===config.own), other=participants.find(p=>p.displayName===selected.name);
+      const own=participants.find(p=>p.id===config.own) || participants.find(p=>normalizeTeamName(p.displayName)===normalizeTeamName(config.ownName));
+      const other=participants.find(p=>normalizeTeamName(p.displayName)===normalizeTeamName(selected.name));
       if (!own?.team?.id || !other?.team?.id) throw new Error("Teamzuordnung fehlt");
       const rows=DartPreviewData.tableRows(table);
       const values=[DartPreviewData.teamStats(rows,own.id),DartPreviewData.teamStats(rows,other.id)];
@@ -233,7 +306,7 @@
       applyStatValues(values);
       state.stamp=new Date();
       state.source="live";
-      saveLocalCache(state.team,fields.Opponent.value,values,state.stamp);
+      saveLocalCache(state.team,config.event,fields.Opponent.value,values,state.stamp);
       const partial=performance.some(p=>p.status!=="fulfilled");
       status(partial ? "Tabelle live geladen. Bestleistungen teilweise nicht verfügbar; fehlende Werte bleiben leer." : "",partial);
     } catch (error) {
@@ -246,10 +319,10 @@
         applyStatValues(fallback.values);
         state.stamp=fallback.stamp;
         state.source="snapshot";
-        saveLocalCache(state.team,fields.Opponent.value,fallback.values,fallback.stamp);
+        saveLocalCache(state.team,config.event,fields.Opponent.value,fallback.values,fallback.stamp);
         status(fallbackStatus("3K live ist gerade nicht erreichbar. Gespeicherten",fallback.stamp,fallback.partial),true);
       } else {
-        const local=readLocalCache(state.team,fields.Opponent.value);
+        const local=readLocalCache(state.team,config.event,fields.Opponent.value);
         if (local) {
           applyStatValues(local.values);
           state.stamp=local.stamp;
@@ -331,7 +404,7 @@
       state.format=button.dataset.previewFormat;update();
     }));
     root.querySelectorAll("[data-preview-team]").forEach(button=>button.addEventListener("click",()=>{
-      if(state.team===button.dataset.previewTeam)return;state.team=button.dataset.previewTeam;populate();updateVenue();clearStats();status("Bitte Gegner auswählen.");$("previewRefresh").disabled=false;update();
+      if(state.team===button.dataset.previewTeam)return;state.team=button.dataset.previewTeam;populate();updateVenue();clearStats();syncLeagueSettings();status("Bitte Gegner auswählen.");$("previewRefresh").disabled=false;update();
     }));
     root.querySelectorAll("[data-preview-location]").forEach(button=>button.addEventListener("click",()=>{
       const location=button.dataset.previewLocation;if(location===state.location)return;state.location=location;
@@ -341,6 +414,9 @@
     fields.Compare.addEventListener("change",()=>{update();loadStats();});
     for(const name of ["CustomOpponent","Matchday","Date","Time","Venue","Address"]) fields[name].addEventListener("input",render);
     $("previewRefresh").addEventListener("click",()=>loadStats(true));
+    $("previewLeagueSave").addEventListener("click",saveLeagueLink);
+    $("previewLeagueReset").addEventListener("click",resetLeagueLink);
+    $("previewLeagueUrl").addEventListener("keydown",event=>{ if(event.key==="Enter"){ event.preventDefault();saveLeagueLink(); } });
     $("openPreviewStory").addEventListener("click",()=>{ $("previewModal").hidden=false;document.body.classList.add("result-modal-open");render();$("closePreviewStory").focus(); });
     document.querySelectorAll("[data-preview-close]").forEach(b=>b.addEventListener("click",closeModal));
     $("previewModal").addEventListener("keydown",event=>{
@@ -353,6 +429,7 @@
       if(!state.ready)return;
       render();await window.exportCanvasPng(canvas,`spielankuendigung-${state.format}-${state.team}-${leagueSlugify(opponent()?.name||fields.CustomOpponent.value)}-${fields.Date.value}.png`);
     });
+    syncLeagueSettings();
     update();
   }
   async function initImages() {
