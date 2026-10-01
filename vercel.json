@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/3k.js": {
+      "maxDuration": 10
+    }
+  }
+}
