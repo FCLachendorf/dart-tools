@@ -571,13 +571,12 @@ function updateStatInputs() {
 async function loadLeagueFonts() {
   try {
     const definitions = [
-      ["Topshow", "fonts/topshow.otf"],
-      ["TacticSans", "fonts/tacticsans.otf"],
+      ["Topshow", "fonts/topshow.otf?v=20261001-result-fonts-1"],
+      ["TacticSans", "fonts/tacticsans.otf?v=20261001-result-fonts-1"],
     ];
 
     await Promise.all(
       definitions.map(async ([family, source]) => {
-        if (document.fonts.check(`16px "${family}"`)) return;
         const face = new FontFace(family, `url(${source})`);
         const loaded = await face.load();
         document.fonts.add(loaded);
