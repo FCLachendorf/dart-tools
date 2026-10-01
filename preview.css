@@ -12,3 +12,12 @@
 #previewModalCanvas { width:auto; max-width:100%; height:auto; max-height:70svh; display:block; }
 #previewTool .preview-refresh { margin:8px 0; min-height:38px; padding:8px 12px; background:#25252c; color:var(--text); border:1px solid var(--border); border-radius:10px; cursor:pointer; }
 #previewTool input:focus-visible, #previewTool button:focus-visible { outline:2px solid #e31b2f; outline-offset:2px; }
+
+#previewTool .preview-league-settings { margin-top:10px; border-top:1px solid var(--border); padding-top:10px; }
+#previewTool .preview-league-settings summary { color:var(--muted); font-size:.78rem; cursor:pointer; user-select:none; }
+#previewTool .preview-league-settings-body { margin-top:10px; }
+#previewTool .preview-league-settings-body label { display:grid; gap:6px; color:var(--muted); font-size:.75rem; }
+#previewTool .preview-league-settings-body input[type="url"] { width:100%; min-height:42px; padding:0 11px; color:var(--text); background:#0f0f13; border:1px solid var(--border); border-radius:11px; }
+#previewTool .preview-league-actions { display:flex; flex-wrap:wrap; gap:8px; }
+#previewTool .preview-league-actions .preview-refresh { margin:8px 0 0; }
+#previewTool .preview-league-actions .preview-secondary { background:#17171c; color:var(--muted); }
