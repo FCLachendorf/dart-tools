@@ -302,6 +302,21 @@
             <button id="previewRefresh" class="preview-refresh" type="button">3K-Werte aktualisieren</button>
             <p id="previewSourceStatus" class="preview-status"></p>
             <p id="previewDataStatus" class="preview-status" role="status" aria-live="polite"></p>
+
+            <details class="preview-league-settings">
+              <summary>3K-Liga-Link ändern</summary>
+              <div class="preview-league-settings-body">
+                <label>
+                  Liga-Link für <span id="previewLeagueTeamLabel">A-Team</span>
+                  <input id="previewLeagueUrl" type="url" inputmode="url" autocomplete="off" placeholder="3K-Liga-Link hier einfügen" />
+                </label>
+                <div class="preview-league-actions">
+                  <button id="previewLeagueSave" class="preview-refresh" type="button">Link speichern</button>
+                  <button id="previewLeagueReset" class="preview-refresh preview-secondary" type="button">Standard</button>
+                </div>
+                <p id="previewLeagueStatus" class="preview-status" role="status" aria-live="polite"></p>
+              </div>
+            </details>
           </div>
         </div>
       </div>
@@ -330,7 +345,7 @@
   <script src="app.js?v=20260929-ranking-1"></script>
   <script src="ranking.js?v=20260929-ranking-3"></script>
   <script src="league.js?v=20260929-ranking-1"></script>
-  <script src="preview-data.js?v=20260928-preview-1"></script>
-  <script src="preview.js?v=20260930-3k-fallback-2"></script>
+  <script src="preview-data.js?v=20261001-3k-link-1"></script>
+  <script src="preview.js?v=20261001-3k-proxy-1"></script>
 </body>
 </html>
