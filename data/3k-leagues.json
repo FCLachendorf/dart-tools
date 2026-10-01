@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "leagues": {
+    "a": {
+      "event": 1428,
+      "ownName": "FC Lachendorf Darts A"
+    },
+    "b": {
+      "event": 1422,
+      "ownName": "FC Lachendorf Darts B"
+    }
+  },
+  "proxyBase": ""
+}

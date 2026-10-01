@@ -10,15 +10,17 @@ from __future__ import annotations
 
 import json
 import sys
+import time
+import unicodedata
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
 BASE = "https://backend-ddv.3k-darts.com/2k-backend-ddv/api/v1/frontend/event/"
-EVENTS = (1428, 1422)
+CONFIG_PATH = Path("data/3k-leagues.json")
 CACHE_PATH = Path("data/3k-cache.json")
-TIMEOUT = 20
+TIMEOUT = 12
 
 
 def now_iso() -> str:
@@ -33,10 +35,16 @@ def fetch_json(path: str):
             "User-Agent": "FC-Lachendorf-Darts-Tools/1.0 (+https://fclachendorf.github.io/dart-tools/)",
         },
     )
-    with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
-        if response.status != 200:
-            raise RuntimeError(f"HTTP {response.status}")
-        return json.load(response)
+    for attempt in range(2):
+        try:
+            with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+                if response.status != 200:
+                    raise RuntimeError(f"HTTP {response.status}")
+                return json.load(response)
+        except (OSError, ValueError, RuntimeError):
+            if attempt:
+                raise
+            time.sleep(1)
 
 
 def table_rows(data):
@@ -52,12 +60,18 @@ def table_rows(data):
 
 
 def table_stats(rows, participant_id):
-    row = next((item for item in rows if item.get("participantId") == participant_id), None)
+    row = next((item for item in rows if str(item.get("participantId", item.get("participant", {}).get("id"))) == str(participant_id)), None)
     if row is None:
         raise ValueError(f"participant {participant_id} missing from table")
     placement = row.get("placement")
     if isinstance(placement, str):
         placement = placement.rstrip(".")
+    try:
+        if float(placement) < 1 or not float(placement).is_integer() or not float(row.get("matchCount")).is_integer() or float(row.get("matchCount")) < 0:
+            raise ValueError("invalid table values")
+        float(row.get("points1"))
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"invalid table row for {participant_id}") from exc
     return {
         "place": placement,
         "points": row.get("points1"),
@@ -107,19 +121,9 @@ def read_existing():
         return {"version": 1, "updatedAt": None, "events": {}}
 
 
-def participant_without_runtime_fields(item):
-    if not isinstance(item, dict):
-        return {}
-    return {
-        "participantId": item.get("participantId"),
-        "displayName": item.get("displayName"),
-        "place": item.get("place"),
-        "points": item.get("points"),
-        "games": item.get("games"),
-        "finish": item.get("finish"),
-        "counter": item.get("counter"),
-        "performanceKnown": bool(item.get("performanceKnown")),
-    }
+def normalized_name(value):
+    value = unicodedata.normalize("NFD", str(value or "").lower().replace("ß", "ss"))
+    return "".join(c for c in value if c.isascii() and c.isalnum())
 
 
 def build_event(event_id: int, old_event: dict):
@@ -131,6 +135,8 @@ def build_event(event_id: int, old_event: dict):
     rows = table_rows(table)
     old_participants = old_event.get("participants", {}) if isinstance(old_event, dict) else {}
     result = {}
+    partial = False
+    checked_at = now_iso()
 
     for participant in participants:
         if not isinstance(participant, dict):
@@ -142,10 +148,11 @@ def build_event(event_id: int, old_event: dict):
 
         try:
             stats = table_stats(rows, participant_id)
-        except ValueError:
-            continue
+        except ValueError as exc:
+            # An incomplete table must not replace the last complete event.
+            raise ValueError(f"incomplete table: {exc}") from exc
 
-        old = participant_without_runtime_fields(old_participants.get(str(participant_id), {}))
+        old = old_participants.get(str(participant_id), {})
         item = {
             "participantId": participant_id,
             "displayName": display_name,
@@ -153,6 +160,8 @@ def build_event(event_id: int, old_event: dict):
             "finish": old.get("finish"),
             "counter": old.get("counter"),
             "performanceKnown": bool(old.get("performanceKnown")),
+            "performanceCheckedAt": old.get("performanceCheckedAt") or (old_event.get("updatedAt") if old.get("performanceKnown") else None),
+            "performanceStale": True,
         }
 
         team = participant.get("team")
@@ -160,63 +169,66 @@ def build_event(event_id: int, old_event: dict):
         if team_id is not None:
             try:
                 item.update(performance_stats(fetch_json(f"{event_id}/performance?teamId={team_id}")))
+                item["performanceCheckedAt"] = now_iso()
+                item["performanceStale"] = False
             except Exception as exc:  # retain the last known team-level best performances
-                print(f"warning: event {event_id}, team {team_id}: performance refresh failed: {exc}")
+                print(f"::warning::event {event_id}, team {team_id}: performance refresh failed: {exc}")
+        if item["performanceStale"]:
+            partial = True
 
         result[str(participant_id)] = item
 
     if not result:
         raise ValueError("no usable participants")
 
-    comparable_old = {
-        key: participant_without_runtime_fields(value)
-        for key, value in old_participants.items()
-        if isinstance(value, dict)
-    }
-    changed = result != comparable_old
-
     return {
-        "updatedAt": now_iso() if changed or not old_event.get("updatedAt") else old_event["updatedAt"],
+        "updatedAt": checked_at,
+        "checkedAt": checked_at,
         "participants": result,
-    }, changed
+    }, partial
 
 
 def main() -> int:
+    config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    leagues = config.get("leagues", {})
+    if not all(isinstance(leagues.get(team, {}).get("event"), int)
+               and leagues[team]["event"] > 0 and leagues[team].get("ownName") for team in ("a", "b")):
+        raise ValueError("Missing or invalid A/B league configuration")
     existing = read_existing()
     old_events = existing.get("events", {}) if isinstance(existing.get("events"), dict) else {}
     events = dict(old_events)
-    any_change = False
     any_success = False
+    failed = False
 
-    for event_id in EVENTS:
+    for event_id in sorted({league["event"] for league in leagues.values()}):
         key = str(event_id)
         old_event = old_events.get(key, {})
         try:
-            event, changed = build_event(event_id, old_event)
+            event, partial = build_event(event_id, old_event)
+            for league in leagues.values():
+                if league["event"] != event_id:
+                    continue
+                matches = [p for p in event["participants"].values()
+                           if normalized_name(p["displayName"]) == normalized_name(league["ownName"])]
+                if len(matches) != 1:
+                    raise ValueError(f"Own team not uniquely present: {league['ownName']}")
         except Exception as exc:
-            print(f"warning: event {event_id}: refresh failed, keeping previous snapshot: {exc}")
+            print(f"::error::event {event_id}: refresh failed, keeping previous snapshot: {exc}")
+            failed = True
             continue
         events[key] = event
-        any_change = any_change or changed or key not in old_events
+        failed = failed or partial
         any_success = True
 
     if not any_success:
         print("No 3K event could be refreshed; existing cache remains untouched.")
-        return 0
+        return 1
 
-    if not any_change:
-        print("3K values are unchanged; no cache update needed.")
-        return 0
-
-    output = {
-        "version": 1,
-        "updatedAt": now_iso(),
-        "events": events,
-    }
+    output = {"version": 2, "updatedAt": now_iso(), "events": events}
     CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
     CACHE_PATH.write_text(json.dumps(output, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print("Updated", CACHE_PATH)
-    return 0
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

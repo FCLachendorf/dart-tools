@@ -40,8 +40,16 @@
   ];
   const state = { team:"a", location:"home", format:"story", images:new Map(), ready:false, request:0, stamp:null, source:null, edited:false, controller:null };
   const cache = new Map();
-  const SNAPSHOT_URL = "data/3k-cache.json";
-  const LOCAL_CACHE_KEY = "fcl-darts-preview-3k-v2";
+  // Bot commits do not rebuild GitHub Pages. Read the published repository data directly.
+  const DATA_ROOT = "https://raw.githubusercontent.com/FCLachendorf/dart-tools/main/";
+  const SNAPSHOT_URLS = [DATA_ROOT + "data/3k-cache.json", "data/3k-cache.json"];
+  let configuredLeagues = DartPreviewData.leagues;
+  let configuredProxy = DartPreviewData.proxyBase;
+  let linkOverrides = null;
+  let rosterRequest = 0;
+  let snapshotPromise = null;
+  let snapshotTime = 0;
+  const LOCAL_CACHE_KEY = "fcl-darts-preview-3k-v3";
   const LEAGUE_LINK_KEY = "fcl-darts-preview-league-links-v1";
   // Shared venues for A/B or C/D teams; addresses supplied by the club.
   const venues = {
@@ -73,8 +81,10 @@
   const teams = Object.fromEntries(Object.entries(LEAGUE_CONFIG).map(([key, value]) => [key, { ...value,
     opponents: value.opponents.map(o => ({ ...o, name:o.id === "team-utd-suedseite-c" ? "Team Utd. Südheide C" : o.name }))
   }]));
+  const knownOpponents = Object.values(teams).flatMap(t=>t.opponents.map(o=>({...o})));
   function opponent() { return teams[state.team].opponents.find(o => o.id === fields.Opponent.value); }
   function readLeagueLinks() {
+    if (linkOverrides) return {...linkOverrides};
     try {
       const saved=JSON.parse(localStorage.getItem(LEAGUE_LINK_KEY) || "{}");
       return saved && typeof saved==="object" ? saved : {};
@@ -83,13 +93,14 @@
     }
   }
   function writeLeagueLinks(links) {
-    try { localStorage.setItem(LEAGUE_LINK_KEY,JSON.stringify(links)); } catch {}
+    linkOverrides={...links};
+    try { localStorage.setItem(LEAGUE_LINK_KEY,JSON.stringify(links)); return true; } catch { return false; }
   }
   function leagueConfig(team=state.team) {
-    const base=DartPreviewData.leagues[team];
+    const base=configuredLeagues[team];
     const saved=readLeagueLinks()[team];
     const customEvent=DartPreviewData.eventFromUrl(saved);
-    return { ...base, event:customEvent || base.event };
+    return { ownName:DartPreviewData.leagues[team].ownName, ...base, event:customEvent || base.event };
   }
   function syncLeagueSettings(message="", error=false) {
     const links=readLeagueLinks();
@@ -103,29 +114,135 @@
       : `Standard-Liga aktiv · Event ${config.event}`);
     $("previewLeagueStatus").dataset.error=String(error);
   }
-  function saveLeagueLink() {
-    const value=$("previewLeagueUrl").value.trim();
-    const event=DartPreviewData.eventFromUrl(value);
+  async function changeLeague(reset=false) {
+    const team=state.team, value=$("previewLeagueUrl").value.trim();
+    const event=reset ? configuredLeagues[team].event : DartPreviewData.eventFromUrl(value);
     if (!event) {
-      syncLeagueSettings("In diesem Link konnte keine 3K-Event-ID erkannt werden.",true);
+      $("previewLeagueStatus").textContent="Bitte einen gültigen HTTPS-Link von 3k-darts.com oder eine Event-ID eintragen.";
+      $("previewLeagueStatus").dataset.error="true";
       return;
     }
-    const links=readLeagueLinks();
-    links[state.team]=value;
-    writeLeagueLinks(links);
-    cache.clear();
-    clearStats();
-    syncLeagueSettings(`Liga-Link gespeichert · Event ${event}`);
-    if (fields.Compare.checked && opponent()) loadStats(true);
+    const request=++rosterRequest;
+    $("previewLeagueStatus").textContent="Liga und eigenes Team werden geprüft …";
+    try {
+      const config={...leagueConfig(team),event};
+      const roster=await fetchRoster(config,true);
+      if (request!==rosterRequest || team!==state.team) return;
+      const links=readLeagueLinks();
+      if(reset) delete links[team]; else links[team]=value;
+      const persisted=writeLeagueLinks(links);
+      clearStats();
+      applyRoster(roster,config);
+      syncLeagueSettings((reset ? "Standard-Liga aktiviert." : "Liga geprüft und gespeichert.") +
+        (persisted ? "" : " Speicherung blockiert: gilt nur bis zum Neuladen.") +
+        (!reset && event!==configuredLeagues[team].event ? " Eigene Links gelten nur hier; die automatische Sicherung folgt der zentralen Liga-Einstellung." : ""));
+      status("Bitte Gegner auswählen.");
+      update();
+    } catch(error) {
+      if(request!==rosterRequest || team!==state.team) return;
+      $("previewLeagueStatus").textContent="Liga konnte nicht bestätigt werden. Bisherige Einstellung bleibt erhalten. " + error.message;
+      $("previewLeagueStatus").dataset.error="true";
+    }
   }
-  function resetLeagueLink() {
-    const links=readLeagueLinks();
-    delete links[state.team];
-    writeLeagueLinks(links);
-    cache.clear();
-    clearStats();
-    syncLeagueSettings("Standard-Liga wiederhergestellt.");
-    if (fields.Compare.checked && opponent()) loadStats(true);
+  function saveLeagueLink() { return changeLeague(false); }
+  function resetLeagueLink() { return changeLeague(true); }
+
+  async function fetchDocument(url, parentSignal, timeout=5000) {
+    const controller=new AbortController();
+    const abort=()=>controller.abort();
+    if(parentSignal?.aborted) controller.abort();
+    parentSignal?.addEventListener("abort",abort,{once:true});
+    const timer=setTimeout(abort,timeout);
+    try {
+      const response=await fetch(url,{signal:controller.signal,credentials:"omit",cache:"no-store"});
+      if(!response.ok) throw new Error("Datenabruf fehlgeschlagen: HTTP "+response.status);
+      return await response.json();
+    } finally {
+      clearTimeout(timer); parentSignal?.removeEventListener("abort",abort);
+    }
+  }
+  async function snapshots(refresh=false) {
+    if(!refresh && snapshotPromise && Date.now()-snapshotTime<60000) return snapshotPromise;
+    snapshotTime=Date.now();
+    snapshotPromise=Promise.allSettled(SNAPSHOT_URLS.map(url=>fetchDocument(url+"?v="+Date.now())))
+      .then(results=>results.filter(r=>r.status==="fulfilled" && r.value?.events).map(r=>r.value));
+    return snapshotPromise;
+  }
+  async function fetchRoster(config, refresh=false) {
+    try {
+      const participants=await json(config.event+"/participant",null,refresh);
+      if(!Array.isArray(participants)) throw new Error("Ungültige Teilnehmerliste");
+      DartPreviewData.ownParticipant(participants,config);
+      try {
+        const minimal=participants.map(p=>({id:p.id,displayName:p.displayName}));
+        localStorage.setItem("fcl-roster-"+config.event,JSON.stringify(minimal));
+      } catch {}
+      return participants;
+    } catch(error) {
+      const candidates=(await snapshots(refresh)).map(s=>s.events?.[String(config.event)]).filter(Boolean)
+        .sort((a,b)=>DartPreviewData.timestamp(b.checkedAt||b.updatedAt)-DartPreviewData.timestamp(a.checkedAt||a.updatedAt));
+      for(const event of candidates) {
+        const participants=Object.values(event.participants||{}).map(p=>({...p,id:p.participantId}));
+        try { DartPreviewData.ownParticipant(participants,config); return participants; } catch {}
+      }
+      try {
+        const saved=JSON.parse(localStorage.getItem("fcl-roster-"+config.event)||"null");
+        if(Array.isArray(saved)) { DartPreviewData.ownParticipant(saved,config); return saved; }
+      } catch {}
+      throw error;
+    }
+  }
+  function applyRoster(participants,config,preserve=false) {
+    const selectedName=preserve ? opponent()?.name : null;
+    const own=DartPreviewData.ownParticipant(participants,config);
+    teams[state.team].opponents=participants.filter(p=>String(p.id)!==String(own.id) && p.displayName && p.id!=null).map(p=>{
+      const known=knownOpponents.find(o=>normalizeTeamName(o.name)===normalizeTeamName(p.displayName));
+      return {...known,id:known?.id || "3k-"+p.id,name:p.displayName,participantId:p.id};
+    });
+    populate();
+    const previous=teams[state.team].opponents.find(o=>normalizeTeamName(o.name)===normalizeTeamName(selectedName));
+    if(previous) fields.Opponent.value=previous.id;
+    updateVenue();
+  }
+  async function refreshRoster() {
+    const request=++rosterRequest, team=state.team, config=leagueConfig();
+    try {
+      const roster=await fetchRoster(config);
+      if(request!==rosterRequest || team!==state.team) return;
+      // Do not replace a selection while its values are being loaded or edited.
+      if(fields.Opponent.value) return;
+      applyRoster(roster,config,true);
+      update();
+    } catch(error) {
+      if(request!==rosterRequest || team!==state.team) return;
+      syncLeagueSettings("Teilnehmerliste gerade nicht verfügbar. Bekannte Teams oder „Anderer Gegner“ verwenden.",true);
+    }
+  }
+  async function initConfiguration() {
+    let config=null;
+    for(const url of [DATA_ROOT+"data/3k-leagues.json","data/3k-leagues.json"]) {
+      try {
+        const candidate=await fetchDocument(url+"?v="+Date.now(),null,3500);
+        if(!["a","b"].every(team=>Number.isSafeInteger(candidate?.leagues?.[team]?.event) && candidate.leagues[team].event>0 && candidate.leagues[team].ownName)) throw new Error("Ungültige Liga-Konfiguration");
+        config=candidate; break;
+      } catch {}
+    }
+    if(config) {
+      configuredLeagues=config.leagues;
+      configuredProxy=typeof config.proxyBase==="string" && /^https:\/\//.test(config.proxyBase) ? config.proxyBase : "";
+      try { localStorage.setItem("fcl-league-config",JSON.stringify(config)); } catch {}
+    } else {
+      try {
+        const saved=JSON.parse(localStorage.getItem("fcl-league-config")||"null");
+        if(["a","b"].every(team=>Number.isSafeInteger(saved?.leagues?.[team]?.event) && saved.leagues[team].event>0 && saved.leagues[team].ownName)) configuredLeagues=saved.leagues;
+      } catch {}
+    }
+    for(const team of ["a","b"]) {
+      if(leagueConfig(team).event!==DartPreviewData.leagues[team].event) teams[team].opponents=[];
+    }
+    setup(); initImages();
+    if(!config) syncLeagueSettings("Liga-Konfiguration nicht erreichbar; letzte bekannte Einstellung wird verwendet.",true);
+    refreshRoster();
   }
   function status(text, error = false) { $("previewDataStatus").textContent = text; $("previewDataStatus").dataset.error = String(error); }
   function updateSourceStatus() {
@@ -183,54 +300,48 @@
     if (!refresh && saved && Date.now()-saved.time<300000) return saved.data;
 
     const candidates=[];
-    if (DartPreviewData.proxyBase) {
-      candidates.push(`${DartPreviewData.proxyBase}?path=${encodeURIComponent(path)}`);
+    if (configuredProxy) {
+      candidates.push(`${configuredProxy}?path=${encodeURIComponent(path)}`);
     }
     candidates.push(DartPreviewData.base + path);
 
     let lastError=null;
     for (const url of candidates) {
       try {
-        const response=await fetch(url,{signal,credentials:"omit",cache:refresh?"no-store":"default"});
-        if (!response.ok) throw new Error(`3K-Abruf fehlgeschlagen (HTTP ${response.status})`);
-        const data=await response.json();
+        const data=await fetchDocument(url,signal,7000);
         cache.set(path,{time:Date.now(),data});
         return data;
       } catch (error) {
-        if (error?.name==="AbortError") throw error;
+        if (signal?.aborted) throw error;
         lastError=error;
       }
     }
     throw lastError || new Error("3K-Abruf fehlgeschlagen");
   }
-  function normalizeTeamName(value) {
-    return String(value || "")
-      .toLowerCase()
-      .replace(/ß/g,"ss")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g,"")
-      .replace(/[^a-z0-9]+/g,"")
-      .trim();
-  }
+  function normalizeTeamName(value) { return DartPreviewData.normalizeName(value); }
   function applyStatValues(values) {
     for (const metric of metrics) ["own","opponent"].forEach((side,index)=> {
       $("previewStat-"+metric.key+"-"+side).value = values[index]?.[metric.key] ?? "";
     });
   }
   function compactValues(values) {
-    return values.map(value => Object.fromEntries(metrics.map(metric => [metric.key, value?.[metric.key] ?? null])));
+    return values.map(value => ({...Object.fromEntries(metrics.map(metric => [metric.key, value?.[metric.key] ?? null])), performanceKnown:Boolean(value.performanceKnown), performanceCheckedAt:value.performanceCheckedAt||null, performanceStale:Boolean(value.performanceStale)}));
   }
   function readLocalCache(team, event, opponentId) {
-    try {
-      const all=JSON.parse(localStorage.getItem(LOCAL_CACHE_KEY) || "{}");
-      const entry=all[`${team}:${event}:${opponentId}`];
-      if (!entry || !Array.isArray(entry.values) || entry.values.length!==2) return null;
-      const stamp=new Date(entry.updatedAt);
-      if (Number.isNaN(stamp.getTime())) return null;
-      return { values:entry.values, stamp };
-    } catch {
-      return null;
+    const candidates=[];
+    for(const key of [LOCAL_CACHE_KEY,"fcl-darts-preview-3k-v2"]) {
+      try {
+        const all=JSON.parse(localStorage.getItem(key) || "{}");
+        const entry=all[`${team}:${event}:${opponentId}`];
+        if(!entry || !DartPreviewData.validValues(entry.values) || !DartPreviewData.timestamp(entry.updatedAt)) continue;
+        const values=entry.values.map(p=>key===LOCAL_CACHE_KEY ? p : ({
+          ...p,performanceKnown:p.counter!=null || p.finish!=null,
+          performanceCheckedAt:entry.updatedAt,performanceStale:true,
+        }));
+        candidates.push({values,stamp:new Date(entry.updatedAt),source:"local"});
+      } catch {}
     }
+    return DartPreviewData.newest(candidates);
   }
   function saveLocalCache(team, event, opponentId, values, stamp) {
     try {
@@ -241,38 +352,32 @@
       // Private browsing/storage limits must never break the generator.
     }
   }
-  async function loadSnapshot(config, selected) {
-    const response=await fetch(`${SNAPSHOT_URL}?v=${Date.now()}`,{cache:"no-store",credentials:"same-origin"});
-    if (!response.ok) return null;
-    const snapshot=await response.json();
-    const event=snapshot?.events?.[String(config.event)];
-    const participants=event?.participants;
-    if (!participants || typeof participants!=="object") return null;
-
-    const entries=Object.values(participants);
-    const own=participants[String(config.own)] || entries.find(p=>Number(p?.participantId)===Number(config.own)) || entries.find(p=>normalizeTeamName(p?.displayName)===normalizeTeamName(config.ownName));
-    const wanted=normalizeTeamName(selected.name);
-    const other=entries.find(p=>normalizeTeamName(p?.displayName)===wanted);
-    if (!own || !other) return null;
-
-    const pick=p=>({
-      place:p.place ?? null,
-      points:p.points ?? null,
-      games:p.games ?? null,
-      finish:p.finish ?? null,
-      counter:p.counter ?? null,
-    });
-    const stamp=new Date(event.updatedAt || snapshot.updatedAt || 0);
-    if (Number.isNaN(stamp.getTime())) return null;
-    return {
-      values:[pick(own),pick(other)],
-      stamp,
-      partial:!own.performanceKnown || !other.performanceKnown,
-    };
+  async function loadSnapshot(config, selected, refresh=false) {
+    const candidates=[];
+    for(const snapshot of await snapshots(refresh)) {
+      const event=snapshot?.events?.[String(config.event)];
+      if(!event?.participants) continue;
+      const entries=Object.values(event.participants);
+      let own;
+      try { own=DartPreviewData.ownParticipant(entries,config); } catch { continue; }
+      const others=entries.filter(p=>normalizeTeamName(p.displayName)===normalizeTeamName(selected.name));
+      if(others.length!==1) continue;
+      const stamp=event.checkedAt || event.updatedAt || snapshot.updatedAt;
+      if(!DartPreviewData.timestamp(stamp)) continue;
+      const pick=p=>({
+        place:p.place ?? null,points:p.points ?? null,games:p.games ?? null,
+        finish:p.finish ?? null,counter:p.counter ?? null,
+        performanceKnown:Boolean(p.performanceKnown),
+        performanceCheckedAt:p.performanceCheckedAt || event.updatedAt,
+        performanceStale:Boolean(p.performanceStale),
+      });
+      candidates.push({values:[pick(own),pick(others[0])],stamp:new Date(stamp),source:"snapshot"});
+    }
+    return DartPreviewData.newest(candidates);
   }
   function fallbackStatus(prefix, stamp, partial=false) {
     const when=`${stamp.toLocaleDateString("de-DE")} ${stamp.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}`;
-    return `${prefix} Stand vom ${when} geladen.${partial ? " Bestleistungen können älter sein." : ""}`;
+    return `${prefix} Stand vom ${when} geladen.${partial ? " Bestleistungen sind älter oder unvollständig." : ""}${Date.now()-stamp.getTime()>86400000 ? " Dieser Stand ist älter als 24 Stunden." : ""}`;
   }
   function liveErrorMessage(error) {
     if (error?.name==="AbortError") return "3K antwortet gerade zu langsam und es ist noch kein gespeicherter Stand verfügbar.";
@@ -285,6 +390,8 @@
     if (!fields.Compare.checked) return;
     if (!opponent()) { status(""); return; }
     const request=state.request, selected=opponent(), config=leagueConfig();
+    const local=readLocalCache(state.team,config.event,selected.id);
+    const savedPromise=loadSnapshot(config,selected,refresh).catch(()=>null);
     const controller=new AbortController(); state.controller=controller;
     const timeout=setTimeout(()=>controller.abort(),10000);
     status("Teamvergleich wird von 3K geladen …");
@@ -295,42 +402,43 @@
       const [table, participants]=await Promise.all([json(`${config.event}/phase/0/round/0/table`,controller.signal,refresh),json(`${config.event}/participant`,controller.signal,refresh)]);
       if (request!==state.request) return;
       if (!Array.isArray(participants)) throw new Error("Ungültige Teams");
-      const own=participants.find(p=>p.id===config.own) || participants.find(p=>normalizeTeamName(p.displayName)===normalizeTeamName(config.ownName));
-      const other=participants.find(p=>normalizeTeamName(p.displayName)===normalizeTeamName(selected.name));
+      const own=DartPreviewData.ownParticipant(participants,config);
+      const matching=participants.filter(p=>normalizeTeamName(p.displayName)===normalizeTeamName(selected.name));
+      const other=matching.length===1 ? matching[0] : null;
       if (!own?.team?.id || !other?.team?.id) throw new Error("Teamzuordnung fehlt");
       const rows=DartPreviewData.tableRows(table);
       const values=[DartPreviewData.teamStats(rows,own.id),DartPreviewData.teamStats(rows,other.id)];
       const performance=await Promise.allSettled([own,other].map(p=>json(`${config.event}/performance?teamId=${p.team.id}`,controller.signal,refresh).then(DartPreviewData.performances)));
       if (request!==state.request) return;
-      performance.forEach((result,index)=> { if(result.status==="fulfilled") Object.assign(values[index],result.value); });
-      applyStatValues(values);
-      state.stamp=new Date();
-      state.source="live";
-      saveLocalCache(state.team,config.event,fields.Opponent.value,values,state.stamp);
-      const partial=performance.some(p=>p.status!=="fulfilled");
-      status(partial ? "Tabelle live geladen. Bestleistungen teilweise nicht verfügbar; fehlende Werte bleiben leer." : "",partial);
+      const stamp=new Date(cache.get(config.event+"/phase/0/round/0/table")?.time || Date.now());
+      performance.forEach((result,index)=> {
+        if(result.status==="fulfilled") Object.assign(values[index],result.value,{performanceKnown:true,performanceCheckedAt:new Date(cache.get(config.event+"/performance?teamId="+[own,other][index].team.id)?.time || Date.now()).toISOString(),performanceStale:false});
+      });
+      const saved=await savedPromise;
+      if(request!==state.request) return;
+      const merged=DartPreviewData.newest([{values,stamp,source:"live"},local,saved]);
+      applyStatValues(merged.values);
+      state.stamp=merged.stamp;
+      state.source=merged.source;
+      saveLocalCache(state.team,config.event,selected.id,merged.values,merged.stamp);
+      status(performance.some(p=>p.status!=="fulfilled")
+        ? "Tabelle live geladen. Bestleistungen nicht vollständig erreichbar; verfügbare ältere Werte werden beibehalten."
+        : "",performance.some(p=>p.status!=="fulfilled"));
+      if(merged.partial) {
+        const dates=merged.values.map(p=>p.performanceCheckedAt ? new Date(p.performanceCheckedAt).toLocaleString("de-DE") : "nicht verfügbar");
+        status("Bestleistungen: eigenes Team "+dates[0]+" · Gegner "+dates[1]+". Tabelle siehe Quellenstand.",true);
+      }
     } catch (error) {
       if (request!==state.request) return;
-      let fallback=null;
-      try { fallback=await loadSnapshot(config,selected); } catch { fallback=null; }
+      const fallback=DartPreviewData.newest([local,await savedPromise]);
       if (request!==state.request) return;
-
-      if (fallback) {
-        applyStatValues(fallback.values);
-        state.stamp=fallback.stamp;
-        state.source="snapshot";
-        saveLocalCache(state.team,config.event,fields.Opponent.value,fallback.values,fallback.stamp);
-        status(fallbackStatus("3K live ist gerade nicht erreichbar. Gespeicherten",fallback.stamp,fallback.partial),true);
+      if(fallback) {
+        applyStatValues(fallback.values); state.stamp=fallback.stamp; state.source=fallback.source;
+        saveLocalCache(state.team,config.event,selected.id,fallback.values,fallback.stamp);
+        const detail=fallback.partial ? " Bestleistungen geprüft: "+fallback.values.map(p=>p.performanceCheckedAt ? new Date(p.performanceCheckedAt).toLocaleString("de-DE") : "nicht verfügbar").join(" / ")+ " (eigenes Team / Gegner)." : "";
+        status(fallbackStatus("Live-Abruf nicht möglich.",fallback.stamp,fallback.partial)+detail,true);
       } else {
-        const local=readLocalCache(state.team,config.event,fields.Opponent.value);
-        if (local) {
-          applyStatValues(local.values);
-          state.stamp=local.stamp;
-          state.source="local";
-          status(fallbackStatus("3K live ist gerade nicht erreichbar. Letzten lokalen",local.stamp),true);
-        } else {
-          status(liveErrorMessage(error),true);
-        }
+        status(liveErrorMessage(error),true);
       }
     } finally {
       clearTimeout(timeout);
@@ -396,7 +504,12 @@
       const label=document.createElement("label");label.className="result-stat-check";
       const check=document.createElement("input");check.type="checkbox";check.id="previewShow-"+metric.key;check.checked=["place","points","finish"].includes(metric.key);
       label.append(check,document.createTextNode(metric.label));row.append(label);
-      for(const side of ["own","opponent"]) { const input=document.createElement("input");input.type="number";input.id="previewStat-"+metric.key+"-"+side;input.min=metric.key==="finish"?101:metric.key==="place"?1:metric.key==="points"?-999:0;input.max=metric.max;input.step=metric.key==="points"?"any":"1";input.placeholder="—";input.setAttribute("aria-label",`${metric.label} ${side==="own"?"eigenes Team":"Gegner"}`);input.addEventListener("input",()=>{state.edited=true;render();});row.append(input); }
+      for(const side of ["own","opponent"]) { const input=document.createElement("input");input.type="number";input.id="previewStat-"+metric.key+"-"+side;input.min=metric.key==="finish"?101:metric.key==="place"?1:metric.key==="points"?-999:0;input.max=metric.max;input.step=metric.key==="points"?"any":"1";input.placeholder="—";input.setAttribute("aria-label",`${metric.label} ${side==="own"?"eigenes Team":"Gegner"}`);input.addEventListener("input",()=>{if(state.controller) {
+          ++state.request;state.controller.abort();state.controller=null;
+          $("previewRefresh").disabled=false;$("downloadPreviewStory").disabled=false;$("previewComparison").setAttribute("aria-busy","false");
+          status("Automatischen Abruf wegen manueller Eingabe beendet.");
+        }
+        state.edited=true;render();});row.append(input); }
       check.addEventListener("change",update);$("previewStatRows").append(row);
     }
     root.querySelectorAll("[data-preview-format]").forEach(button=>button.addEventListener("click",()=>{
@@ -404,7 +517,7 @@
       state.format=button.dataset.previewFormat;update();
     }));
     root.querySelectorAll("[data-preview-team]").forEach(button=>button.addEventListener("click",()=>{
-      if(state.team===button.dataset.previewTeam)return;state.team=button.dataset.previewTeam;populate();updateVenue();clearStats();syncLeagueSettings();status("Bitte Gegner auswählen.");$("previewRefresh").disabled=false;update();
+      if(state.team===button.dataset.previewTeam)return;state.team=button.dataset.previewTeam;populate();updateVenue();clearStats();syncLeagueSettings();status("Bitte Gegner auswählen.");$("previewRefresh").disabled=false;update();refreshRoster();
     }));
     root.querySelectorAll("[data-preview-location]").forEach(button=>button.addEventListener("click",()=>{
       const location=button.dataset.previewLocation;if(location===state.location)return;state.location=location;
@@ -434,12 +547,12 @@
   }
   async function initImages() {
     try {
-      const definitions=[...Object.keys(PREVIEW_LAYOUTS).flatMap(format=>["bg","bgb","overlaya","overlayb","headera","headerb","seta","setb","compa","compb"].map(name=>[`${format}/${name}`,`assets/league/preview/${format}/${name}.png`])),...Object.values(teams).flatMap(t=>[[t.logo,t.logo],...t.opponents.map(o=>[o.logo,o.logo])])];
+      const definitions=[...Object.keys(PREVIEW_LAYOUTS).flatMap(format=>["bg","bgb","overlaya","overlayb","headera","headerb","seta","setb","compa","compb"].map(name=>[`${format}/${name}`,`assets/league/preview/${format}/${name}.png`])),...Object.values(teams).map(t=>[t.logo,t.logo]),...knownOpponents.filter(o=>o.logo).map(o=>[o.logo,o.logo])];
       await Promise.all([...new Map(definitions)].map(([name,path])=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{state.images.set(name,image);resolve();};image.onerror=()=>reject(new Error(path));image.src=path+"?v=20260929-preview-post-1";})));
       await Promise.all([new FontFace("PreviewTopshow","url(fonts/topshow.otf)").load().then(f=>document.fonts.add(f)),new FontFace("PreviewTacticSans","url(fonts/tacticsans.otf)").load().then(f=>document.fonts.add(f))]);
       state.ready=true;$("openPreviewStory").disabled=false;$("previewAssetStatus").textContent="";render();
     } catch(error) { $("previewAssetStatus").textContent="Das Design konnte nicht vollständig geladen werden. Bitte die Seite neu laden.";console.warn("Ankündigungsdesign",error); }
   }
-  setup();initImages();
+  initConfiguration();
 })();
 

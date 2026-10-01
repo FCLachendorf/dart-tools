@@ -10,6 +10,7 @@ on:
     paths:
       - ".github/workflows/refresh-3k-cache.yml"
       - "scripts/update_3k_cache.py"
+      - "data/3k-leagues.json"
 
 permissions:
   contents: write
@@ -21,6 +22,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,7 +32,14 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Test fallback handling
+        run: |
+          node --test tests/preview-data.test.cjs tests/preview-fallback.test.cjs
+          python -m unittest discover -s tests -p "test_*.py"
+
       - name: Refresh cached 3K values
+        id: refresh
+        continue-on-error: true
         run: python scripts/update_3k_cache.py
 
       - name: Commit changed cache
@@ -46,3 +55,9 @@ jobs:
           git commit -m "Update 3K fallback cache"
           git pull --rebase origin main
           git push
+
+      - name: Report incomplete refresh
+        if: steps.refresh.outcome == 'failure'
+        run: |
+          echo "::error::3K refresh incomplete. Successful updates were saved; failed values keep their original timestamps."
+          exit 1

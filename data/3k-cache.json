@@ -1,6 +1,7 @@
 {
   "events": {
     "1422": {
+      "checkedAt": "2026-10-01T14:17:29Z",
       "participants": {
         "172473": {
           "counter": 1,
@@ -8,7 +9,9 @@
           "finish": null,
           "games": 3,
           "participantId": 172473,
+          "performanceCheckedAt": "2026-10-01T14:17:29Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "2",
           "points": 6.0
         },
@@ -18,7 +21,9 @@
           "finish": null,
           "games": 2,
           "participantId": 172475,
+          "performanceCheckedAt": "2026-10-01T14:17:29Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "6",
           "points": 0.0
         },
@@ -28,7 +33,9 @@
           "finish": null,
           "games": 3,
           "participantId": 172477,
+          "performanceCheckedAt": "2026-10-01T14:17:29Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "4",
           "points": 2.0
         },
@@ -38,7 +45,9 @@
           "finish": null,
           "games": 2,
           "participantId": 172478,
+          "performanceCheckedAt": "2026-10-01T14:17:29Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "3",
           "points": 2.0
         },
@@ -48,7 +57,9 @@
           "finish": null,
           "games": 2,
           "participantId": 172487,
+          "performanceCheckedAt": "2026-10-01T14:17:29Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "7",
           "points": 0.0
         },
@@ -58,7 +69,9 @@
           "finish": null,
           "games": 3,
           "participantId": 172488,
+          "performanceCheckedAt": "2026-10-01T14:17:29Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "5",
           "points": 2.0
         },
@@ -68,14 +81,17 @@
           "finish": null,
           "games": 3,
           "participantId": 172491,
+          "performanceCheckedAt": "2026-10-01T14:17:29Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "1",
           "points": 6.0
         }
       },
-      "updatedAt": "2026-09-30T21:11:26Z"
+      "updatedAt": "2026-10-01T14:17:29Z"
     },
     "1428": {
+      "checkedAt": "2026-10-01T14:17:29Z",
       "participants": {
         "171880": {
           "counter": 0,
@@ -83,7 +99,9 @@
           "finish": null,
           "games": 3,
           "participantId": 171880,
+          "performanceCheckedAt": "2026-10-01T14:17:29Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "7",
           "points": 0.0
         },
@@ -93,7 +111,9 @@
           "finish": 116,
           "games": 3,
           "participantId": 171883,
+          "performanceCheckedAt": "2026-10-01T14:17:30Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "1",
           "points": 6.0
         },
@@ -103,7 +123,9 @@
           "finish": 101,
           "games": 2,
           "participantId": 172474,
+          "performanceCheckedAt": "2026-10-01T14:17:29Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "3",
           "points": 4.0
         },
@@ -113,7 +135,9 @@
           "finish": null,
           "games": 2,
           "participantId": 172476,
+          "performanceCheckedAt": "2026-10-01T14:17:29Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "4",
           "points": 2.0
         },
@@ -123,7 +147,9 @@
           "finish": null,
           "games": 3,
           "participantId": 172479,
+          "performanceCheckedAt": "2026-10-01T14:17:30Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "5",
           "points": 2.0
         },
@@ -133,7 +159,9 @@
           "finish": 120,
           "games": 2,
           "participantId": 172503,
+          "performanceCheckedAt": "2026-10-01T14:17:29Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "2",
           "points": 4.0
         },
@@ -143,14 +171,16 @@
           "finish": null,
           "games": 3,
           "participantId": 172509,
+          "performanceCheckedAt": "2026-10-01T14:17:30Z",
           "performanceKnown": true,
+          "performanceStale": false,
           "place": "6",
           "points": 0.0
         }
       },
-      "updatedAt": "2026-09-30T21:11:21Z"
+      "updatedAt": "2026-10-01T14:17:29Z"
     }
   },
-  "updatedAt": "2026-09-30T21:11:26Z",
-  "version": 1
+  "updatedAt": "2026-10-01T14:17:30Z",
+  "version": 2
 }
