@@ -6,8 +6,10 @@ const fs=require('node:fs');
 test('table renders seven manual rows, highlights its club and uses shared export',async()=>{
   const nodes=new Map(),drawn=[],exported=[];
   class Element {
-    constructor(){this.value='';this.children=[];this.events={};this.error='';}
+    constructor(){this.dataset={};this.classList={toggle(){}};this.value='';this.children=[];this.events={};this.error='';}
     set id(value){this._id=value;nodes.set(value,this)} get id(){return this._id}
+    get options(){return this.children}
+    replaceChildren(){this.children=[]}
     setAttribute(){} add(option){this.children.push(option)}
     append(...items){items.forEach(item=>{item.parent=this;this.children.push(item)})}
     addEventListener(event,fn){this.events[event]=fn}
@@ -16,11 +18,14 @@ test('table renders seven manual rows, highlights its club and uses shared expor
     closest(){return this.parent?.parent?.parent} focus(){} reportValidity(){}
     querySelectorAll(){return [...nodes.values()].filter(e=>e.required)}
   }
-  for(const id of ['tableCanvas','tableRows','tableForm','tableMatchday','tableDownload','tableStatus']) {const e=new Element();e.id=id;}
+  for(const id of ['tableCanvas','tableRows','tableForm','tableMatchday','tableDownload','tableStatus','tableSource','tableManual','tableTool','tableRefresh','tablePhoto','tablePhotoPosition','tablePhotoRemove','tablePhotoZoom','tablePhotoX','tablePhotoLabel','tablePhotoAdjust']) {const e=new Element();e.id=id;}
+  nodes.get('tableTool').hidden=true;
+  const buttons=['a','b'].map(team=>{const e=new Element();e.dataset.tableTeam=team;return e});
   const canvas=nodes.get('tableCanvas');canvas.width=1080;canvas.height=1920;
   const ctx={clearRect(){drawn.length=0},fillRect(...args){drawn.push({kind:'box',color:this.fillStyle,args})},drawImage(){},measureText(value){return{width:value.length*Number.parseFloat(this.font)*.7}},fillText(value,x,y,max){drawn.push({kind:'text',value,x,y,max,font:this.font})}};
   canvas.getContext=()=>ctx;
-  const env={document:{getElementById:id=>nodes.get(id),createElement:()=>new Element(),fonts:{add(){}}},Image:class{set src(v){queueMicrotask(()=>this.onload())}},FontFace:class{async load(){return this}},Option:class{constructor(text,value){this.text=text;this.value=value}},window:{exportCanvasPng:async(c,name)=>exported.push({width:c.width,height:c.height,name})},console};
+  const env={DartTableData:require('../table-data.js'),AbortController,setTimeout,clearTimeout,
+    fetch:async url=>({ok:true,json:async()=>url.includes('3k-leagues')?{leagues:{a:{event:1428,ownName:'FC Lachendorf Darts A'},b:{event:1422,ownName:'FC Lachendorf Darts B'}}}:{tableEntries:[{tableEntries:Array.from({length:7},(_,i)=>({placement:(i+1)+'.',participant:{displayName:i===0?'FC Lachendorf Darts A':`Opponent ${i}`},matchCount:4,points1:8-i,sets1:24,sets2:12,legs1:80,legs2:60}))}]}}),MutationObserver:class{observe(){}},document:{querySelectorAll:()=>buttons,getElementById:id=>nodes.get(id),createElement:()=>new Element(),fonts:{add(){}}},Image:class{set src(v){queueMicrotask(()=>this.onload())}},FontFace:class{async load(){return this}},Option:class{constructor(text,value){this.text=text;this.value=value}},window:{exportCanvasPng:async(c,name)=>exported.push({width:c.width,height:c.height,name})},console};
   vm.runInNewContext(fs.readFileSync(require.resolve('../table.js'),'utf8'),env);
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(nodes.get('tableRows').children.length,7);
@@ -37,4 +42,22 @@ test('table renders seven manual rows, highlights its club and uses shared expor
   assert.equal(drawn.filter(d=>d.kind==='box'&&d.color==='#d7d7db').length,1);
   nodes.get('table-1-team').value=nodes.get('table-0-team').value;
   await nodes.get('tableDownload').events.click();assert.equal(exported.length,1);
+  nodes.get('table-0-points').events.input(); // Retain a manual B draft across switches.
+  buttons[0].events.click();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(nodes.get('table-0-team').value,'FC Lachendorf Darts A');
+  assert.ok(nodes.get('tableSource').textContent.endsWith('/Ost'));
+  nodes.get('tableMatchday').value='5';
+  await nodes.get('tableDownload').events.click();
+  assert.equal(exported.at(-1).name,'tabelle-team-a-spieltag-5-story.png');
+  const pending=nodes.get('tableRefresh').events.click();
+  buttons[1].events.click();
+  await pending;
+  assert.equal(nodes.get('tableMatchday').value,'12');
+  assert.equal(nodes.get('table-0-team').value,'Bulls Eye C');
+  assert.match(nodes.get('tableSource').textContent,/Manuell bearbeitet/);
+  const layout=vm.runInNewContext(fs.readFileSync(require.resolve('../table.js'),'utf8').split('(() =>')[0]+'; TABLE_STORY_LAYOUT');
+  assert.equal(layout.columns.place.x-layout.rowBox.x,layout.rowBox.x+layout.rowBox.width-layout.columns.legs.x);
+
 });
+
