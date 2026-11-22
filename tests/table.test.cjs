@@ -30,6 +30,9 @@ test('table renders seven manual rows, highlights its club and uses shared expor
   vm.runInNewContext(fs.readFileSync(require.resolve('../table.js'),'utf8'),env);
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(nodes.get('tableRows').children.length,7);
+  assert.equal(nodes.get('table-1-team').value,'FC Lachendorf A');
+  buttons[1].events.click();
+  await new Promise(resolve=>setImmediate(resolve));
   await nodes.get('tableDownload').events.click();assert.equal(exported.length,0);
   nodes.get('tableMatchday').value='12';
   for(let i=0;i<7;i++)for(const [key,value] of Object.entries({games:'12',points:String(i*2),sets:'84:60',legs:'250:200'})) nodes.get(`table-${i}-${key}`).value=value;
@@ -58,7 +61,7 @@ test('table renders seven manual rows, highlights its club and uses shared expor
   assert.equal(exported.at(-1).height,1350);
   assert.equal(exported.at(-1).name,'tabelle-team-a-spieltag-5-post.png');
   assert.ok(drawn.some(d=>d.kind==='image' && d.src.includes('/post/overlaya.png')));
-  assert.equal(new Set(drawn.filter(d=>d.kind==='text' && ['PLATZ','MANNSCHAFT','SPIELE','PUNKTE','SETS','LEGS'].includes(d.value)).map(d=>d.font)).size,1);
+  assert.equal(new Set(drawn.filter(d=>d.kind==='text' && ['PLATZ','MANNSCHAFT','SP.','PKT.','SETS','LEGS'].includes(d.value)).map(d=>d.font)).size,1);
   formats[0].events.click();
   assert.equal(canvas.height,1920);
   const pending=nodes.get('tableRefresh').events.click();

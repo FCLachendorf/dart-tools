@@ -8,8 +8,8 @@ const TABLE_STORY_LAYOUT = {
   columns: {
     place: { x: 82, maxWidth: 54, align: "left", label: "PLATZ" },
     team: { x: 224, maxWidth: 315, align: "left", label: "MANNSCHAFT" },
-    games: { x: 590, maxWidth: 82, align: "center", label: "SPIELE" },
-    points: { x: 686, maxWidth: 86, align: "center", label: "PUNKTE" },
+    games: { x: 590, maxWidth: 82, align: "center", label: "SP." },
+    points: { x: 686, maxWidth: 86, align: "center", label: "PKT." },
     sets: { x: 804, maxWidth: 116, align: "center", label: "SETS" },
     legs: { x: 998, maxWidth: 118, align: "right", label: "LEGS" },
   },
@@ -32,7 +32,7 @@ const TABLE_STORY_LAYOUT = {
     },
   };
   let format="story";
-  let team="b", config = TEAM_CONFIG.b;
+  let team="a", config = TEAM_CONFIG.a;
   const drafts=new Map(), completed=new Set(), designs=new Map(), logos=new Map();
   const logoKey=name=>DartTableData.normalize(name.replace(" Darts", "").replace("Südseite", "Südheide"));
   const $ = id => document.getElementById(id);
@@ -125,7 +125,7 @@ const TABLE_STORY_LAYOUT = {
       }
       for(const [key,column] of Object.entries(l.columns)) {
         const value = fields[key].value.trim().replace(/\s*:\s*/g, ":") || "–";
-        text(value, column.x, y, key === "team" ? l.fonts.team : l.fonts.values, column.maxWidth, column.align,
+        text(value, column.x, y + (key === "team" ? 5 : 0), key === "team" ? l.fonts.team : l.fonts.values, column.maxWidth, column.align,
           team === "a" ? "#cc2331" : own ? l.highlight.text : l.colors.text, key === "team" ? "TableTop" : "TableNumbers", key === "team" ? l.fonts.minTeam : l.fonts.minValue);
       }
     });
