@@ -1,186 +1,214 @@
 {
   "events": {
     "1422": {
-      "checkedAt": "2026-11-22T15:24:35Z",
+      "checkedAt": "2026-11-22T17:03:07Z",
       "participants": {
         "172473": {
           "counter": 2,
           "displayName": "DSV Hambühren C",
           "finish": 108,
           "games": 5,
+          "legs": "137:91",
           "participantId": 172473,
-          "performanceCheckedAt": "2026-11-22T15:24:35Z",
+          "performanceCheckedAt": "2026-11-22T17:03:08Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "2",
-          "points": 6.0
+          "points": 6.0,
+          "sets": "37:23"
         },
         "172475": {
           "counter": 0,
           "displayName": "FC Lachendorf Darts B",
           "finish": null,
           "games": 4,
+          "legs": "94:98",
           "participantId": 172475,
-          "performanceCheckedAt": "2026-11-22T15:24:36Z",
+          "performanceCheckedAt": "2026-11-22T17:03:08Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "4",
-          "points": 4.0
+          "points": 4.0,
+          "sets": "24:24"
         },
         "172477": {
           "counter": 0,
           "displayName": "Team Utd. Südheide C",
           "finish": null,
           "games": 4,
+          "legs": "99:83",
           "participantId": 172477,
-          "performanceCheckedAt": "2026-11-22T15:24:37Z",
+          "performanceCheckedAt": "2026-11-22T17:03:09Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "3",
-          "points": 4.0
+          "points": 4.0,
+          "sets": "26:22"
         },
         "172478": {
           "counter": 0,
           "displayName": "VfL Schickeria A",
           "finish": null,
           "games": 4,
+          "legs": "71:121",
           "participantId": 172478,
-          "performanceCheckedAt": "2026-11-22T15:24:38Z",
+          "performanceCheckedAt": "2026-11-22T17:03:10Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "6",
-          "points": 2.0
+          "points": 2.0,
+          "sets": "17:31"
         },
         "172487": {
           "counter": 0,
           "displayName": "Bulls Eye C",
           "finish": null,
           "games": 4,
+          "legs": "57:117",
           "participantId": 172487,
-          "performanceCheckedAt": "2026-11-22T15:24:35Z",
+          "performanceCheckedAt": "2026-11-22T17:03:08Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "7",
-          "points": 0.0
+          "points": 0.0,
+          "sets": "11:37"
         },
         "172488": {
           "counter": 2,
           "displayName": "MTV Beedenbostel A",
           "finish": null,
           "games": 4,
+          "legs": "84:98",
           "participantId": 172488,
-          "performanceCheckedAt": "2026-11-22T15:24:36Z",
+          "performanceCheckedAt": "2026-11-22T17:03:09Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "5",
-          "points": 4.0
+          "points": 4.0,
+          "sets": "23:25"
         },
         "172491": {
           "counter": 0,
           "displayName": "TuS Eschede B",
           "finish": 104,
           "games": 5,
+          "legs": "151:85",
           "participantId": 172491,
-          "performanceCheckedAt": "2026-11-22T15:24:37Z",
+          "performanceCheckedAt": "2026-11-22T17:03:09Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "1",
-          "points": 10.0
+          "points": 10.0,
+          "sets": "42:18"
         }
       },
-      "updatedAt": "2026-11-22T15:24:35Z"
+      "updatedAt": "2026-11-22T17:03:07Z"
     },
     "1428": {
-      "checkedAt": "2026-11-22T15:24:38Z",
+      "checkedAt": "2026-11-22T17:03:11Z",
       "participants": {
         "171880": {
           "counter": 0,
           "displayName": "MTV Beedenbostel B",
           "finish": null,
           "games": 5,
+          "legs": "62:159",
           "participantId": 171880,
-          "performanceCheckedAt": "2026-11-22T15:24:40Z",
+          "performanceCheckedAt": "2026-11-22T17:03:12Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "7",
-          "points": 0.0
+          "points": 0.0,
+          "sets": "9:51"
         },
         "171883": {
           "counter": 8,
           "displayName": "TuS Eschede A",
           "finish": 116,
           "games": 4,
+          "legs": "125:41",
           "participantId": 171883,
-          "performanceCheckedAt": "2026-11-22T15:24:40Z",
+          "performanceCheckedAt": "2026-11-22T17:03:13Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "3",
-          "points": 6.0
+          "points": 6.0,
+          "sets": "40:8"
         },
         "172474": {
           "counter": 1,
           "displayName": "FC Lachendorf Darts A",
           "finish": 101,
           "games": 4,
+          "legs": "119:65",
           "participantId": 172474,
-          "performanceCheckedAt": "2026-11-22T15:24:39Z",
+          "performanceCheckedAt": "2026-11-22T17:03:11Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "1",
-          "points": 8.0
+          "points": 8.0,
+          "sets": "35:13"
         },
         "172476": {
           "counter": 0,
           "displayName": "PSV Celle B",
           "finish": 109,
           "games": 4,
+          "legs": "93:99",
           "participantId": 172476,
-          "performanceCheckedAt": "2026-11-22T15:24:40Z",
+          "performanceCheckedAt": "2026-11-22T17:03:12Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "4",
-          "points": 5.0
+          "points": 5.0,
+          "sets": "24:24"
         },
         "172479": {
           "counter": 0,
           "displayName": "Vorwerk Fun Force A",
           "finish": null,
           "games": 5,
+          "legs": "96:132",
           "participantId": 172479,
-          "performanceCheckedAt": "2026-11-22T15:24:41Z",
+          "performanceCheckedAt": "2026-11-22T17:03:13Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "5",
-          "points": 4.0
+          "points": 4.0,
+          "sets": "25:35"
         },
         "172503": {
           "counter": 3,
           "displayName": "DSV Hambühren D",
           "finish": 120,
           "games": 4,
+          "legs": "117:66",
           "participantId": 172503,
-          "performanceCheckedAt": "2026-11-22T15:24:39Z",
+          "performanceCheckedAt": "2026-11-22T17:03:11Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "2",
-          "points": 7.0
+          "points": 7.0,
+          "sets": "35:13"
         },
         "172509": {
           "counter": 0,
           "displayName": "Scheuener Heidedarter A",
           "finish": null,
           "games": 4,
+          "legs": "71:121",
           "participantId": 172509,
-          "performanceCheckedAt": "2026-11-22T15:24:40Z",
+          "performanceCheckedAt": "2026-11-22T17:03:12Z",
           "performanceKnown": true,
           "performanceStale": false,
           "place": "6",
-          "points": 0.0
+          "points": 0.0,
+          "sets": "12:36"
         }
       },
-      "updatedAt": "2026-11-22T15:24:38Z"
+      "updatedAt": "2026-11-22T17:03:11Z"
     }
   },
-  "updatedAt": "2026-11-22T15:24:41Z",
+  "updatedAt": "2026-11-22T17:03:13Z",
   "version": 2
 }
