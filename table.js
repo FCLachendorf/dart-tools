@@ -7,13 +7,13 @@ const TABLE_STORY_LAYOUT = {
   headerY: 660, startY: 770, rowHeight: 118,
   columns: {
     place: { x: 82, maxWidth: 54, align: "left", label: "PLATZ" },
-    team: { x: 154, maxWidth: 385, align: "left", label: "MANNSCHAFT" },
+    team: { x: 224, maxWidth: 315, align: "left", label: "MANNSCHAFT" },
     games: { x: 590, maxWidth: 82, align: "center", label: "SPIELE" },
     points: { x: 686, maxWidth: 86, align: "center", label: "PUNKTE" },
     sets: { x: 804, maxWidth: 116, align: "center", label: "SETS" },
     legs: { x: 998, maxWidth: 118, align: "right", label: "LEGS" },
   },
-  fonts: { header: 28, team: 38, values: 32, minTeam: 18, minValue: 16 },
+  fonts: { header: 34, team: 38, values: 32, minTeam: 18, minValue: 16 },
   colors: { header: "#d7d7db", text: "#ffffff", row: "rgba(5,5,8,.72)", alternateRow: "rgba(5,5,8,.55)" },
   rowBox: { x: 48, width: 984, height: 104 },
   highlight: { enabled: true, background: "#d7d7db", text: "#111114", accent: "#ffffff", accentWidth: 6 },
@@ -31,8 +31,10 @@ const TABLE_STORY_LAYOUT = {
       clubs: ["Bulls Eye C", "DSV Hambühren C", "FC Lachendorf B", "MTV Beedenbostel A", "Team Utd. Südseite C", "TuS Eschede B", "VfL Schickeria A"],
     },
   };
+  let format="story";
   let team="b", config = TEAM_CONFIG.b;
-  const drafts=new Map(), completed=new Set(), designs=new Map();
+  const drafts=new Map(), completed=new Set(), designs=new Map(), logos=new Map();
+  const logoKey=name=>DartTableData.normalize(name.replace(" Darts", "").replace("Südseite", "Südheide"));
   const $ = id => document.getElementById(id);
   const canvas = $("tableCanvas"), ctx = canvas.getContext("2d");
   const rows = [];
@@ -95,35 +97,36 @@ const TABLE_STORY_LAYOUT = {
     ctx.fillText(value, x, y, maxWidth);
   }
   function render() {
-    const l = config.layout;
+    const l = format === "post" ? {...config.layout,height:1350,headerY:455,startY:540,rowHeight:100,rowBox:{...config.layout.rowBox,height:88},matchday:{...config.layout.matchday,y:148}} : config.layout;
+    canvas.height=l.height;
     ctx.clearRect(0, 0, l.width, l.height);
     if(!ready) { ctx.fillStyle = "#1b1b20"; ctx.fillRect(0,0,l.width,l.height); return; }
-    ctx.drawImage(designs.get(team).background, 0, 0, l.width, l.height);
+    ctx.drawImage(designs.get(`${format}/${team}`).background, 0, 0, l.width, l.height);
     if(photo) {
       const scale=Math.max(l.width/photo.width,l.height/photo.height)*Number($("tablePhotoZoom").value), w=photo.width*scale,h=photo.height*scale;
       ctx.drawImage(photo,(l.width-w)*Number($("tablePhotoX").value)/100,(l.height-h)*Number($("tablePhotoPosition").value)/100,w,h);
     }
-    ctx.drawImage(designs.get(team).overlay,0,0,l.width,l.height);
-    text(config.league,540,1815,32,960,"center",l.colors.header,"TableTop",24);
+    ctx.drawImage(designs.get(`${format}/${team}`).overlay,0,0,l.width,l.height);
+    text(config.league,540,l.height-105,32,960,"center",l.colors.header,"TableTop",24);
     const day = $("tableMatchday").value;
-    if(day) text(day, l.matchday.x, l.matchday.y, l.matchday.fontSize, l.matchday.maxWidth, "center", l.matchday.color, "TableTop", 18);
-    let headerSize=l.fonts.header;
-    while(headerSize>12) {
-      ctx.font=`${headerSize}px TableTop`;
-      if(Object.values(l.columns).every(c=>ctx.measureText(c.label).width<=c.maxWidth)) break;
-      headerSize--;
-    }
-    for(const column of Object.values(l.columns)) text(column.label, column.x, l.headerY, headerSize, column.maxWidth, column.align, l.colors.header, "TableTop", headerSize);
+    if(day) text(day, l.matchday.x, l.matchday.y, l.matchday.fontSize, l.matchday.maxWidth, "center", team === "a" ? "#cc2331" : l.matchday.color, "TableTop", 18);
+    // Give headings their own width so the narrow rank cell cannot shrink every title.
+    for(const [key,column] of Object.entries(l.columns)) text(column.label, column.x, l.headerY, l.fonts.header, key === "place" ? 90 : column.maxWidth, column.align, l.colors.header, "TableTop", l.fonts.header);
     rows.forEach(({fields}, index) => {
       const y = l.startY + index * l.rowHeight;
       const own = l.highlight.enabled && [config.own,`FC Lachendorf Darts ${team.toUpperCase()}`].includes(fields.team.value);
       ctx.fillStyle = own ? l.highlight.background : index % 2 ? l.colors.alternateRow : l.colors.row;
       ctx.fillRect(l.rowBox.x, y-l.rowBox.height/2, l.rowBox.width, l.rowBox.height);
       if(own) { ctx.fillStyle=l.highlight.accent; ctx.fillRect(l.rowBox.x,y-l.rowBox.height/2,l.highlight.accentWidth,l.rowBox.height); }
+      const logo=logos.get(logoKey(fields.team.value));
+      if(logo) {
+        const size=64, scale=Math.min(size/logo.width,size/logo.height);
+        ctx.drawImage(logo,176-logo.width*scale/2,y-logo.height*scale/2,logo.width*scale,logo.height*scale);
+      }
       for(const [key,column] of Object.entries(l.columns)) {
         const value = fields[key].value.trim().replace(/\s*:\s*/g, ":") || "–";
         text(value, column.x, y, key === "team" ? l.fonts.team : l.fonts.values, column.maxWidth, column.align,
-          own ? l.highlight.text : l.colors.text, key === "team" ? "TableTop" : "TableNumbers", key === "team" ? l.fonts.minTeam : l.fonts.minValue);
+          team === "a" ? "#cc2331" : own ? l.highlight.text : l.colors.text, key === "team" ? "TableTop" : "TableNumbers", key === "team" ? l.fonts.minTeam : l.fonts.minValue);
       }
     });
   }
@@ -149,7 +152,7 @@ const TABLE_STORY_LAYOUT = {
     }
     try {
       render();
-      await window.exportCanvasPng(canvas, `tabelle-team-${team}-spieltag-${$("tableMatchday").value}-story.png`);
+      await window.exportCanvasPng(canvas, `tabelle-team-${team}-spieltag-${$("tableMatchday").value}-${format}.png`);
     } catch(error) { console.error(error); $("tableStatus").textContent="Export fehlgeschlagen. Bitte erneut versuchen."; }
   });
   document.querySelectorAll("[data-table-team]").forEach(button=>button.addEventListener("click",()=>{
@@ -171,6 +174,14 @@ const TABLE_STORY_LAYOUT = {
     $("tableTool").dataset.team=team;
     $("tableRefresh").disabled=false; clearCustomErrors(); render();
     if(!completed.has(team)) loadStandings();
+  }));
+  document.querySelectorAll("[data-table-format]").forEach(button=>button.addEventListener("click",()=>{
+    format=button.dataset.tableFormat;
+    document.querySelectorAll("[data-table-format]").forEach(btn=>{btn.classList.toggle("active",btn.dataset.tableFormat===format);btn.setAttribute("aria-pressed",String(btn.dataset.tableFormat===format));});
+    $("tableDownload").textContent=format==="post"?"Post herunterladen":"Story herunterladen";
+    $("tablePreviewTitle").textContent=format==="post"?"Tabellen-Post":"Tabellen-Story";
+    $("tablePreviewSize").textContent=format==="post"?"1080 × 1350 px":"1080 × 1920 px";
+    render();
   }));
   const DATA_ROOT="https://raw.githubusercontent.com/FCLachendorf/dart-tools/main/";
   async function json(url) {
@@ -246,10 +257,14 @@ const TABLE_STORY_LAYOUT = {
       const fonts = [["TableTop","topshow"],["TableNumbers","tacticsans"]].map(async ([name,file]) => {
         const font=new FontFace(name, `url(fonts/${file}.otf)`); document.fonts.add(await font.load());
       });
-      await Promise.all([...fonts,...["a","b"].map(async key=>{
-        const [background,overlay]=await Promise.all([image(`assets/league/table/story/${key==="a"?"bg":"bgb"}.png`),image(`assets/league/table/story/overlay${key}.png`)]);
-        designs.set(key,{background,overlay});
+      await Promise.all([...fonts,...["story/a","story/b","post/a","post/b"].map(async id=>{
+        const [kind,key]=id.split("/");
+        const [background,overlay]=await Promise.all([image(`assets/league/table/${kind}/${key==="a"?"bg":"bgb"}.png`),image(`assets/league/table/${kind}/overlay${key}.png`)]);
+        designs.set(id,{background,overlay});
       })]);
+      if(typeof LEAGUE_CONFIG !== "undefined") await Promise.all(Object.values(LEAGUE_CONFIG).flatMap(t=>[{name:t.clubName,logo:t.logo},...t.opponents]).map(async club=>{
+        try { logos.set(logoKey(club.name),await image(club.logo)); } catch { /* Leave the logo space empty if unavailable. */ }
+      }));
       ready=true; $("tableDownload").disabled=false; $("tableStatus").textContent=""; render();
     } catch(error) { console.error(error); $("tableStatus").textContent="Tabellendesign konnte nicht geladen werden. Bitte Seite neu laden."; }
   }
