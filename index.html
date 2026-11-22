@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="league.css?v=20260927-ios-export-1" />
   <link rel="stylesheet" href="preview.css?v=20261001-3k-link-1" />
   <link rel="stylesheet" href="ranking.css?v=20260929-ranking-1" />
-  <link rel="stylesheet" href="table.css?v=20261122-2" />
+  <link rel="stylesheet" href="table.css?v=20261122-3" />
 </head>
 <body>
   <header class="app-header">
@@ -343,21 +343,38 @@
     </section>
   </div>
 
-  <main class="layout tool-page" id="tableTool" data-tool-page="table" hidden>
-    <section class="card data-card">
-      <div class="section-head"><h2>Tabelle</h2><p>Story · 1080 × 1920</p></div>
+  <main class="layout tool-page result-layout" id="tableTool" data-tool-page="table" data-team="b" hidden>
+    <section class="card data-card result-card">
+      <div class="section-head result-title"><h2>Tabelle</h2></div>
+      <div class="mode-switch result-format-switch" role="group" aria-label="Tabellenformat auswählen">
+        <button type="button" class="mode-button active" data-table-format="story" aria-pressed="true">Story · 9:16</button>
+        <button type="button" class="mode-button" data-table-format="post" aria-pressed="false" disabled title="Post-Design folgt">Post · 4:5 · folgt</button>
+      </div>
+      <p class="result-subheading">Mannschaft</p>
       <div class="mode-switch" role="group" aria-label="Tabellenmannschaft">
-        <button type="button" class="mode-button" data-table-team="a" disabled aria-pressed="false" title="Team-A-Design folgt">A-Team · folgt</button>
+        <button type="button" class="mode-button" data-table-team="a" aria-pressed="false">A-Team</button>
         <button type="button" class="mode-button active" data-table-team="b" aria-pressed="true">B-Team</button>
       </div>
       <form id="tableForm" novalidate>
         <label>Spieltag<input id="tableMatchday" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="1" required /></label>
+        <p class="result-subheading">Foto <span class="table-optional">optional</span></p>
+        <div class="result-photo-row">
+          <label class="result-photo-upload" for="tablePhoto">
+            <input id="tablePhoto" type="file" accept="image/*" />
+            <span><strong id="tablePhotoLabel">Foto auswählen / aufnehmen</strong><small>JPG oder PNG</small></span>
+          </label>
+          <button id="tablePhotoRemove" class="result-photo-remove" type="button" hidden>Entfernen</button>
+        </div>
+        <details id="tablePhotoAdjust" class="result-compact-details" hidden>
+          <summary>Bild ausrichten</summary>
+          <label>Zoom<input id="tablePhotoZoom" type="range" min="1" max="3" step="0.01" value="1" /></label>
+          <label>Horizontal<input id="tablePhotoX" type="range" min="0" max="100" value="50" /></label>
+          <label>Vertikal<input id="tablePhotoPosition" type="range" min="0" max="100" value="50" /></label>
+        </details>
+        <p class="result-subheading">Tabellenwerte</p>
         <button id="tableRefresh" class="preview-refresh" type="button">3K-Tabelle aktualisieren</button>
         <p class="hint" id="tableSource" role="status" aria-live="polite">Die Werte werden beim Öffnen automatisch geladen.</p>
-        <details id="tableManual"><summary>Werte manuell korrigieren</summary><div id="tableRows"></div></details>
-        <label>Hintergrundfoto (optional)<input id="tablePhoto" type="file" accept="image/*" /></label>
-        <label>Foto-Ausschnitt vertikal<input id="tablePhotoPosition" type="range" min="0" max="100" value="50" /></label>
-        <button id="tablePhotoRemove" class="preview-refresh preview-secondary" type="button">Foto entfernen</button>
+        <details id="tableManual" class="result-compact-details"><summary>Werte manuell korrigieren <span>optional</span></summary><div id="tableRows"></div></details>
       </form>
       <p class="hint" id="tableStatus" role="status" aria-live="polite">Tabellendesign wird geladen …</p>
     </section>
@@ -376,6 +393,6 @@
   <script src="preview-data.js?v=20261001-3k-reliable-1"></script>
   <script src="preview.js?v=20261001-3k-reliable-1"></script>
   <script src="table-data.js?v=20261122-2"></script>
-  <script src="table.js?v=20261122-2"></script>
+  <script src="table.js?v=20261122-3"></script>
 </body>
 </html>

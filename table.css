@@ -1,18 +1,23 @@
 #tableTool .table-edit-row { border:1px solid var(--border); border-radius:12px; margin-top:8px; background:#101014; }
-#tableTool summary { cursor:pointer; padding:12px; min-height:48px; }
-#tableTool summary strong { font-size:.86rem; }
-#tableTool summary span { display:block; margin-top:5px; font-size:.7rem; color:var(--muted); line-height:1.5; }
+#tableTool .table-edit-row summary { cursor:pointer; padding:12px; min-height:48px; }
+#tableTool .table-edit-row summary strong { font-size:.86rem; }
+#tableTool .table-edit-row summary span { display:block; margin-top:5px; font-size:.7rem; color:var(--muted); line-height:1.5; }
 #tableTool .table-edit-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; padding:0 12px 12px; }
 #tableTool .table-team-field { grid-column:1/-1; }
-#tableTool input, #tableTool select { width:100%; min-width:0; min-height:44px; border:1px solid var(--border); border-radius:9px; background:#1d1d23; color:var(--text); padding:10px 8px; font:inherit; font-size:16px; }
 #tableTool label { font-size:.75rem; min-width:0; }
 #tableTool button:disabled { opacity:.45; cursor:not-allowed; }
 #tableTool .preview-card { position:static; }
 #tableCanvas { width:auto; height:auto; max-width:100%; max-height:70svh; cursor:default; touch-action:auto; }
 @media(min-width:860px) { #tableTool .preview-card { position:sticky; top:84px; } #tableCanvas { max-height:82svh; } }
 
-#tableManual > summary { cursor:pointer; padding:14px 0; font-weight:700; }
-#tablePhotoPosition { width:100%; }
+
+
 #tableForm > button { min-height:44px; margin:8px 0; }
 
 #tableForm > button { width:100%; border:1px solid var(--border); border-radius:10px; padding:12px; background:#25252c; color:var(--text); font:inherit; font-weight:700; cursor:pointer; }
+
+#tableTool .table-optional { color:var(--muted); text-transform:none; letter-spacing:0; }
+#tableTool input[type="range"] { width:100%; padding:0; }
+#tableTool .table-edit-grid select, #tableTool .table-edit-grid input { font-size:16px; min-width:0; }
+#tableTool .result-photo-upload:focus-within { outline:2px solid var(--red); outline-offset:2px; }
+#tableTool .result-photo-upload input { display:block; position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; }

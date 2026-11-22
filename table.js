@@ -6,37 +6,43 @@ const TABLE_STORY_LAYOUT = {
   matchday: { x: 134, y: 254, fontSize: 58, maxWidth: 64, color: "#ededf5" },
   headerY: 660, startY: 770, rowHeight: 118,
   columns: {
-    place: { x: 100, maxWidth: 75, align: "center", label: "PLATZ" },
-    team: { x: 163, maxWidth: 395, align: "left", label: "MANNSCHAFT" },
-    games: { x: 613, maxWidth: 86, align: "center", label: "SPIELE" },
-    points: { x: 719, maxWidth: 88, align: "center", label: "PUNKTE" },
-    sets: { x: 833, maxWidth: 112, align: "center", label: "SETS" },
-    legs: { x: 973, maxWidth: 130, align: "center", label: "LEGS" },
+    place: { x: 82, maxWidth: 54, align: "left", label: "PLATZ" },
+    team: { x: 154, maxWidth: 385, align: "left", label: "MANNSCHAFT" },
+    games: { x: 590, maxWidth: 82, align: "center", label: "SPIELE" },
+    points: { x: 686, maxWidth: 86, align: "center", label: "PUNKTE" },
+    sets: { x: 804, maxWidth: 116, align: "center", label: "SETS" },
+    legs: { x: 998, maxWidth: 118, align: "right", label: "LEGS" },
   },
   fonts: { header: 28, team: 38, values: 32, minTeam: 18, minValue: 16 },
   colors: { header: "#d7d7db", text: "#ffffff", row: "rgba(5,5,8,.72)", alternateRow: "rgba(5,5,8,.55)" },
-  rowBox: { x: 48, width: 990, height: 104 },
+  rowBox: { x: 48, width: 984, height: 104 },
   highlight: { enabled: true, background: "#d7d7db", text: "#111114", accent: "#ffffff", accentWidth: 6 },
 };
 
 (() => {
   "use strict";
   const TEAM_CONFIG = {
-    a: { enabled: false, league: "Kreisklasse Süd/Ost" },
+    a: {
+      enabled:true, league:"Kreisklasse Süd/Ost", own:"FC Lachendorf A", layout:TABLE_STORY_LAYOUT,
+      clubs:["DSV Hambühren D","FC Lachendorf A","MTV Beedenbostel B","PSV Celle B","Scheuener Heidedarter A","TuS Eschede A","Vorwerk Fun Force A"],
+    },
     b: {
       enabled: true, league: "Kreisklasse Süd", own: "FC Lachendorf B", layout: TABLE_STORY_LAYOUT,
       clubs: ["Bulls Eye C", "DSV Hambühren C", "FC Lachendorf B", "MTV Beedenbostel A", "Team Utd. Südseite C", "TuS Eschede B", "VfL Schickeria A"],
     },
   };
-  const config = TEAM_CONFIG.b;
+  let team="b", config = TEAM_CONFIG.b;
+  const drafts=new Map(), completed=new Set(), designs=new Map();
   const $ = id => document.getElementById(id);
   const canvas = $("tableCanvas"), ctx = canvas.getContext("2d");
   const rows = [];
-  let background = null, overlay = null, photo = null, ready = false;
+  let photo = null, ready = false;
   let request = 0, opened = false;
   const numeric = key => key === "place" || key === "games" || key === "points";
   const labels = { place: "Platz", team: "Mannschaft", games: "Spiele", points: "Punkte", sets: "Sets", legs: "Legs" };
 
+  function buildRows() {
+  rows.length=0; $("tableRows").replaceChildren();
   config.clubs.forEach((club, index) => {
     const details = document.createElement("details");
     details.className = "table-edit-row"; details.open = index === 0;
@@ -66,8 +72,8 @@ const TABLE_STORY_LAYOUT = {
         input.placeholder = "0:0"; input.title = "Verhältnis eintragen, z. B. 12:6";
       }
       fields[key] = input; label.append(input); grid.append(label);
-      input.addEventListener("input", () => { request++; $("tableRefresh").disabled=false; $("tableSource").textContent="Manuell bearbeitet · Automatische Werte werden erst nach erneutem Aktualisieren übernommen."; clearCustomErrors(); updateSummary(); render(); });
-      input.addEventListener("change", () => { request++; $("tableRefresh").disabled=false; $("tableSource").textContent="Manuell bearbeitet · Automatische Werte werden erst nach erneutem Aktualisieren übernommen."; clearCustomErrors(); updateSummary(); render(); });
+      input.addEventListener("input", () => { request++; completed.add(team); $("tableRefresh").disabled=false; $("tableSource").textContent="Manuell bearbeitet · Automatische Werte werden erst nach erneutem Aktualisieren übernommen."; clearCustomErrors(); updateSummary(); render(); });
+      input.addEventListener("change", () => { request++; completed.add(team); $("tableRefresh").disabled=false; $("tableSource").textContent="Manuell bearbeitet · Automatische Werte werden erst nach erneutem Aktualisieren übernommen."; clearCustomErrors(); updateSummary(); render(); });
     }
     function updateSummary() {
       title.textContent = `${fields.place.value || "–"} · ${fields.team.value}`;
@@ -76,6 +82,8 @@ const TABLE_STORY_LAYOUT = {
     details.append(grid); $("tableRows").append(details);
     rows.push({ fields, details, updateSummary }); updateSummary();
   });
+  }
+  buildRows();
   function clearCustomErrors() {
     rows.forEach(row => Object.values(row.fields).forEach(field => field.setCustomValidity("")));
     $("tableStatus").textContent = ready ? "" : $("tableStatus").textContent;
@@ -90,12 +98,12 @@ const TABLE_STORY_LAYOUT = {
     const l = config.layout;
     ctx.clearRect(0, 0, l.width, l.height);
     if(!ready) { ctx.fillStyle = "#1b1b20"; ctx.fillRect(0,0,l.width,l.height); return; }
-    ctx.drawImage(background, 0, 0, l.width, l.height);
+    ctx.drawImage(designs.get(team).background, 0, 0, l.width, l.height);
     if(photo) {
-      const scale=Math.max(l.width/photo.width,l.height/photo.height), w=photo.width*scale,h=photo.height*scale;
-      ctx.drawImage(photo,(l.width-w)/2,(l.height-h)*Number($("tablePhotoPosition").value)/100,w,h);
+      const scale=Math.max(l.width/photo.width,l.height/photo.height)*Number($("tablePhotoZoom").value), w=photo.width*scale,h=photo.height*scale;
+      ctx.drawImage(photo,(l.width-w)*Number($("tablePhotoX").value)/100,(l.height-h)*Number($("tablePhotoPosition").value)/100,w,h);
     }
-    ctx.drawImage(overlay,0,0,l.width,l.height);
+    ctx.drawImage(designs.get(team).overlay,0,0,l.width,l.height);
     text(config.league,540,1815,32,960,"center",l.colors.header,"TableTop",24);
     const day = $("tableMatchday").value;
     if(day) text(day, l.matchday.x, l.matchday.y, l.matchday.fontSize, l.matchday.maxWidth, "center", l.matchday.color, "TableTop", 18);
@@ -108,7 +116,7 @@ const TABLE_STORY_LAYOUT = {
     for(const column of Object.values(l.columns)) text(column.label, column.x, l.headerY, headerSize, column.maxWidth, column.align, l.colors.header, "TableTop", headerSize);
     rows.forEach(({fields}, index) => {
       const y = l.startY + index * l.rowHeight;
-      const own = l.highlight.enabled && [config.own,"FC Lachendorf Darts B"].includes(fields.team.value);
+      const own = l.highlight.enabled && [config.own,`FC Lachendorf Darts ${team.toUpperCase()}`].includes(fields.team.value);
       ctx.fillStyle = own ? l.highlight.background : index % 2 ? l.colors.alternateRow : l.colors.row;
       ctx.fillRect(l.rowBox.x, y-l.rowBox.height/2, l.rowBox.width, l.rowBox.height);
       if(own) { ctx.fillStyle=l.highlight.accent; ctx.fillRect(l.rowBox.x,y-l.rowBox.height/2,l.highlight.accentWidth,l.rowBox.height); }
@@ -141,9 +149,29 @@ const TABLE_STORY_LAYOUT = {
     }
     try {
       render();
-      await window.exportCanvasPng(canvas, `tabelle-team-b-spieltag-${$("tableMatchday").value}-story.png`);
+      await window.exportCanvasPng(canvas, `tabelle-team-${team}-spieltag-${$("tableMatchday").value}-story.png`);
     } catch(error) { console.error(error); $("tableStatus").textContent="Export fehlgeschlagen. Bitte erneut versuchen."; }
   });
+  document.querySelectorAll("[data-table-team]").forEach(button=>button.addEventListener("click",()=>{
+    const next=button.dataset.tableTeam;
+    if(next===team) return;
+    drafts.set(team,{clubs:Array.from(rows[0].fields.team.options,option=>option.value),rows:rows.map(({fields})=>Object.fromEntries(Object.entries(fields).map(([key,input])=>[key,input.value]))),source:$("tableSource").textContent,day:$("tableMatchday").value});
+    request++; team=next; config=TEAM_CONFIG[team]; buildRows();
+    const draft=drafts.get(team);
+    if(draft) {
+      const clubs=draft.clubs;
+      rows.forEach(({fields,updateSummary},index)=>{
+        fields.team.replaceChildren(); clubs.forEach(name=>fields.team.add(new Option(name,name)));
+        Object.entries(draft.rows[index]).forEach(([key,value])=>fields[key].value=value); updateSummary();
+      });
+      $("tableMatchday").value=draft.day; $("tableSource").textContent=draft.source;
+    } else { $("tableMatchday").value=""; $("tableSource").textContent=""; }
+    document.querySelectorAll("[data-table-team]").forEach(btn=>{btn.classList.toggle("active",btn.dataset.tableTeam===team);btn.setAttribute("aria-pressed",String(btn.dataset.tableTeam===team));});
+    canvas.setAttribute("aria-label",`Live-Vorschau der Team-${team.toUpperCase()}-Tabelle`);
+    $("tableTool").dataset.team=team;
+    $("tableRefresh").disabled=false; clearCustomErrors(); render();
+    if(!completed.has(team)) loadStandings();
+  }));
   const DATA_ROOT="https://raw.githubusercontent.com/FCLachendorf/dart-tools/main/";
   async function json(url) {
     const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),6000);
@@ -151,16 +179,16 @@ const TABLE_STORY_LAYOUT = {
     finally { clearTimeout(timer); }
   }
   async function loadStandings() {
-    const token=++request;
+    const token=++request, selectedTeam=team;
     $("tableRefresh").disabled=true;
     $("tableSource").textContent="3K-Tabelle wird geladen …";
     try {
       let settings;
       try { settings=await json(DATA_ROOT+"data/3k-leagues.json"); } catch { settings=await json("data/3k-leagues.json"); }
-      const league=settings?.leagues?.b;
+      const league=settings?.leagues?.[selectedTeam];
       if(!Number.isInteger(league?.event) || !league.ownName) throw new Error("Liga-Einstellung fehlt");
       let event=league.event;
-      try { event=DartPreviewData.eventFromUrl(JSON.parse(localStorage.getItem("fcl-darts-preview-league-links-v1") || "{}").b) || event; } catch {}
+      try { event=DartPreviewData.eventFromUrl(JSON.parse(localStorage.getItem("fcl-darts-preview-league-links-v1") || "{}")[selectedTeam]) || event; } catch {}
       const key=`fcl-darts-table-v1-${event}`;
       let result;
       try {
@@ -186,7 +214,7 @@ const TABLE_STORY_LAYOUT = {
         updateSummary();
       });
       try { localStorage.setItem(key,JSON.stringify({rows:result.rows,stamp:result.stamp})); } catch {}
-      clearCustomErrors(); render();
+      completed.add(team); clearCustomErrors(); render();
       $("tableSource").textContent=`${result.source} · Stand ${new Date(result.stamp).toLocaleString("de-DE")} · ${config.league}`;
     } catch(error) {
       if(token!==request) return;
@@ -204,24 +232,24 @@ const TABLE_STORY_LAYOUT = {
     const file=$("tablePhoto").files?.[0], token=++photoRequest;
     if(!file) return;
     const url=URL.createObjectURL(file), img=new Image();
-    img.onload=()=>{URL.revokeObjectURL(url); if(token!==photoRequest) return; photo=img; render(); $("tableStatus").textContent="";};
+    img.onload=()=>{URL.revokeObjectURL(url); if(token!==photoRequest) return; photo=img; $("tablePhotoLabel").textContent=file.name; $("tablePhotoRemove").hidden=false; $("tablePhotoAdjust").hidden=false; $("tablePhotoZoom").value="1"; $("tablePhotoX").value="50"; $("tablePhotoPosition").value="50"; render(); $("tableStatus").textContent="";};
     img.onerror=()=>{URL.revokeObjectURL(url); if(token===photoRequest) $("tableStatus").textContent="Foto konnte nicht geöffnet werden. Bitte JPG oder PNG verwenden.";};
     img.src=url;
   });
-  $("tablePhotoPosition").addEventListener("input",render);
-  $("tablePhotoRemove").addEventListener("click",()=>{photoRequest++; photo=null; $("tablePhoto").value=""; render();});
+  for(const id of ["tablePhotoPosition","tablePhotoZoom","tablePhotoX"]) $(id).addEventListener("input",render);
+  $("tablePhotoRemove").addEventListener("click",()=>{photoRequest++; photo=null; $("tablePhoto").value=""; $("tablePhotoLabel").textContent="Foto auswählen / aufnehmen"; $("tablePhotoRemove").hidden=true; $("tablePhotoAdjust").hidden=true; render();});
   async function init() {
     try {
-      const image = new Promise((resolve,reject) => {
-        const img=new Image(); img.onload=()=>resolve(img); img.onerror=()=>reject(new Error("Tabellenhintergrund nicht geladen")); img.src=config.layout.background;
+      const image = path => new Promise((resolve,reject) => {
+        const img=new Image(); img.onload=()=>resolve(img); img.onerror=()=>reject(new Error("Tabellendesign nicht geladen")); img.src=path;
       });
       const fonts = [["TableTop","topshow"],["TableNumbers","tacticsans"]].map(async ([name,file]) => {
         const font=new FontFace(name, `url(fonts/${file}.otf)`); document.fonts.add(await font.load());
       });
-      const overlayImage = new Promise((resolve,reject)=>{
-        const img=new Image(); img.onload=()=>resolve(img); img.onerror=()=>reject(new Error("Overlay nicht geladen")); img.src="assets/league/table/story/overlayb.png";
-      });
-      [background,overlay] = await Promise.all([image,overlayImage,...fonts]);
+      await Promise.all([...fonts,...["a","b"].map(async key=>{
+        const [background,overlay]=await Promise.all([image(`assets/league/table/story/${key==="a"?"bg":"bgb"}.png`),image(`assets/league/table/story/overlay${key}.png`)]);
+        designs.set(key,{background,overlay});
+      })]);
       ready=true; $("tableDownload").disabled=false; $("tableStatus").textContent=""; render();
     } catch(error) { console.error(error); $("tableStatus").textContent="Tabellendesign konnte nicht geladen werden. Bitte Seite neu laden."; }
   }
