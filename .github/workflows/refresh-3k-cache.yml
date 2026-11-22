@@ -34,7 +34,7 @@ jobs:
 
       - name: Test fallback handling
         run: |
-          node --test tests/preview-data.test.cjs tests/preview-fallback.test.cjs
+          node --test tests/preview-data.test.cjs tests/preview-fallback.test.cjs tests/table-data.test.cjs tests/table.test.cjs
           python -m unittest discover -s tests -p "test_*.py"
 
       - name: Refresh cached 3K values

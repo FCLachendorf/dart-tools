@@ -16,11 +16,12 @@ test('table renders seven manual rows, highlights its club and uses shared expor
     closest(){return this.parent?.parent?.parent} focus(){} reportValidity(){}
     querySelectorAll(){return [...nodes.values()].filter(e=>e.required)}
   }
-  for(const id of ['tableCanvas','tableRows','tableForm','tableMatchday','tableDownload','tableStatus']) {const e=new Element();e.id=id;}
+  for(const id of ['tableCanvas','tableRows','tableForm','tableMatchday','tableDownload','tableStatus','tableSource','tableManual','tableTool','tableRefresh','tablePhoto','tablePhotoPosition','tablePhotoRemove']) {const e=new Element();e.id=id;}
+  nodes.get('tableTool').hidden=true;
   const canvas=nodes.get('tableCanvas');canvas.width=1080;canvas.height=1920;
   const ctx={clearRect(){drawn.length=0},fillRect(...args){drawn.push({kind:'box',color:this.fillStyle,args})},drawImage(){},measureText(value){return{width:value.length*Number.parseFloat(this.font)*.7}},fillText(value,x,y,max){drawn.push({kind:'text',value,x,y,max,font:this.font})}};
   canvas.getContext=()=>ctx;
-  const env={document:{getElementById:id=>nodes.get(id),createElement:()=>new Element(),fonts:{add(){}}},Image:class{set src(v){queueMicrotask(()=>this.onload())}},FontFace:class{async load(){return this}},Option:class{constructor(text,value){this.text=text;this.value=value}},window:{exportCanvasPng:async(c,name)=>exported.push({width:c.width,height:c.height,name})},console};
+  const env={MutationObserver:class{observe(){}},document:{getElementById:id=>nodes.get(id),createElement:()=>new Element(),fonts:{add(){}}},Image:class{set src(v){queueMicrotask(()=>this.onload())}},FontFace:class{async load(){return this}},Option:class{constructor(text,value){this.text=text;this.value=value}},window:{exportCanvasPng:async(c,name)=>exported.push({width:c.width,height:c.height,name})},console};
   vm.runInNewContext(fs.readFileSync(require.resolve('../table.js'),'utf8'),env);
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(nodes.get('tableRows').children.length,7);

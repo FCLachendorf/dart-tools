@@ -10,3 +10,9 @@
 #tableTool .preview-card { position:static; }
 #tableCanvas { width:auto; height:auto; max-width:100%; max-height:70svh; cursor:default; touch-action:auto; }
 @media(min-width:860px) { #tableTool .preview-card { position:sticky; top:84px; } #tableCanvas { max-height:82svh; } }
+
+#tableManual > summary { cursor:pointer; padding:14px 0; font-weight:700; }
+#tablePhotoPosition { width:100%; }
+#tableForm > button { min-height:44px; margin:8px 0; }
+
+#tableForm > button { width:100%; border:1px solid var(--border); border-radius:10px; padding:12px; background:#25252c; color:var(--text); font:inherit; font-weight:700; cursor:pointer; }

@@ -72,7 +72,13 @@ def table_stats(rows, participant_id):
         float(row.get("points1"))
     except (TypeError, ValueError) as exc:
         raise ValueError(f"invalid table row for {participant_id}") from exc
+    pairs = {}
+    for metric in ("sets", "legs"):
+        values = [row.get(metric + suffix) for suffix in ("1", "2")]
+        if all(isinstance(v, int) and not isinstance(v, bool) and 0 <= v <= 9999 for v in values):
+            pairs[metric] = f"{values[0]}:{values[1]}"
     return {
+        **pairs,
         "place": placement,
         "points": row.get("points1"),
         "games": row.get("matchCount"),

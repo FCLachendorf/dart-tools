@@ -10,6 +10,15 @@ cache = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(cache)
 
 class CacheTests(unittest.TestCase):
+    def test_table_pairs_are_saved_without_using_participant_defaults(self):
+        row = {'participantId':1,'placement':'2.','points1':6,'matchCount':5,
+               'sets1':37,'sets2':23,'legs1':137,'legs2':91}
+        stats = cache.table_stats([row],1)
+        self.assertEqual(stats['sets'],'37:23')
+        self.assertEqual(stats['legs'],'137:91')
+        del row['legs2']
+        self.assertNotIn('legs',cache.table_stats([row],1))
+
     def test_failed_performance_keeps_original_timestamp(self):
         old = {'updatedAt':'2026-09-28T12:00:00Z','participants':{'1':{'finish':120,'counter':2,'performanceKnown':True}}}
         def fetch(path):

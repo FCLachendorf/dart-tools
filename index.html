@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="league.css?v=20260927-ios-export-1" />
   <link rel="stylesheet" href="preview.css?v=20261001-3k-link-1" />
   <link rel="stylesheet" href="ranking.css?v=20260929-ranking-1" />
-  <link rel="stylesheet" href="table.css?v=20261122-1" />
+  <link rel="stylesheet" href="table.css?v=20261122-2" />
 </head>
 <body>
   <header class="app-header">
@@ -352,7 +352,12 @@
       </div>
       <form id="tableForm" novalidate>
         <label>Spieltag<input id="tableMatchday" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="1" required /></label>
-        <div id="tableRows"></div>
+        <button id="tableRefresh" class="preview-refresh" type="button">3K-Tabelle aktualisieren</button>
+        <p class="hint" id="tableSource" role="status" aria-live="polite">Die Werte werden beim Öffnen automatisch geladen.</p>
+        <details id="tableManual"><summary>Werte manuell korrigieren</summary><div id="tableRows"></div></details>
+        <label>Hintergrundfoto (optional)<input id="tablePhoto" type="file" accept="image/*" /></label>
+        <label>Foto-Ausschnitt vertikal<input id="tablePhotoPosition" type="range" min="0" max="100" value="50" /></label>
+        <button id="tablePhotoRemove" class="preview-refresh preview-secondary" type="button">Foto entfernen</button>
       </form>
       <p class="hint" id="tableStatus" role="status" aria-live="polite">Tabellendesign wird geladen …</p>
     </section>
@@ -370,6 +375,7 @@
   <script src="league.js?v=20261001-result-fonts-1"></script>
   <script src="preview-data.js?v=20261001-3k-reliable-1"></script>
   <script src="preview.js?v=20261001-3k-reliable-1"></script>
-  <script src="table.js?v=20261122-1"></script>
+  <script src="table-data.js?v=20261122-2"></script>
+  <script src="table.js?v=20261122-2"></script>
 </body>
 </html>
