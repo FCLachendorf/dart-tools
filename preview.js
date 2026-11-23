@@ -28,7 +28,7 @@
       dateBox:{ x:98, y:765, width:884, height:92 },
       date:{ y:790, fontSize:44 }, time:{ y:834, fontSize:28 },
       venueLabelY:null, venue:{ y:879, fontSize:28 }, address:{ y:906, fontSize:24 },
-      comparison:{ start:1010, rowHeight:57, boxGap:5, labelOffsetY:29, valueOffsetY:29, labelFontSize:32, valueFontSize:34 },
+      comparison:{ start:1010, rowHeight:57, boxGap:5, labelOffsetY:29, valueOffsetY:24, labelFontSize:32, valueFontSize:34 },
     },
   };
   function layout() { return PREVIEW_LAYOUTS[state.format]; }

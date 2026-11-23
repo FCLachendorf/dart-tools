@@ -343,17 +343,17 @@
     </section>
   </div>
 
-  <main class="layout tool-page result-layout" id="tableTool" data-tool-page="table" data-team="b" hidden>
+  <main class="layout tool-page result-layout" id="tableTool" data-tool-page="table" data-team="a" hidden>
     <section class="card data-card result-card">
       <div class="section-head result-title"><h2>Tabelle</h2></div>
       <div class="mode-switch result-format-switch" role="group" aria-label="Tabellenformat auswählen">
         <button type="button" class="mode-button active" data-table-format="story" aria-pressed="true">Story · 9:16</button>
-        <button type="button" class="mode-button" data-table-format="post" aria-pressed="false" disabled title="Post-Design folgt">Post · 4:5 · folgt</button>
+        <button type="button" class="mode-button" data-table-format="post" aria-pressed="false">Post · 4:5</button>
       </div>
       <p class="result-subheading">Mannschaft</p>
       <div class="mode-switch" role="group" aria-label="Tabellenmannschaft">
-        <button type="button" class="mode-button" data-table-team="a" aria-pressed="false">A-Team</button>
-        <button type="button" class="mode-button active" data-table-team="b" aria-pressed="true">B-Team</button>
+        <button type="button" class="mode-button active" data-table-team="a" aria-pressed="true">A-Team</button>
+        <button type="button" class="mode-button" data-table-team="b" aria-pressed="false">B-Team</button>
       </div>
       <form id="tableForm" novalidate>
         <label>Spieltag<input id="tableMatchday" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="1" required /></label>
@@ -379,8 +379,8 @@
       <p class="hint" id="tableStatus" role="status" aria-live="polite">Tabellendesign wird geladen …</p>
     </section>
     <section class="preview-card">
-      <div class="preview-topline"><span>Tabellen-Story</span><span>1080 × 1920 px</span></div>
-      <div class="canvas-shell"><canvas id="tableCanvas" width="1080" height="1920" role="img" aria-label="Live-Vorschau der Team-B-Tabelle"></canvas></div>
+      <div class="preview-topline"><span id="tablePreviewTitle">Tabellen-Story</span><span id="tablePreviewSize">1080 × 1920 px</span></div>
+      <div class="canvas-shell"><canvas id="tableCanvas" width="1080" height="1920" role="img" aria-label="Live-Vorschau der Team-A-Tabelle"></canvas></div>
     </section>
     <section class="card controls-card">
       <button id="tableDownload" class="download-button" type="button" disabled>Story herunterladen</button>
@@ -391,8 +391,8 @@
   <script src="ranking.js?v=20260929-ranking-3"></script>
   <script src="league.js?v=20261001-result-fonts-1"></script>
   <script src="preview-data.js?v=20261001-3k-reliable-1"></script>
-  <script src="preview.js?v=20261001-3k-reliable-1"></script>
+  <script src="preview.js?v=20261123-compare-y-1"></script>
   <script src="table-data.js?v=20261122-2"></script>
-  <script src="table.js?v=20261122-3"></script>
+  <script src="table.js?v=20261122-5"></script>
 </body>
 </html>
