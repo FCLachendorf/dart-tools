@@ -121,7 +121,7 @@ const TABLE_STORY_LAYOUT = {
       const logo=logos.get(logoKey(fields.team.value));
       if(logo) {
         const size=64, scale=Math.min(size/logo.width,size/logo.height);
-        ctx.drawImage(logo,176-logo.width*scale/2,y-logo.height*scale/2,logo.width*scale,logo.height*scale);
+        window.drawLogoSmooth(ctx,logo,176-logo.width*scale/2,y-logo.height*scale/2,logo.width*scale,logo.height*scale);
       }
       for(const [key,column] of Object.entries(l.columns)) {
         const value = fields[key].value.trim().replace(/\s*:\s*/g, ":") || "–";

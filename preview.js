@@ -456,7 +456,7 @@
     const image=state.images.get(path);if(!image)return;
     const config=layout().logos;
     const scale=Math.min(config.size/image.width,config.size/image.height);
-    ctx.drawImage(image,x-image.width*scale/2,config.y-image.height*scale/2,image.width*scale,image.height*scale);
+    window.drawLogoSmooth(ctx,image,x-image.width*scale/2,config.y-image.height*scale/2,image.width*scale,image.height*scale);
   }
   function render() {
     updateSourceStatus();
@@ -555,4 +555,3 @@
   }
   initConfiguration();
 })();
-

@@ -966,7 +966,7 @@ function drawTeamLogo(ctx, logoPath, config) {
   const width = image.width * ratio;
   const height = image.height * ratio;
 
-  ctx.drawImage(
+  window.drawLogoSmooth(ctx,
     image,
     config.x - width / 2,
     config.y - height / 2,
